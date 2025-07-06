@@ -1,2 +1,6 @@
 # -*- coding: utf-8 -*-
-from models import *
+from . import models
+
+__all__ = [
+    "models",
+]
