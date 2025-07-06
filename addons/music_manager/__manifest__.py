@@ -21,14 +21,14 @@
         "security/ir.model.access.csv",
         "security/music_manager_groups.xml",
 
-        # Menus
-        "views/music_manager_menus.xml",
-
         # Views
         "views/music_manager_album_views.xml",
         "views/music_manager_artist_views.xml",
         "views/music_manager_genre_views.xml",
         "views/music_manager_track_views.xml",
+
+        # Menus
+        "views/music_manager_menus.xml",
     ],
     'installable': True,
     'application': True,
