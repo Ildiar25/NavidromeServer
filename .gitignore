@@ -1,0 +1,35 @@
+# Set main ignores
+
+# Virtual environment
+.venv/
+
+# PyCharm IDE files
+.idea/
+.idea/**/*.xml
+.idea/*.xml
+.idea/*.iml
+
+# VSCode files
+__pycache__/
+__pycache__/*.pyc
+
+# Linting
+.ruff_cache/
+
+# Version control
+*.git
+
+# Database files
+**/*.db
+
+# Logs
+**/*.log
+
+# Docker project folders
+music/
+data/navidrome/
+data/odoo_files/
+data/postgres_db/
+
+# Odoo official core
+odoo/

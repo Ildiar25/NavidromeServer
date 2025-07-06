@@ -1,0 +1,10 @@
+<odoo>
+    <data noupdate="True">
+
+        <!-- Music manager user group security -->
+        <record id="group_music_manager_user" model="res.groups">
+            <field name="name">Music Manager User</field>
+            <field name="category_id" ref="base.module_category_hidden"/>
+        </record>
+    </data>
+</odoo>

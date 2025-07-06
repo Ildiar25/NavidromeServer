@@ -1,0 +1,64 @@
+# version: '3.8'
+# Copyright (C) 2025 Joan Pastor
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.html).
+
+services:
+  database:
+    image: postgres:15
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: odoo_db
+      POSTGRES_USER: odoo_user
+      POSTGRES_PASSWORD: odoo_password
+    volumes:
+      - "./data/postgres_db:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo_user -d odoo_db"]
+      interval: 5s
+      start_period: 5s
+      timeout: 5s
+    restart: always
+
+  odoo:
+    build:
+      context: .
+      dockerfile: ./dockerfile.odoo
+    container_name: odoo_app
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8069:8069"
+      - "8071:8071"  # Livechat
+    environment:
+      ODOO_RC: /etc/odoo/odoo.conf
+    volumes:
+      - "./entrypoint.sh:/entrypoint.sh"
+      - "./data/config:/etc/odoo"
+      - "./data/odoo_files:/var/lib/odoo"
+      - "./addons:/mnt/extra-addons"
+      - "./music:/music"
+    command: ["bash", "/entrypoint.sh"]
+    restart: always
+
+  navidrome:
+    image: deluan/navidrome:latest
+    # user: 1000:1000
+    container_name: navidrome
+    ports:
+      - "4533:4533"
+    environment:
+      # Navidrome developing
+      ND_DATAFOLDER: /data
+      ND_MUSICFOLDER: /music
+      ND_LOGLEVEL: debug
+
+      # Navidrome behaviour
+      ND_DEFAULTSHAREEXPIRATION: 24h
+      ND_SCANINTERVAL: 1h
+    volumes:
+      - "./data/navidrome:/data"
+      - "./music:/music:ro"
+    restart: unless-stopped
