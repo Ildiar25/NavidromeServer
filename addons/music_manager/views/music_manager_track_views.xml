@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-
+        <record id="music_manager_track_view_action" model="ir.actions.act_window">
+            <field name="name">Track</field>
+            <field name="res_model">music_manager.track</field>
+            <field name="view_mode">tree,form</field>
+        </record>
     </data>
 </odoo>
