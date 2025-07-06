@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <data>
+    <!-- Main menu -->
+    <menuitem id="music_manager_menu_root" name="Music Manager"/>
 
-    </data>
+    <!-- Submenus -->
+    <menuitem id="music_manager_music_menu" name="Music" parent="music_manager_menu_root"/>
+
+    <!-- Actions -->
+    <menuitem id="music_manager_music_menu_song_action" name="Manage songs" parent="music_manager_music_menu" action="music_manager_track_view_action"/>
+    <menuitem id="music_manager_music_menu_artist_action" name="Manage artists" parent="music_manager_music_menu" action="music_manager_artist_view_action"/>
+    <menuitem id="music_manager_music_menu_album_action" name="Manage albums" parent="music_manager_music_menu" action="music_manager_album_view_action"/>
+    <menuitem id="music_manager_music_menu_genre_action" name="Manage genres" parent="music_manager_music_menu" action="music_manager_genre_view_action"/>
 </odoo>
