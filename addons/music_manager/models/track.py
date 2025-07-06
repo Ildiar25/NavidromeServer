@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # noinspection PyProtectedMember
 from odoo import _
 from odoo.models import Model
