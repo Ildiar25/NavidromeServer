@@ -13,4 +13,5 @@ class Genre(Model):
     name = Char(string=_("Name"))
 
     # Relationships
+    track_ids = One2many(comodel_name='music_manager.track', inverse_name='genre_id', string=_("Song(s)"))
     album_ids = One2many(comodel_name='music_manager.album', inverse_name='genre_id', string=_("Album(s)"))

@@ -2,7 +2,7 @@
 # noinspection PyProtectedMember
 from odoo import _
 from odoo.models import Model
-from odoo.fields import Char, Many2many, Many2one, One2many
+from odoo.fields import Binary, Char, Many2many, One2many
 
 
 class Artist(Model):
@@ -11,6 +11,7 @@ class Artist(Model):
 
     # Default fields
     name = Char(string=_("Artist(s)"))
+    picture = Binary(string=_("Profile"))
 
     # Relationships
     track_ids = Many2many(comodel_name='music_manager.track', string=_("Track(s)"))
