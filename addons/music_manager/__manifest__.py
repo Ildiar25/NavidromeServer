@@ -18,8 +18,8 @@
     ],
     'data': [
         # Security
-        "security/ir.model.access.csv",
         "security/music_manager_groups.xml",
+        "security/ir.model.access.csv",
 
         # Views
         "views/music_manager_album_views.xml",

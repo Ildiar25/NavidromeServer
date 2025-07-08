@@ -1,10 +1,16 @@
 <odoo>
     <data noupdate="True">
 
+        <!-- Music manager category -->
+        <record id="module_category_music_manager" model="ir.module.category">
+            <field name="name">Music Manager</field>
+            <field name="sequence">1</field>
+        </record>
+
         <!-- Music manager user group security -->
         <record id="group_music_manager_user" model="res.groups">
             <field name="name">Music Manager User</field>
-            <field name="category_id" ref="base.module_category_user_type"/>
+            <field name="category_id" ref="music_manager.module_category_music_manager"/>
         </record>
     </data>
 </odoo>
