@@ -7,17 +7,17 @@
             <field name="sequence">1</field>
         </record>
 
+        <!-- Music manager admin -->
+        <record id="group_music_manager_user_admin" model="res.groups">
+            <field name="name">Music Manager Admin</field>
+            <field name="category_id" ref="music_manager.module_category_music_manager"/>
+        </record>
+
         <!-- Music manager user group security -->
         <record id="group_music_manager_user_general" model="res.groups">
             <field name="name">Music Manager User</field>
             <field name="category_id" ref="music_manager.module_category_music_manager"/>
-        </record>
-
-        <!-- Music manager admin -->
-        <record id="group_music_manager_user_admin" model="res.groups">
-            <field name="name">Music Manager Admin</field>
-            <field name="implied_ids" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
-            <field name="category_id" ref="music_manager.module_category_music_manager"/>
+            <field name="implied_ids" eval="[(4, ref('music_manager.group_music_manager_user_admin'))]"/>
         </record>
 
         <!-- Music manager model rules -->
