@@ -8,9 +8,38 @@
         </record>
 
         <!-- Music manager user group security -->
-        <record id="group_music_manager_user" model="res.groups">
+        <record id="group_music_manager_user_general" model="res.groups">
             <field name="name">Music Manager User</field>
             <field name="category_id" ref="music_manager.module_category_music_manager"/>
+        </record>
+
+        <!-- Music manager admin -->
+        <record id="group_music_manager_user_admin" model="res.groups">
+            <field name="name">Music Manager Admin</field>
+            <field name="implied_ids" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+            <field name="category_id" ref="music_manager.module_category_music_manager"/>
+        </record>
+
+        <!-- Music manager model rules -->
+        <record id="rule_music_manager_own_tracks" model="ir.rule">
+            <field name="name">Music Manager: Own Tracks</field>
+            <field name="model_id" ref="music_manager.model_music_manager_track"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+        </record>
+
+        <record id="rule_music_manager_own_albums" model="ir.rule">
+            <field name="name">Music Manager: Own Albums</field>
+            <field name="model_id" ref="music_manager.model_music_manager_album"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+        </record>
+
+        <record id="rule_music_manager_own_artists" model="ir.rule">
+            <field name="name">Music Manager: Own Artists</field>
+            <field name="model_id" ref="music_manager.model_music_manager_artist"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
         </record>
     </data>
 </odoo>
