@@ -20,6 +20,7 @@ class Track(Model):
     duration = Char(string=_("Duration (min)"), readonly=True)
     file = Binary(string=_("File"))
     url = Char(string=_("Youtube URL"))
+    file_path = Char(string=_("File path"))
     cover = Binary(string=_("Cover"))
     state = Selection(
         selection=[
@@ -57,13 +58,15 @@ class Track(Model):
 
     def save_file(self) -> None:
         for track in self:
-            if not track.file:
-                continue
+            if isinstance(track.file, bytes):
+                picture = base64.b64decode(track.file)
 
-            picture = base64.b64decode(track.file)
+                name = track.name
+                with open(f"/music/{name}.mp3", "wb") as file_test:
+                    file_test.write(picture)
 
-            name = track.name
-            with open(f"/music/{name}.png", "wb") as file_test:
-                file_test.write(picture)
+                track.file = False
 
-            track.file = False
+    def save_changes(self) -> None:
+        pass
+
