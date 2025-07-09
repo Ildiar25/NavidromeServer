@@ -76,7 +76,17 @@
                             </group>
                         </section>
 
-                        <button name="action_next" string="Next" type="object"/>
+                        <section invisible="state != 'added'">
+                            <header>
+                                <h1><field name="name"/></h1>
+                            </header>
+                            <group>
+                                <field name="name" string="Title" readonly="True"/>
+                                <button name="save_changes" string="Save" type="object"/>
+                            </group>
+                        </section>
+
+                        <button name="action_next" string="Next" type="object" invisible="state == 'added'"/>
                     </sheet>
                 </form>
             </field>
