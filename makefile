@@ -10,7 +10,7 @@ VENV_DIR:=.venv
 YELLOW:=\033[33m
 
 
-.PHONY: help venv gitinit gitcommit dkinit dkup dkdown dkrestart
+.PHONY: help venv install gitinit gitcommit dkinit dkup dkdown dkrestart
 
 
 # Set main functions
@@ -26,10 +26,26 @@ venv: ## Create new virtual environment
 		echo "\n🛠️  Creating a new virtual environment with 'Venv'..."; \
 		python3 -m venv $(VENV_DIR) && \
 		echo "✅️  Virtual environment ready to activate!" && \
-		echo "👉️  Please, run $(CYAN)'$(VENV_DIR)/bin/activate'$(NC)...\n"; \
+		echo "👉️  Please, run $(CYAN)'source $(VENV_DIR)/bin/activate'$(NC)...\n"; \
 	else \
 		echo "\n✅  '$(VENV_DIR)' already exists!"; \
 		echo "Make sure it is active! 😊\n"; \
+	fi
+
+
+install: ## Install project dependencies
+	@if [ -f requirements.txt ]; then \
+		if [ "$$(which python)" = "$$(realpath -s $(VENV_DIR)/bin/python)" ]; then \
+			echo "\n⏰  Preparing all requirements...\n"; \
+			$(VENV_DIR)/bin/pip install --upgrade pip -q; \
+			$(VENV_DIR)/bin/pip install -r requirements.txt && \
+			echo "\n📦️  All requirements ready!\n"; \
+		else \
+			echo "\n⚠️  Activate virtual environment before install dependencies!"; \
+			echo "👉️  Please, run $(CYAN)'source $(VENV_DIR)/bin/activate'$(NC) to activate virtual environment...\n"; \
+		fi; \
+	else \
+		echo "\n$(YELLOW)WARNING: ℹ️  There is no requirements file! The program could fail while running... 😱️ Make sure it no needs any requirement before run!$(NC)\n"; \
 	fi
 
 
@@ -80,7 +96,7 @@ dkinit: ## Prepare docker
 
 
 dkup: dkinit ## Start docker services
-	@if [ $(dev) != 'False' ]; then \
+	@if [ $(dev) = 'True' ]; then \
 		echo "\n👀️  ...Starting docker services in DEBUG mode... 👀️"; \
 		docker compose -f compose.yaml up; \
 	else \
@@ -97,7 +113,7 @@ dkdown: dkinit ## Stop docker services
 dkrestart: dkinit ## Restart docker services
 	@echo "\n👀️  Restarting docker services... \n"
 	@$(MAKE) dkdown
-	@if [ $(dev) != 'False' ]; then \
+	@if [ $(dev) = 'True' ]; then \
 		echo "\n👀️  ...Starting docker services in DEBUG mode... 👀️"; \
 		docker compose -f compose.yaml up; \
 	else \
