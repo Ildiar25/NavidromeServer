@@ -6,5 +6,83 @@
             <field name="res_model">music_manager.track</field>
             <field name="view_mode">tree,form</field>
         </record>
+
+        <!-- Tree view -->
+        <record id="music_manager_track_tree_view" model="ir.ui.view">
+            <field name="name">music_manager.track.tree</field>
+            <field name="model">music_manager.track</field>
+            <field name="arch" type="xml">
+                <tree string="Songs">
+                    <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [24]}" optional="hide"/>
+                    <field name="name" string="Title"/>
+                    <field name="original_artist" string="Artist"/>
+                    <field name="album_id" string="Album"/>
+                    <field name="year" string="Year"/>
+                    <field name="genre_id" string="Genre"/>
+                    <field name="duration" string="Duration"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form view -->
+        <record id="music_manager_track_form_view" model="ir.ui.view">
+            <field name="name">music_manager.track.form</field>
+            <field name="model">music_manager.track</field>
+            <field name="arch" type="xml">
+                <form string="Song">
+                    <field name="state" string="" widget="statusbar"/>
+                    <sheet>
+
+                        <section invisible="state != 'start'">
+                            <header>
+                                <h1>1. Add your song</h1>
+                            </header>
+                            <separator/>
+                            <group>
+                                <group>
+                                    <field name="file"/>
+                                </group>
+                                <group>
+                                    <field name="url"/>
+                                </group>
+                            </group>
+                        </section>
+
+                        <section invisible="state != 'uploaded'">
+                            <header>
+                                <h1>2. Check data</h1>
+                            </header>
+                            <group>
+                                <field name="name" string="Title" readonly="True"/>
+                            </group>
+                        </section>
+
+                        <section invisible="state != 'metadata'">
+                            <header>
+                                <h1>3. Update info</h1>
+                            </header>
+                            <group>
+                                <field name="name" string="Title"/>
+                            </group>
+                        </section>
+
+                        <section invisible="state != 'done'">
+                            <header>
+                                <h1>4. Save song</h1>
+                            </header>
+                            <group>
+                                <field name="name" string="Title" readonly="True"/>
+                                <button name="save_file" string="Save" type="object"/>
+                            </group>
+                        </section>
+
+                        <button name="action_next" string="Next" type="object"/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Searchbar -->
+
     </data>
 </odoo>

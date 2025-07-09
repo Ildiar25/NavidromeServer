@@ -13,7 +13,7 @@ class Album(Model):
     name = Char(string=_("Album title"))
     year = Char(string=_("Year"))
     total_disks = Char(string=_("Total disks"), readonly=True)
-    cover = Binary(string=_("Cover"))
+    cover = Binary(string=_("Cover"), readonly=True)
     genre = Char(string=_("Genre"), readonly=True)
 
     # Relationships
