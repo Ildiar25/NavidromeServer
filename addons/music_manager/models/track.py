@@ -27,6 +27,7 @@ class Track(Model):
             ('uploaded', _("Uploaded")),
             ('metadata', _("Metadata Editing")),
             ('done', _("Done")),
+            ('added', _("Added")),
         ],
         string=_("State"),
         default='start'
@@ -52,7 +53,7 @@ class Track(Model):
                     track.state = 'done'
 
                 case 'done':
-                    track.state = 'start'
+                    track.state = 'added'
 
     def save_file(self) -> None:
         for track in self:
