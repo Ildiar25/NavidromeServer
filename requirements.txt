@@ -11,3 +11,4 @@ idna==3.10
 pytube==15.0.0
 requests==2.32.4
 urllib3==2.5.0
+yt-dlp==2025.6.30
