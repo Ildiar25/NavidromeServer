@@ -7,13 +7,13 @@ from pytube import YouTube
 from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable
 from urllib.parse import urlparse
 
-
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
+from ..services.download_service import YTDLPAdapter, YoutubeDownload
 
 _logger = logging.getLogger(__name__)
 
@@ -22,6 +22,10 @@ class Track(Model):
 
     _name = 'music_manager.track'
     _description = 'track_table'
+
+    # # Class attributes
+    # video = None
+    # song = None
 
     # Default fields
     name = Char(string=_("Song title"))
@@ -45,6 +49,9 @@ class Track(Model):
         string=_("State"),
         default='start'
     )
+
+    # # Computed fields
+    # display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
 
     # Relationships
     track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
@@ -102,7 +109,7 @@ class Track(Model):
                 mime_type = magic.from_buffer(file_data, mime=True)
 
                 if mime_type != 'audio/mpeg':
-                    raise ValidationError(_(f"Actually only MP3 files are allowed: {mime_type}."))
+                    raise ValidationError(_("Actually only MP3 files are allowed."))
 
     @api.constrains('url')
     def _validate_url_path(self) -> None:
@@ -115,7 +122,13 @@ class Track(Model):
                     raise ValidationError(_("URL must be a valid YouTube URL."))
 
                 try:
-                    video = YouTube(track.url).streams.get_audio_only()
+                    # video = YouTube(track.url).streams.filter(only_audio=True).first()
+                    adapter = YTDLPAdapter(track.url)
+
+                    downloader = YoutubeDownload()
+                    downloader.set_stream_to_file(adapter, "/music/my_song")
+
+                    # Aquí implementaría lo que hemos estado hablando: track.song = buffer devuelto
 
                 except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
                     _logger.warning(f"Failed to process YouTube URL {track.url}: {video_error}")
