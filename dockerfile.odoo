@@ -11,7 +11,7 @@ USER root
 
 # Set environment language and locals
 RUN apt-get update && \
-    apt-get install -y locales && \
+    apt-get install -y locales libmagic1 libmagic-dev && \
     sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
 
