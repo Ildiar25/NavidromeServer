@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 
+
 # noinspection PyProtectedMember
 from odoo import _
 from odoo.models import Model
@@ -55,6 +56,11 @@ class Track(Model):
 
                 case 'done':
                     track.state = 'added'
+
+    def action_back(self) -> None:
+        for track in self:
+            if track.state == 'done':
+                track.state = 'metadata'
 
     def save_file(self) -> None:
         for track in self:
