@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
 import base64
+import logging
+# noinspection PyPackageRequirements
+import magic
+from pytube import YouTube
+from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable
+from urllib.parse import urlparse
 
 
 # noinspection PyProtectedMember
-from odoo import _
-from odoo.models import Model
+from odoo import _, api
+from odoo.exceptions import ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
+from odoo.models import Model
+
+
+_logger = logging.getLogger(__name__)
 
 
 class Track(Model):
 
     _name = 'music_manager.track'
+    _description = 'track_table'
 
     # Default fields
     name = Char(string=_("Song title"))
@@ -76,3 +87,40 @@ class Track(Model):
     def save_changes(self) -> None:
         pass
 
+    @api.constrains('file', 'url')
+    def _check_fields(self) -> None:
+        for track in self:
+            if not track.file and not track.url:
+                raise ValidationError(_("Must add an URL or a file to proceed."))
+
+    @api.constrains('file')
+    def _validate_file_type(self) -> None:
+        for track in self:
+            if track.file and isinstance(track.file, bytes):
+
+                file_data = base64.b64decode(track.file)
+                mime_type = magic.from_buffer(file_data, mime=True)
+
+                if mime_type != 'audio/mpeg':
+                    raise ValidationError(_(f"Actually only MP3 files are allowed: {mime_type}."))
+
+    @api.constrains('url')
+    def _validate_url_path(self) -> None:
+        for track in self:
+            if track.url and isinstance(track.url, str):
+
+                parsed_url = urlparse(track.url)
+
+                if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
+                    raise ValidationError(_("URL must be a valid YouTube URL."))
+
+                try:
+                    video = YouTube(track.url).streams.get_audio_only()
+
+                except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
+                    _logger.warning(f"Failed to process YouTube URL {track.url}: {video_error}")
+                    raise ValidationError(_("Invalid YouTube URLL or video is not accessible."))
+
+                except Exception as unkown_error:
+                    _logger.error(f"Unexpected error while validating URL {track.url}: {unkown_error}")
+                    raise ValidationError(_("Sorry, something went wrong while validating URL."))
