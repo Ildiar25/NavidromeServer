@@ -33,24 +33,53 @@
                     <field name="state" string="" widget="statusbar"/>
                     <sheet>
 
+                        <!-- First step -->
                         <section invisible="state != 'start'">
                             <header>
-                                <h1>1. Add your song</h1>
+                                <h1>Ready to upload your next hit? 🚀 </h1>
                             </header>
                             <separator/>
-                            <group>
-                                <group>
-                                    <field name="file"/>
-                                </group>
-                                <group>
-                                    <field name="url"/>
-                                </group>
-                            </group>
+                            <div class="d-flex flex-row justify-content-around">
+                                <div class="w-50 mb-3">
+                                    <h3 class="text-muted">Add a song!🎧</h3>
+                                    <p>
+                                        <em>Welcome to your personal music manager!</em>
+                                        <br/>
+                                        <br/>
+                                        Here you can start building your collection by either uploading an
+                                        <b>MP3 file</b> from your computer or adding a <b>YouTube link</b> to download
+                                        and convert it automatically.
+                                        <br/>
+                                        Once your song is uploaded, you’ll be able to review and edit its metadata to
+                                        keep everything tidy and organized.
+                                        <br/>
+                                        <br/>
+                                        <em>Let’s get started and bring some music to life!</em>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-row justify-content-around">
+                                <div class="d-flex flex-column align-items-center mx-3">
+                                    <div class="mb-3">
+                                        <img src="#" width="300" height="300"/>
+                                    </div>
+                                    <p class="mx-auto"><b>MP3 file</b></p>
+                                    <field name="file" string="MP3 file"/>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center">
+                                    <div class="mb-3">
+                                        <img src="#" width="300" height="300"/>
+                                    </div>
+                                    <p class="mx-auto"><b>YouTube URL</b></p>
+                                    <field name="url" placeholder="https://"/>
+                                </div>
+                            </div>
                         </section>
 
+                        <!-- Second step -->
                         <section invisible="state != 'uploaded'">
                             <header>
-                                <h1>2. Check data</h1>
+                                <h1>File uploaded successfully! 📤 </h1>
                             </header>
                             <group>
                                 <field name="name" string="Title" readonly="True"/>
@@ -59,7 +88,7 @@
 
                         <section invisible="state != 'metadata'">
                             <header>
-                                <h1>3. Update info</h1>
+                                <h1>Let’s polish your track details! ✏️ </h1>
                             </header>
                             <group>
                                 <field name="name" string="Title"/>
@@ -68,7 +97,7 @@
 
                         <section invisible="state != 'done'">
                             <header>
-                                <h1>4. Save song</h1>
+                                <h1>Your song is ready to rock! 🎉 </h1>
                             </header>
                             <group>
                                 <field name="name" string="Title" readonly="True"/>
@@ -78,15 +107,21 @@
 
                         <section invisible="state != 'added'">
                             <header>
-                                <h1><field name="name"/></h1>
+                                <h1><field name="name"/> 🎵 </h1>
                             </header>
                             <group>
                                 <field name="name" string="Title" readonly="True"/>
-                                <button name="save_changes" string="Save" type="object"/>
+                                <button name="save_changes" string="Update" type="object"/>
                             </group>
                         </section>
-
-                        <button name="action_next" string="Next" type="object" invisible="state == 'added'"/>
+                        <div class="d-flex flex-row justify-content-between">
+                            <div class="w-100 d-flex flex-row justify-content-start">
+                                <button name="action_back" string="Back" class="btn btn-outline-primary" type="object" invisible="state != 'done'"/>
+                            </div>
+                            <div class="w-100 d-flex flex-row justify-content-end">
+                                <button name="action_next" string="Next" class="btn btn-outline-primary" type="object" invisible="state == 'added'"/>
+                            </div>
+                        </div>
                     </sheet>
                 </form>
             </field>
