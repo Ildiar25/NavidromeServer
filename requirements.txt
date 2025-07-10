@@ -1,2 +1,13 @@
 # ID3 mp3 label edition
 mutagen==1.47.0
+
+# MIME file reader
+python-magic==0.4.27
+
+# Web section
+certifi==2025.7.9
+charset-normalizer==3.4.2
+idna==3.10
+pytube==15.0.0
+requests==2.32.4
+urllib3==2.5.0
