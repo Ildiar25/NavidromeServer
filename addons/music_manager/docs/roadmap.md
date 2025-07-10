@@ -9,3 +9,4 @@
  - [ ] **Preparar bien los diferentes pasos del formulario principal**
  - [ ] **Función al pulsar save que devuelva las etiquetas añadidas al archivo y actualice los campos**
  - [ ] **Añadir automatización al crear las carpetas principales en Linux (y permisos)**
+ - [ ] **Arreglar botón 'Save'. Constrains detecta que no hay URL ni archivo y da error**
