@@ -1,9 +1,11 @@
 import io
+import hashlib
+import logging
+import os
 import yt_dlp
 from abc import ABC, abstractmethod
 from pytube import Stream
 from typing import Protocol
-import logging
 
 
 _logger = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ class YTDLPAdapter:
         self.__url = url
 
     def stream_to_file(self, output_path: str) -> None:
-        ydl_opts = {
+        options = {
             'format': 'bestaudio/best',
             'outtmpl': output_path,
             'quiet': False,
@@ -50,13 +52,41 @@ class YTDLPAdapter:
             ]
         }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download(
+        with yt_dlp.YoutubeDL(options) as yotube_dl:
+            yotube_dl.download(
                 [self.__url]
             )
 
     def stream_to_buffer(self, buffer: io.BytesIO) -> None:
-        pass
+
+        filename = hashlib.sha256(self.__url.encode()).hexdigest()
+        tmp_path = f'/tmp/{filename}'
+
+        options = {
+            'format': 'bestaudio/best',
+            'outtmpl': tmp_path,
+            'quiet': False,
+            'no_warnings': True,
+            'prefer_ffmpeg': True,
+            'postprocessors': [
+                {
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192'
+                },
+            ]
+        }
+
+        with yt_dlp.YoutubeDL(options) as yotube_dl:
+            yotube_dl.download(
+                [self.__url]
+            )
+
+        with open(f'{tmp_path}.mp3', 'rb') as new_song:
+            track = new_song.read()
+            buffer.write(track)
+
+        os.remove(f'{tmp_path}.mp3')
 
 
 # ---- Donwload service ---- #
@@ -67,7 +97,7 @@ class DownloadTrack(ABC):
         ...
 
     @abstractmethod
-    def set_stream_to_buffer(self, stream: StreamProtocol, buffer: io.BytesIO) -> io.BytesIO:
+    def set_stream_to_buffer(self, stream: StreamProtocol, buffer: io.BytesIO) -> bytes:
         ...
 
 
@@ -76,7 +106,7 @@ class YoutubeDownload(DownloadTrack):
     def set_stream_to_file(self, stream: StreamProtocol, output_path: str) -> None:
         stream.stream_to_file(output_path)
 
-    def set_stream_to_buffer(self, stream: StreamProtocol, buffer: io.BytesIO) -> io.BytesIO:
+    def set_stream_to_buffer(self, stream: StreamProtocol, buffer: io.BytesIO) -> bytes:
         stream.stream_to_buffer(buffer)
         buffer.seek(0)
-        return buffer
+        return buffer.read()
