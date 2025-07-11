@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import base64
+import io
 import logging
 # noinspection PyPackageRequirements
 import magic
-from pytube import YouTube
 from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable
 from urllib.parse import urlparse
 
@@ -22,10 +22,6 @@ class Track(Model):
 
     _name = 'music_manager.track'
     _description = 'track_table'
-
-    # # Class attributes
-    # video = None
-    # song = None
 
     # Default fields
     name = Char(string=_("Song title"))
@@ -100,6 +96,11 @@ class Track(Model):
             if not track.file and not track.url:
                 raise ValidationError(_("Must add an URL or a file to proceed."))
 
+            if track.file and track.url:
+                raise ValidationError(
+                    _("Only one file can be added at the same time. Please, delete one of them to continue.")
+                )
+
     @api.constrains('file')
     def _validate_file_type(self) -> None:
         for track in self:
@@ -108,8 +109,10 @@ class Track(Model):
                 file_data = base64.b64decode(track.file)
                 mime_type = magic.from_buffer(file_data, mime=True)
 
+                _logger.info(f"CONSTRAINT | Bytes length: {len(file_data)} | MIME type: {mime_type}")
+
                 if mime_type != 'audio/mpeg':
-                    raise ValidationError(_("Actually only MP3 files are allowed."))
+                    raise ValidationError(_("Actually only MP3 files are allowed: %s", mime_type))
 
     @api.constrains('url')
     def _validate_url_path(self) -> None:
@@ -119,20 +122,23 @@ class Track(Model):
                 parsed_url = urlparse(track.url)
 
                 if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
-                    raise ValidationError(_("URL must be a valid YouTube URL."))
+                    raise ValidationError(_("The URL must be a valid YouTube URL."))
 
                 try:
-                    # video = YouTube(track.url).streams.filter(only_audio=True).first()
+
+                    buffer = io.BytesIO()
                     adapter = YTDLPAdapter(track.url)
-
                     downloader = YoutubeDownload()
-                    downloader.set_stream_to_file(adapter, "/music/my_song")
 
-                    # Aquí implementaría lo que hemos estado hablando: track.song = buffer devuelto
+                    bytes_file = downloader.set_stream_to_buffer(adapter, buffer)
+                    mime_type = magic.from_buffer(bytes_file, mime=True)
+                    _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}\n")
+
+                    track.file = base64.b64encode(bytes_file)
 
                 except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
                     _logger.warning(f"Failed to process YouTube URL {track.url}: {video_error}")
-                    raise ValidationError(_("Invalid YouTube URLL or video is not accessible."))
+                    raise ValidationError(_("Invalid YouTube URL or video is not accessible."))
 
                 except Exception as unkown_error:
                     _logger.error(f"Unexpected error while validating URL {track.url}: {unkown_error}")
