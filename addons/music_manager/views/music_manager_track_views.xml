@@ -83,6 +83,9 @@
                             </header>
                             <group>
                                 <field name="name" string="Title" readonly="True"/>
+                                <field name="year" string="Year" readonly="True"/>
+                                <field name="track_no" string="Track" readonly="True"/>
+                                <field name="disk_no" string="Disk" readonly="True"/>
                             </group>
                         </section>
 

@@ -5,17 +5,18 @@ import logging
 
 # noinspection PyPackageRequirements
 import magic
-from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable
 from urllib.parse import urlparse
 
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import ValidationError
-from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
+from odoo.fields import Binary, Boolean, Char, Many2many, Many2one, Selection
 from odoo.models import Model
 
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
 from ..services.metadata_service import MP3File
+from ..utils.exceptions import DownloadServiceError, InvalidMetadataServiceError, MusicManagerError
+
 
 _logger = logging.getLogger(__name__)
 
@@ -28,8 +29,8 @@ class Track(Model):
     # Default fields
     name = Char(string=_("Song title"))
     year = Char(string=_("Year"))
-    track_nu = Integer(string=_("Track no"))
-    disk_nu = Integer(string=_("Disk no"))
+    track_no = Char(string=_("Track no"))
+    disk_no = Char(string=_("Disk no"))
     collection = Boolean(string=_("Part of a collection"))
     duration = Char(string=_("Duration (min)"), readonly=True)
     file = Binary(string=_("File"))
@@ -63,7 +64,10 @@ class Track(Model):
             match track.state:
                 case 'start':
                     track.state = 'uploaded'
-                    # self._update_fields()
+                    if track.url:
+                        self._convert_to_mp3()
+
+                    self._update_fields()
 
                 case 'uploaded':
                     track.state = 'metadata'
@@ -88,21 +92,22 @@ class Track(Model):
                 with open(f"/music/{name}.mp3", "wb") as file_test:
                     file_test.write(picture)
 
-                track.file = False
-
     def save_changes(self) -> None:
         pass
 
     @api.constrains('file', 'url')
     def _check_fields(self) -> None:
         for track in self:
+
             if not track.file and not track.url:
+                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
                 raise ValidationError(_("Must add an URL or a file to proceed."))
 
-            # if track.file and track.url:
-            #     raise ValidationError(
-            #         _("Only one file can be added at the same time. Please, delete one of them to continue.")
-            #     )
+            if track.file and track.url:
+                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
+                raise ValidationError(
+                    _("Only one file can be added at the same time. Please, delete one of them to continue.")
+                )
 
     @api.constrains('file')
     def _validate_file_type(self) -> None:
@@ -111,8 +116,6 @@ class Track(Model):
 
                 file_data = base64.b64decode(track.file)
                 mime_type = magic.from_buffer(file_data, mime=True)
-
-                _logger.info(f"CONSTRAINT | Bytes length: {len(file_data)} | MIME type: {mime_type}")
 
                 if mime_type not in ["audio/mpeg", "audio/mpg", "audio/x-mpeg"]:
                     raise ValidationError(_("Actually only MP3 files are allowed: %s", mime_type))
@@ -127,30 +130,47 @@ class Track(Model):
                 if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
                     raise ValidationError(_("The URL must be a valid YouTube URL."))
 
+    def _convert_to_mp3(self) -> None:
+        for track in self:
+            if track.url and isinstance(track.url, str):
                 try:
-
                     buffer = io.BytesIO()
-                    adapter = YTDLPAdapter(track.url)
+                    adapter = YTDLPAdapter(url=track.url)
                     downloader = YoutubeDownload()
 
                     bytes_file = downloader.set_stream_to_buffer(adapter, buffer)
                     mime_type = magic.from_buffer(bytes_file, mime=True)
                     _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}\n")
 
-                    # track.url = False
-                    track.file = base64.b64encode(bytes_file)
+                    track.write(
+                        {
+                            'url': False,
+                            'file': base64.b64encode(bytes_file)
+                        }
+                    )
 
-                except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
-                    _logger.warning(f"Failed to process YouTube URL {track.url}: {video_error}")
+                except DownloadServiceError as video_error:
+                    _logger.error(f"Failed to process YouTube URL {track.url}: {video_error}")
                     raise ValidationError(_("Invalid YouTube URL or video is not accessible."))
 
-                except Exception as unkown_error:
-                    _logger.error(f"Unexpected error while validating URL {track.url}: {unkown_error}")
+                except MusicManagerError as unknown_error:
+                    _logger.error(f"Unexpected error while validating URL {track.url}: {unknown_error}")
                     raise ValidationError(_("Sorry, something went wrong while validating URL."))
 
-    # def _update_fields(self) -> None:
-    #     for track in self:
-    #         track_info = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
-    #
-    #         track.name = track_info['title']
-    #         track.year = track_info['year']
+    def _update_fields(self) -> None:
+        for track in self:
+            try:
+                metadata = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
+
+                track.name = metadata.TIT2
+                track.year = metadata.TDRC
+                track.track_no = metadata.TRCK
+                track.disk_no = metadata.TPOS
+
+            except InvalidMetadataServiceError as invalid_metadata:
+                _logger.error(f"Failed to process file metadata: {invalid_metadata}")
+                raise ValidationError(_("Invalid metadata founded on file."))
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
+                raise ValidationError(_("Sorry, something went wrong while loading metadata file."))
