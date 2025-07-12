@@ -2,6 +2,7 @@
 import base64
 import io
 import logging
+
 # noinspection PyPackageRequirements
 import magic
 from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable
@@ -14,6 +15,7 @@ from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Sel
 from odoo.models import Model
 
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
+from ..services.metadata_service import MP3File
 
 _logger = logging.getLogger(__name__)
 
@@ -61,6 +63,7 @@ class Track(Model):
             match track.state:
                 case 'start':
                     track.state = 'uploaded'
+                    # self._update_fields()
 
                 case 'uploaded':
                     track.state = 'metadata'
@@ -96,10 +99,10 @@ class Track(Model):
             if not track.file and not track.url:
                 raise ValidationError(_("Must add an URL or a file to proceed."))
 
-            if track.file and track.url:
-                raise ValidationError(
-                    _("Only one file can be added at the same time. Please, delete one of them to continue.")
-                )
+            # if track.file and track.url:
+            #     raise ValidationError(
+            #         _("Only one file can be added at the same time. Please, delete one of them to continue.")
+            #     )
 
     @api.constrains('file')
     def _validate_file_type(self) -> None:
@@ -111,7 +114,7 @@ class Track(Model):
 
                 _logger.info(f"CONSTRAINT | Bytes length: {len(file_data)} | MIME type: {mime_type}")
 
-                if mime_type != 'audio/mpeg':
+                if mime_type not in ["audio/mpeg", "audio/mpg", "audio/x-mpeg"]:
                     raise ValidationError(_("Actually only MP3 files are allowed: %s", mime_type))
 
     @api.constrains('url')
@@ -134,6 +137,7 @@ class Track(Model):
                     mime_type = magic.from_buffer(bytes_file, mime=True)
                     _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}\n")
 
+                    # track.url = False
                     track.file = base64.b64encode(bytes_file)
 
                 except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
@@ -143,3 +147,10 @@ class Track(Model):
                 except Exception as unkown_error:
                     _logger.error(f"Unexpected error while validating URL {track.url}: {unkown_error}")
                     raise ValidationError(_("Sorry, something went wrong while validating URL."))
+
+    # def _update_fields(self) -> None:
+    #     for track in self:
+    #         track_info = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
+    #
+    #         track.name = track_info['title']
+    #         track.year = track_info['year']
