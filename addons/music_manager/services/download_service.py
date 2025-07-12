@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
 import io
 import hashlib
 import logging
 import os
-import yt_dlp
 from abc import ABC, abstractmethod
-from pytube import Stream
 from typing import Protocol
+
+import yt_dlp
+from pytube import Stream
 
 
 _logger = logging.getLogger(__name__)
