@@ -4,11 +4,12 @@ import logging
 from abc import ABC, abstractmethod
 
 import mutagen.id3 as tag_type
+import mutagen.mp3 as exception
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
 
-from ..models.metadata import TrackMetadata
 from ..utils.exceptions import InvalidMetadataServiceError, MusicManagerError
+from ..utils.metadata_schema import TrackMetadata
 
 
 _logger = logging.getLogger(__name__)
@@ -24,10 +25,6 @@ class FileMetadata(ABC):
     def set_metadata(self, file_path: str | io.BytesIO, new_data: TrackMetadata) -> None:
         ...
 
-    @abstractmethod
-    def reset_metadata(self, file_path: str | io.BytesIO) -> None:
-        ...
-
 
 class MP3File(FileMetadata):
 
@@ -35,33 +32,77 @@ class MP3File(FileMetadata):
 
         track = self.__load_track(file_path)
 
-        if track.tags:
+        if not track.tags:
+            return TrackMetadata()
 
-            metadata = {}
-            metadata_fields = TrackMetadata().__dict__.keys()
+        metadata = {}
+        metadata_fields = TrackMetadata().__dict__.keys()
 
-            for key, value in track.tags.items():
-                if key in metadata_fields and hasattr(value, 'text'):
-                    if key == 'TRCK' and '/' in value.text[0]:
-                        trck, tpos = self.__parse_track_string(value.text[0])
-                        metadata['TRCK'] = trck
-                        metadata['TPOS'] = tpos
+        for key, value in track.tags.items():
+            if key in metadata_fields and hasattr(value, 'text'):
+                if key == 'TRCK':
+                    if '/' in value.text[0]:
+                        trck_no, total = self.__parse_track_string(value.text[0])
+                        metadata['TRCK'] = trck_no, total
                     else:
-                        metadata[key] = value.text[0]
+                        metadata['TRCK'] = value.text[0], "1"
 
-            return TrackMetadata(**metadata)
+                elif key == 'TPOS':
+                    if '/' in value.text[0]:
+                        dsk_no, total = self.__parse_track_string(value.text[0])
+                        metadata['TPOS'] = dsk_no, total
+                    else:
+                        metadata['TPOS'] = value.text[0], "1"
 
-        return TrackMetadata()
+                else:
+                    metadata[key] = value.text[0]
+
+        return TrackMetadata(**metadata)
 
     def set_metadata(self, file_path: str | io.BytesIO, new_data: TrackMetadata) -> None:
-        pass
 
-    def reset_metadata(self, file_path: str | io.BytesIO) -> None:
+        tag_mapping = {
+            'TIT2': tag_type.TIT2,
+            'TPE1': tag_type.TPE1,
+            'TPE2': tag_type.TPE2,
+            'TOPE': tag_type.TOPE,
+            'TALB': tag_type.TALB,
+            'TRCK': tag_type.TRCK,
+            'TPOS': tag_type.TPOS,
+            'TDRC': tag_type.TDRC,
+            'TCON': tag_type.TCON,
+            'APIC': tag_type.APIC,
+        }
 
-        track = MP3(file_path)
+        track = self.__load_track(file_path)
+        self.__reset_metadata(track)
 
+        for name, tag in tag_mapping.items():
+            value = getattr(new_data, name)
+
+            if name == 'TRCK' or name == 'TPOS':
+                track.tags.add(tag(encoding=3, text=self.__format_track_tuple(value)))
+
+            elif name == 'APIC' and value is not None:
+                track.tags.add(
+                    tag(
+                        encoding=3,
+                        mime='image/png',
+                        type=3,
+                        data=value
+                    )
+                )
+
+            elif isinstance(value, str):
+                track.tags.add(tag(encoding=3, text=value))
+
+        track.save()
+
+    @staticmethod
+    def __reset_metadata(track: MP3) -> None:
         if track.tags:
             track.tags.clear()
+
         else:
             track.add_tags()
 
@@ -73,26 +114,23 @@ class MP3File(FileMetadata):
             return MP3(file, ID3=ID3)
 
         except tag_type.ID3NoHeaderError as no_tags:
-            _logger.error(f"No tags founded in this file: {no_tags}")
+            _logger.warning(f"No tags founded in this file: {no_tags}")
             raise InvalidMetadataServiceError(no_tags)
+
+        except exception.HeaderNotFoundError as corrupt_file:
+            _logger.error(f"There was a problem with the file: {corrupt_file}")
+            raise InvalidMetadataServiceError(corrupt_file)
 
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while analyzing file metadata: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __parse_track_string(data: str) -> tuple[str, str] | str:
-        if "/" in data:
-            track, disk = data.split("/")
-            return track, disk
-
-        return data
+    def __parse_track_string(data: str) -> tuple[str, str]:
+        track, total_track = data.split("/")
+        return track, total_track
 
     @staticmethod
-    def __format_track_tuple(track_tuple: tuple[str, str] | str) -> str:
-        if isinstance(track_tuple, tuple):
-            data = "/".join(track_tuple)
-            return data
-
-        return track_tuple
-
+    def __format_track_tuple(track_tuple: tuple[str, str]) -> str:
+        data = "/".join(track_tuple)
+        return data
