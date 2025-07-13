@@ -33,7 +33,7 @@
                     <field name="state" string="" widget="statusbar"/>
                     <sheet>
 
-                        <!-- First step -->
+                        <!-- Upload song -->
                         <section invisible="state != 'start'">
                             <header>
                                 <h1>Ready to upload your next hit? 🚀 </h1>
@@ -61,14 +61,14 @@
                             <div class="d-flex flex-row justify-content-around">
                                 <div class="d-flex flex-column align-items-center mx-3">
                                     <div class="mb-3">
-                                        <img src="#" width="300" height="300"/>
+                                        <img src="music_manager/static/src/img/update-img.png" width="300" height="300"/>
                                     </div>
                                     <p class="mx-auto"><b>MP3 file</b></p>
                                     <field name="file" string="MP3 file"/>
                                 </div>
                                 <div class="d-flex flex-column justify-content-center">
                                     <div class="mb-3">
-                                        <img src="#" width="300" height="300"/>
+                                        <img src="music_manager/static/src/img/youtube-img.png" width="300" height="300"/>
                                     </div>
                                     <p class="mx-auto"><b>YouTube URL</b></p>
                                     <field name="url" placeholder="https://"/>
@@ -76,7 +76,7 @@
                             </div>
                         </section>
 
-                        <!-- Second step -->
+                        <!-- Check metadata -->
                         <section invisible="state != 'uploaded'">
                             <header>
                                 <h1>File uploaded successfully! 📤 </h1>
@@ -89,6 +89,7 @@
                             </group>
                         </section>
 
+                        <!-- Update metadata -->
                         <section invisible="state != 'metadata'">
                             <header>
                                 <h1>Let’s polish your track details! ✏️ </h1>
@@ -98,6 +99,7 @@
                             </group>
                         </section>
 
+                        <!-- Save changes & file -->
                         <section invisible="state != 'done'">
                             <header>
                                 <h1>Your song is ready to rock! 🎉 </h1>
