@@ -164,8 +164,8 @@ class Track(Model):
 
                 track.name = metadata.TIT2
                 track.year = metadata.TDRC
-                track.track_no = metadata.TRCK
-                track.disk_no = metadata.TPOS
+                track.track_no = metadata.TRCK[0]
+                track.disk_no = metadata.TPOS[0]
 
             except InvalidMetadataServiceError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
