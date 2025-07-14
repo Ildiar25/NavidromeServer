@@ -41,7 +41,11 @@ class MP3File(FileMetadata):
         metadata_fields = TrackMetadata().__dict__.keys()
 
         for key, value in track.tags.items():
-            if key in metadata_fields and hasattr(value, 'text'):
+            if key.startswith('APIC'):
+                if value.type == 3:
+                    metadata['APIC'] = value.data
+
+            elif key in metadata_fields and hasattr(value, 'text'):
                 if key == 'TRCK':
                     if '/' in value.text[0]:
                         trck_no, total = self.__parse_track_string(value.text[0])
@@ -58,8 +62,6 @@ class MP3File(FileMetadata):
 
                 else:
                     metadata[key] = value.text[0]
-
-            # INFO: Include cover image treatment!
 
         track_data = TrackMetadata(**metadata)
 
