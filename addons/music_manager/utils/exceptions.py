@@ -6,11 +6,16 @@ class MusicManagerError(Exception):
 
 
 # ---- General exceptions ---- #
-class InvalidMetadataServiceError(MusicManagerError):
+class MetadataServiceError(MusicManagerError):
     """General exception for metadata errors."""
     ...
 
 
 class DownloadServiceError(MusicManagerError):
     """General exception for donwload errors."""
+    ...
+
+
+class ImageServiceError(MusicManagerError):
+    """General exception for image errors."""
     ...
