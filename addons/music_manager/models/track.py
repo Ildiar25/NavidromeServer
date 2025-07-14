@@ -183,7 +183,7 @@ class Track(Model):
                 track.tmp_album = metadata.TALB
                 track.duration = self._format_track_duration(metadata.DUR)
                 track.tmp_genre = metadata.TCON
-                track.cover = metadata.APIC
+                track.cover = base64.b64encode(metadata.APIC)
 
                 track.tmp_album_artist = metadata.TPE2
                 track.tmp_original_artist = metadata.TOPE
