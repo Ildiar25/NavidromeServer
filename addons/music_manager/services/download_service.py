@@ -174,6 +174,9 @@ class YTDLPAdapter(StreamProtocol):
                     'preferredcodec': 'mp3',
                     'preferredquality': '192'
                 },
+                {
+                    'key': 'FFmpegMetadata'
+                },
             ]
         }
 
