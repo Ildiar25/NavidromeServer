@@ -13,3 +13,5 @@ class TrackMetadata:
     TDRC: str = "Unknown"               # Year
     TCON: str = "Unknown"               # Genre
     APIC: bytes | None = None           # Cover
+    DUR: int = 0                        # Duration (seconds)
+    MIME: str | None = None             # MIME type

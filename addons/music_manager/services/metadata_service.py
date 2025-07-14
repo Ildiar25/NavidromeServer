@@ -3,12 +3,14 @@ import io
 import logging
 from abc import ABC, abstractmethod
 
+# noinspection PyPackageRequirements
+import magic
 import mutagen.id3 as tag_type
 import mutagen.mp3 as exception
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
 
-from ..utils.exceptions import InvalidMetadataServiceError, MusicManagerError
+from ..utils.exceptions import MetadataServiceError, MusicManagerError
 from ..utils.metadata_schema import TrackMetadata
 
 
@@ -57,7 +59,25 @@ class MP3File(FileMetadata):
                 else:
                     metadata[key] = value.text[0]
 
-        return TrackMetadata(**metadata)
+            # INFO: Include cover image treatment!
+
+        track_data = TrackMetadata(**metadata)
+
+        try:
+            track_data.DUR = round(track.info.length)
+
+            if isinstance(file_path, io.BytesIO):
+                mime_type = magic.from_buffer(file_path.getvalue(), mime=True)
+
+            else:
+                mime_type = magic.from_file(file_path, mime=True)
+
+            track_data.MIME = mime_type
+
+        except Exception as unknown_error:
+            _logger.warning(f"There was an error while trying to read MIME type and track duration: {unknown_error}")
+
+        return track_data
 
     def set_metadata(self, file_path: str | io.BytesIO, new_data: TrackMetadata) -> None:
 
@@ -115,11 +135,11 @@ class MP3File(FileMetadata):
 
         except tag_type.ID3NoHeaderError as no_tags:
             _logger.warning(f"No tags founded in this file: {no_tags}")
-            raise InvalidMetadataServiceError(no_tags)
+            raise MetadataServiceError(no_tags)
 
         except exception.HeaderNotFoundError as corrupt_file:
             _logger.error(f"There was a problem with the file: {corrupt_file}")
-            raise InvalidMetadataServiceError(corrupt_file)
+            raise MetadataServiceError(corrupt_file)
 
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while analyzing file metadata: {unknown_error}")
