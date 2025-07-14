@@ -29,7 +29,7 @@ class StreamProtocol(Protocol):
 
 
 # ---- Adapters ---- #
-class PyTubeAdapter:  # ❌ Library no updated -> It does not work
+class PyTubeAdapter(StreamProtocol):  # ❌ Library no updated -> It does not work
     def __init__(self, url: str) -> None:
         self.__url = url
 
@@ -120,7 +120,7 @@ class PyTubeAdapter:  # ❌ Library no updated -> It does not work
             raise DownloadServiceError(not_found)
 
 
-class YTDLPAdapter:
+class YTDLPAdapter(StreamProtocol):
     def __init__(self, url: str) -> None:
         self.__url = url
 
