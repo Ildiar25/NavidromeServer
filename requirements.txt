@@ -1,8 +1,11 @@
 # ID3 mp3 label edition
 mutagen==1.47.0
 
-# MIME file reader
+# MIME music file reader
 python-magic==0.4.27
+
+# Photo editing
+pillow ==11.3.0
 
 # Web section
 certifi==2025.7.9
