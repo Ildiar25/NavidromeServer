@@ -14,8 +14,9 @@ from odoo.fields import Binary, Boolean, Char, Many2many, Many2one, Selection
 from odoo.models import Model
 
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
+from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
-from ..utils.exceptions import DownloadServiceError, InvalidMetadataServiceError, MusicManagerError
+from ..utils.exceptions import DownloadServiceError, ImageServiceError, MetadataServiceError, MusicManagerError
 
 
 _logger = logging.getLogger(__name__)
@@ -26,16 +27,18 @@ class Track(Model):
     _name = 'music_manager.track'
     _description = 'track_table'
 
-    # Default fields
-    name = Char(string=_("Song title"))
+    # Form fields
+    name = Char(string=_("Title"))
+    track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
     year = Char(string=_("Year"))
+    album_artist = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
     track_no = Char(string=_("Track no"))
+    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"))
     disk_no = Char(string=_("Disk no"))
+    bpm = Char(string=_("BTM"), readonly=True)
+    original_artist = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
+    genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
     collection = Boolean(string=_("Part of a collection"))
-    duration = Char(string=_("Duration (min)"), readonly=True)
-    file = Binary(string=_("File"))
-    url = Char(string=_("Youtube URL"))
-    file_path = Char(string=_("File path"))
     cover = Binary(string=_("Cover"))
     state = Selection(
         selection=[
@@ -49,14 +52,27 @@ class Track(Model):
         default='start'
     )
 
+    # Info fields
+    # name
+    # original_artist
+    # album_id
+    file_type = Char(string=_("Type"), readonly=True)
+    duration = Char(string=_("Duration (min)"), readonly=True)
+    file_path = Char(string=_("File path"), readonly=True)
+
+    # Temporal fields
+    file = Binary(string=_("File"))
+    url = Char(string=_("Youtube URL"))
+    tmp_artists = Char(string=_("Track artist(s)"))
+    tmp_album_artist = Char(string=_("Album artist"))
+    tmp_original_artist = Char(string=_("Original artist"))
+    tmp_album = Char(string=_("Album"))
+    tmp_genre = Char(string=_("Genre"))
+
     # # Computed fields
     # display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
 
     # Relationships
-    track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
-    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"))
-    genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
-    original_artist = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     def action_next(self) -> None:
@@ -163,14 +179,28 @@ class Track(Model):
                 metadata = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
 
                 track.name = metadata.TIT2
+                track.tmp_artists = metadata.TPE1
+                track.tmp_album = metadata.TALB
+                track.duration = self._format_track_duration(metadata.DUR)
+                track.tmp_genre = metadata.TCON
+                track.cover = metadata.APIC
+
+                track.tmp_album_artist = metadata.TPE2
+                track.tmp_original_artist = metadata.TOPE
                 track.year = metadata.TDRC
                 track.track_no = metadata.TRCK[0]
                 track.disk_no = metadata.TPOS[0]
+                track.file_type = metadata.MIME
 
-            except InvalidMetadataServiceError as invalid_metadata:
+            except MetadataServiceError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
                 raise ValidationError(_("Invalid metadata founded on file."))
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
                 raise ValidationError(_("Sorry, something went wrong while loading metadata file."))
+
+    @staticmethod
+    def _format_track_duration(duration: int) -> str:
+        minutes, seconds = divmod(duration, 60)
+        return f"{minutes:02}:{seconds:02}"
