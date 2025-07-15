@@ -2,6 +2,7 @@
 import base64
 import io
 import logging
+from typing import Any
 
 # noinspection PyPackageRequirements
 import magic
@@ -39,7 +40,7 @@ class Track(Model):
     original_artist = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
     genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
     collection = Boolean(string=_("Part of a collection"))
-    cover = Binary(string=_("Cover"))
+    cover = Binary(string=_("Cover"), attachment=True)
     state = Selection(
         selection=[
             ('start', _("Start")),
@@ -146,6 +147,30 @@ class Track(Model):
                 if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
                     raise ValidationError(_("The URL must be a valid YouTube URL."))
 
+    @api.constrains('cover')
+    def _validate_cover_image(self) -> None:
+        for track in self:
+            if track.cover and isinstance(track.cover, (str, bytes)):
+
+                image_data = base64.b64decode(track.file)
+                mime_type = magic.from_buffer(image_data, mime=True)
+
+                # FIXME: Actually doesn't check cover field
+
+                if mime_type is 'image/webp':
+                    raise ValidationError(_("Actually WEBP Image format is not admited: %s", mime_type))
+
+    @api.model_create_multi
+    def create(self, list_vals: list[dict[str, Any]]):
+        for vals in list_vals:
+            self._process_cover_image(vals)
+
+        return super().create(list_vals)
+
+    def write(self, vals: dict[str, Any]) -> None:
+        self._process_cover_image(vals)
+        return super().write(vals)
+
     def _convert_to_mp3(self) -> None:
         for track in self:
             if track.url and isinstance(track.url, str):
@@ -171,7 +196,9 @@ class Track(Model):
 
                 except MusicManagerError as unknown_error:
                     _logger.error(f"Unexpected error while validating URL {track.url}: {unknown_error}")
-                    raise ValidationError(_("Sorry, something went wrong while validating URL."))
+                    raise ValidationError(
+                        _("DownloadService Error: Sorry, something went wrong while validating URL.")
+                    )
 
     def _update_fields(self) -> None:
         for track in self:
@@ -183,7 +210,9 @@ class Track(Model):
                 track.tmp_album = metadata.TALB
                 track.duration = self._format_track_duration(metadata.DUR)
                 track.tmp_genre = metadata.TCON
-                track.cover = base64.b64encode(metadata.APIC)
+
+                if metadata.APIC:
+                    track.cover = base64.b64encode(metadata.APIC)
 
                 track.tmp_album_artist = metadata.TPE2
                 track.tmp_original_artist = metadata.TOPE
@@ -198,7 +227,28 @@ class Track(Model):
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
-                raise ValidationError(_("Sorry, something went wrong while loading metadata file."))
+                raise ValidationError(
+                    _("MetadataServiceError: Sorry, something went wrong while loading metadata file.")
+                )
+
+    @staticmethod
+    def _process_cover_image(value: dict[str, Any]) -> None:
+        if 'cover' in value and value['cover']:
+            try:
+                if isinstance(value['cover'], (str, bytes)):
+                    image = base64.b64decode(value['cover'])
+                    cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=200, height=200).build()
+                    value['cover'] = base64.b64encode(cover)
+
+            except ImageServiceError as service_error:
+                _logger.error(f"Failed to process cover image: {service_error}")
+                raise ValidationError(_("Something went wrong while processing cover image."))
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unexpected error while processing image: {unknown_error}")
+                raise ValidationError(
+                    _("ImageServiceError: Sorry, something went wrong while processing cover image")
+                )
 
     @staticmethod
     def _format_track_duration(duration: int) -> str:
