@@ -12,14 +12,16 @@
             <field name="name">music_manager.track.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <tree string="Songs">
+                <tree string="Songs" decoration-danger="not has_valid_path">
                     <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Title"/>
-                    <field name="original_artist" string="Original artist"/>
+                    <field name="original_artist_id" string="Original artist"/>
                     <field name="album_id" string="Album"/>
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
                     <field name="duration" string="Duration"/>
+                    <field name="file_path" string="Path" optional="hide"/>
+                    <field name="has_valid_path"/>
                 </tree>
             </field>
         </record>
@@ -177,8 +179,8 @@
                                                         <field name="genre_id" string="Genre"/>
                                                     </group>
                                                     <group>
-                                                        <field name="album_artist" string="Album artist"/>
-                                                        <field name="original_artist" string="Original artist"/>
+                                                        <field name="album_artist_id" string="Album artist"/>
+                                                        <field name="original_artist_id" string="Original artist"/>
                                                         <field name="year" string="Year"/>
                                                         <field name="track_no" string="Track"/>
                                                         <field name="disk_no" string="Disk"/>
@@ -230,6 +232,7 @@
                                                 <div class="flex-grow-1 mx-3">
                                                     <group>
 
+                                                        <field name="file_path" string="Path"/>
                                                     </group>
                                                 </div>
                                             </div>

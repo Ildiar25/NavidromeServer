@@ -7,6 +7,9 @@ python-magic==0.4.27
 # Photo editing
 pillow ==11.3.0
 
+# Text manipulation
+unidecode==1.4.0
+
 # Web section
 certifi==2025.7.9
 charset-normalizer==3.4.2

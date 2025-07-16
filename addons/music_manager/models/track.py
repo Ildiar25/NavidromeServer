@@ -2,6 +2,8 @@
 import base64
 import io
 import logging
+import re
+from unidecode import unidecode
 from typing import Any
 
 # noinspection PyPackageRequirements
@@ -34,17 +36,16 @@ class Track(Model):
     cover = Binary(string=_("Cover"), attachment=True)
     disk_no = Char(string=_("Disk no"))
     duration = Char(string=_("Duration (min)"), readonly=True)
-    file_path = Char(string=_("File path"), readonly=True)
     file_type = Char(string=_("Type"), readonly=True)
     name = Char(string=_("Title"))
     track_no = Char(string=_("Track no"))
     year = Char(string=_("Year"))
 
     # Relational fields
-    album_artist = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
+    album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
     album_id = Many2one(comodel_name='music_manager.album', string=_("Album"))
     genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
-    original_artist = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
+    original_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
     track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
 
     # Temporal fields
@@ -58,10 +59,12 @@ class Track(Model):
 
     # Computed fields
     # display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
+    file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
 
     # Related fields
 
     # Technical fields
+    has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
     state = Selection(
         selection=[
             ('start', _("Start")),
@@ -86,19 +89,45 @@ class Track(Model):
         self._process_cover_image(vals)
         return super().write(vals)
 
+    @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
+    def _compute_file_path(self) -> None:
+        for track in self:
+            artist = self._clean_for_path(track.album_artist_id.name or '')
+            album = self._clean_for_path(track.album_id.name or '')
+
+            if track.track_no and len(track.track_no) == 1:
+                track_no = f"0{self._clean_for_path(track.track_no)}"
+            else:
+                track_no = self._clean_for_path(track.track_no or '')
+
+            title = self._clean_for_path(track.name or '')
+
+            track.file_path = f"/music/{artist}/{album}/{track_no}_-_{title}.mp3"
+
     @api.constrains('file', 'url')
     def _check_fields(self) -> None:
         for track in self:
 
             if not track.file and not track.url:
                 _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                raise ValidationError(_("Must add an URL or update a file to proceed."))
+                raise ValidationError(_("\nMust add an URL or update a file to proceed."))
 
             if track.file and track.url:
                 _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
                 raise ValidationError(
-                    _("Only one field can be added at the same time. Please, delete one of them to continue.")
+                    _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
                 )
+
+    @api.constrains('file_path')
+    def _validate_file_path(self) -> None:
+        for track in self:
+            if track.file_path and isinstance(track.file_path, str):
+
+                if re.match(pattern=r'^\/music\/\w+\/\w+\/\w+-\w+\.[a-zA-Z0-9]{3,4}$', string=track.file_path):
+                    track.has_valid_path = True
+
+                else:
+                    track.has_valid_path = False
 
     @api.onchange('file')
     def _validate_file_type(self) -> dict[str, dict[str, str]] | None:
@@ -211,12 +240,12 @@ class Track(Model):
 
                 except DownloadServiceError as video_error:
                     _logger.error(f"Failed to process YouTube URL {track.url}: {video_error}")
-                    raise ValidationError(_("Invalid YouTube URL or video is not accessible."))
+                    raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
 
                 except MusicManagerError as unknown_error:
                     _logger.error(f"Unexpected error while validating URL {track.url}: {unknown_error}")
                     raise ValidationError(
-                        _("DownloadService Error: Sorry, something went wrong while validating URL.")
+                        _("\nDownloadService Error: Sorry, something went wrong while validating URL.")
                     )
 
     def _find_or_create_album(self, album_name: str) -> int | bool:
@@ -315,18 +344,24 @@ class Track(Model):
                 track.track_artist_ids = self._find_or_create_artist(metadata.TPE1)
                 track.album_id = self._find_or_create_album(metadata.TALB)
                 track.genre_id = self._find_or_create_genre(metadata.TCON)
-                track.album_artist = self._find_or_create_single_artist(metadata.TPE2, track.track_artist_ids.ids)
-                track.original_artist = self._find_or_create_single_artist(metadata.TOPE, track.track_artist_ids.ids)
+                track.album_artist_id = self._find_or_create_single_artist(metadata.TPE2, track.track_artist_ids.ids)
+                track.original_artist_id = self._find_or_create_single_artist(metadata.TOPE, track.track_artist_ids.ids)
 
             except MetadataServiceError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
-                raise ValidationError(_("Invalid metadata founded on file."))
+                raise ValidationError(_("\nInvalid metadata founded on file."))
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
                 raise ValidationError(
-                    _("MetadataServiceError: Sorry, something went wrong while loading metadata file.")
+                    _("\nMetadataServiceError: Sorry, something went wrong while loading metadata file.")
                 )
+
+    @staticmethod
+    def _clean_for_path(text: str) -> str:
+        text = unidecode(text).lower()
+        text = re.sub(pattern=r'[^a-z0-9]', repl='_', string=text)
+        return re.sub(pattern=r'_+', repl='_', string=text).strip('_')
 
     @staticmethod
     def _format_track_duration(duration: int) -> str:
@@ -342,17 +377,17 @@ class Track(Model):
                     mime_type = magic.from_buffer(image, mime=True)
 
                     if mime_type == 'image/webp':
-                        raise ValidationError(_("This track cover has an invalid format: %s", mime_type))
+                        raise ValidationError(_("\nThis track cover has an invalid format: %s", mime_type))
 
                     cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=200, height=200).build()
                     value['cover'] = base64.b64encode(cover)
 
             except ImageServiceError as service_error:
                 _logger.error(f"Failed to process cover image: {service_error}")
-                raise ValidationError(_("Something went wrong while processing cover image: %s", service_error))
+                raise ValidationError(_("\nSomething went wrong while processing cover image: %s", service_error))
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing image: {unknown_error}")
                 raise ValidationError(
-                    _("ImageServiceError: Sorry, something went wrong while processing cover image")
+                    _("\nImageServiceError: Sorry, something went wrong while processing cover image")
                 )
