@@ -147,18 +147,23 @@ class Track(Model):
                 if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
                     raise ValidationError(_("The URL must be a valid YouTube URL."))
 
-    @api.constrains('cover')
-    def _validate_cover_image(self) -> None:
+    @api.onchange('cover')
+    def _validate_cover_image(self) -> dict[str, dict[str, str]] | None:
         for track in self:
             if track.cover and isinstance(track.cover, (str, bytes)):
 
-                image_data = base64.b64decode(track.file)
-                mime_type = magic.from_buffer(image_data, mime=True)
+                image = base64.b64decode(track.cover)
+                mime_type = magic.from_buffer(image, mime=True)
 
-                # FIXME: Actually doesn't check cover field
-
-                if mime_type is 'image/webp':
-                    raise ValidationError(_("Actually WEBP Image format is not admited: %s", mime_type))
+                if mime_type == 'image/webp':
+                    track.cover = False
+                    return {
+                        'warning': {
+                            'title': "Invalid file format",
+                            'message': "Sorry, actually WEBP image format is not admited: 'image/webp'."
+                        }
+                    }
+        return None
 
     @api.model_create_multi
     def create(self, list_vals: list[dict[str, Any]]):
@@ -205,21 +210,31 @@ class Track(Model):
             try:
                 metadata = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
 
-                track.name = metadata.TIT2
-                track.tmp_artists = metadata.TPE1
-                track.tmp_album = metadata.TALB
-                track.duration = self._format_track_duration(metadata.DUR)
-                track.tmp_genre = metadata.TCON
+                mapping_fields = {
+                    'name': metadata.TIT2,
+                    'tmp_artists': metadata.TPE1,
+                    'tmp_album': metadata.TALB,
+                    'duration': self._format_track_duration(metadata.DUR),
+                    'tmp_genre': metadata.TCON,
+                    'tmp_album_artist': metadata.TPE2,
+                    'tmp_original_artist': metadata.TOPE,
+                    'year': metadata.TDRC,
+                    'track_no': metadata.TRCK[0],
+                    'disk_no': metadata.TPOS[0],
+                    'file_type': metadata.MIME,
+                }
+
+                for attr_name, value in mapping_fields.items():
+                    setattr(track, attr_name, value)
 
                 if metadata.APIC:
                     track.cover = base64.b64encode(metadata.APIC)
 
-                track.tmp_album_artist = metadata.TPE2
-                track.tmp_original_artist = metadata.TOPE
-                track.year = metadata.TDRC
-                track.track_no = metadata.TRCK[0]
-                track.disk_no = metadata.TPOS[0]
-                track.file_type = metadata.MIME
+                track.track_artist_ids = self._find_or_create_artist(metadata.TPE1)
+                track.album_id = self._find_or_create_album(metadata.TALB)
+                track.genre_id = self._find_or_create_genre(metadata.TCON)
+                track.album_artist = self._find_or_create_single_artist(metadata.TPE2, track.track_artist_ids.ids)
+                track.original_artist = self._find_or_create_single_artist(metadata.TOPE, track.track_artist_ids.ids)
 
             except MetadataServiceError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
@@ -231,18 +246,91 @@ class Track(Model):
                     _("MetadataServiceError: Sorry, something went wrong while loading metadata file.")
                 )
 
+    def _find_or_create_artist(self, artist_names: str) -> list[tuple[int, int, list[int]]]:
+
+        artists = self.env['music_manager.artist']
+        artist_ids = []
+
+        if artist_names and artist_names.lower() != 'unknown':
+            names_list = (name.strip() for name in artist_names.split(','))
+
+            for name in names_list:
+                artist = artists.search([('name', 'ilike', name)], limit=1)
+
+                if artist:
+                    artist_ids.append(artist.id)
+
+                else:
+                    new_artist = artists.create({'name': name})
+                    artist_ids.append(new_artist.id)
+
+        return [(6, 0, artist_ids)]
+
+    def _find_or_create_album(self, album_name: str) -> int | bool:
+
+        albums = self.env['music_manager.album']
+
+        if album_name and album_name.lower() != 'unknown':
+            album = albums.search([('name', 'ilike', album_name)], limit=1)
+
+            if album:
+                return album.id
+
+            else:
+                return albums.create({'name': album_name}).id
+
+        return False
+
+    def _find_or_create_genre(self, genre_name: str) -> int | bool:
+
+        genres = self.env['music_manager.genre']
+
+        if genre_name and genre_name.lower() != 'unknown':
+            genre = genres.search([('name', 'ilike', genre_name)], limit=1)
+
+            if genre:
+                return genre.id
+
+            else:
+                return genres.create({'name': genre_name}).id
+
+        return False
+
+    def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]) -> int | bool:
+
+        artists = self.env['music_manager.artist']
+
+        if artist_name and artist_name.lower() != 'unknown':
+            artist = artists.search([('name', 'ilike', artist_name)])
+
+            if artist:
+                return artist.id
+
+            else:
+                return artists.create({'name': artist_name}).id
+
+        elif fallback_ids:
+            return fallback_ids[0]
+
+        return False
+
     @staticmethod
     def _process_cover_image(value: dict[str, Any]) -> None:
         if 'cover' in value and value['cover']:
             try:
                 if isinstance(value['cover'], (str, bytes)):
                     image = base64.b64decode(value['cover'])
+                    mime_type = magic.from_buffer(image, mime=True)
+
+                    if mime_type == 'image/webp':
+                        raise ValidationError(_("This track cover has an invalid format: %s", mime_type))
+
                     cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=200, height=200).build()
                     value['cover'] = base64.b64encode(cover)
 
             except ImageServiceError as service_error:
                 _logger.error(f"Failed to process cover image: {service_error}")
-                raise ValidationError(_("Something went wrong while processing cover image."))
+                raise ValidationError(_("Something went wrong while processing cover image: %s", service_error))
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing image: {unknown_error}")
