@@ -28,19 +28,40 @@ class Track(Model):
     _name = 'music_manager.track'
     _description = 'track_table'
 
-    # Form fields
-    name = Char(string=_("Title"))
-    track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
-    year = Char(string=_("Year"))
-    album_artist = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
-    track_no = Char(string=_("Track no"))
-    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"))
-    disk_no = Char(string=_("Disk no"))
+    # Basic fields
     bpm = Char(string=_("BTM"), readonly=True)
-    original_artist = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
-    genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
     collection = Boolean(string=_("Part of a collection"))
     cover = Binary(string=_("Cover"), attachment=True)
+    disk_no = Char(string=_("Disk no"))
+    duration = Char(string=_("Duration (min)"), readonly=True)
+    file_path = Char(string=_("File path"), readonly=True)
+    file_type = Char(string=_("Type"), readonly=True)
+    name = Char(string=_("Title"))
+    track_no = Char(string=_("Track no"))
+    year = Char(string=_("Year"))
+
+    # Relational fields
+    album_artist = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
+    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"))
+    genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
+    original_artist = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
+    track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
+
+    # Temporal fields
+    file = Binary(string=_("File"))
+    tmp_album = Char(string=_("Album"))
+    tmp_album_artist = Char(string=_("Album artist"))
+    tmp_artists = Char(string=_("Track artist(s)"))
+    tmp_genre = Char(string=_("Genre"))
+    tmp_original_artist = Char(string=_("Original artist"))
+    url = Char(string=_("Youtube URL"))
+
+    # Computed fields
+    # display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
+
+    # Related fields
+
+    # Technical fields
     state = Selection(
         selection=[
             ('start', _("Start")),
@@ -52,29 +73,91 @@ class Track(Model):
         string=_("State"),
         default='start'
     )
+    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user, required=True)
 
-    # Info fields
-    # name
-    # original_artist
-    # album_id
-    file_type = Char(string=_("Type"), readonly=True)
-    duration = Char(string=_("Duration (min)"), readonly=True)
-    file_path = Char(string=_("File path"), readonly=True)
+    @api.model_create_multi
+    def create(self, list_vals: list[dict[str, Any]]):
+        for vals in list_vals:
+            self._process_cover_image(vals)
 
-    # Temporal fields
-    file = Binary(string=_("File"))
-    url = Char(string=_("Youtube URL"))
-    tmp_artists = Char(string=_("Track artist(s)"))
-    tmp_album_artist = Char(string=_("Album artist"))
-    tmp_original_artist = Char(string=_("Original artist"))
-    tmp_album = Char(string=_("Album"))
-    tmp_genre = Char(string=_("Genre"))
+        return super().create(list_vals)
 
-    # # Computed fields
-    # display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
+    def write(self, vals: dict[str, Any]) -> None:
+        self._process_cover_image(vals)
+        return super().write(vals)
 
-    # Relationships
-    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
+    @api.constrains('file', 'url')
+    def _check_fields(self) -> None:
+        for track in self:
+
+            if not track.file and not track.url:
+                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
+                raise ValidationError(_("Must add an URL or update a file to proceed."))
+
+            if track.file and track.url:
+                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
+                raise ValidationError(
+                    _("Only one field can be added at the same time. Please, delete one of them to continue.")
+                )
+
+    @api.onchange('file')
+    def _validate_file_type(self) -> dict[str, dict[str, str]] | None:
+        for track in self:
+            if track.file and isinstance(track.file, bytes):
+
+                file_data = base64.b64decode(track.file)
+                mime_type = magic.from_buffer(file_data, mime=True)
+
+                if mime_type not in ["audio/mpeg", "audio/mpg", "audio/x-mpeg"]:
+                    track.file = False
+                    return {
+                        'warning': {
+                            'title': _("Wait a minute! 👮"),
+                            'message': _("\nActually only MP3 files are allowed. Don't f*ck the system: %s", mime_type)
+                        }
+                    }
+        return None
+
+    @api.onchange('url')
+    def _validate_url_path(self) -> dict[str, dict[str, str]] | None:
+        for track in self:
+            if track.url and isinstance(track.url, str):
+
+                parsed_url = urlparse(track.url)
+
+                if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
+                    return {
+                        'warning': {
+                            'title': _("C'mon dude! 🙄"),
+                            'message': _("\nThe web address has to be valid and we both know it isn't.")
+                        }
+                    }
+        return None
+
+    @api.onchange('cover')
+    def _validate_cover_image(self) -> dict[str, dict[str, str]] | None:
+        for track in self:
+            if track.cover and isinstance(track.cover, (str, bytes)):
+
+                image = base64.b64decode(track.cover)
+                mime_type = magic.from_buffer(image, mime=True)
+
+                if mime_type == 'image/webp':
+                    track.cover = False
+                    return {
+                        'warning': {
+                            'title': _("Not today! ❌"),
+                            'message': _(
+                                "\nI'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷", mime_type
+                            )
+                        }
+                    }
+        return None
+
+    def action_back(self) -> None:
+        for track in self:
+            if track.state == 'done':
+                track.state = 'metadata'
 
     def action_next(self) -> None:
         for track in self:
@@ -95,10 +178,8 @@ class Track(Model):
                 case 'done':
                     track.state = 'added'
 
-    def action_back(self) -> None:
-        for track in self:
-            if track.state == 'done':
-                track.state = 'metadata'
+    def save_changes(self) -> None:
+        pass
 
     def save_file(self) -> None:
         for track in self:
@@ -108,73 +189,6 @@ class Track(Model):
                 name = track.name
                 with open(f"/music/{name}.mp3", "wb") as file_test:
                     file_test.write(picture)
-
-    def save_changes(self) -> None:
-        pass
-
-    @api.constrains('file', 'url')
-    def _check_fields(self) -> None:
-        for track in self:
-
-            if not track.file and not track.url:
-                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                raise ValidationError(_("Must add an URL or a file to proceed."))
-
-            if track.file and track.url:
-                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                raise ValidationError(
-                    _("Only one file can be added at the same time. Please, delete one of them to continue.")
-                )
-
-    @api.constrains('file')
-    def _validate_file_type(self) -> None:
-        for track in self:
-            if track.file and isinstance(track.file, bytes):
-
-                file_data = base64.b64decode(track.file)
-                mime_type = magic.from_buffer(file_data, mime=True)
-
-                if mime_type not in ["audio/mpeg", "audio/mpg", "audio/x-mpeg"]:
-                    raise ValidationError(_("Actually only MP3 files are allowed: %s", mime_type))
-
-    @api.constrains('url')
-    def _validate_url_path(self) -> None:
-        for track in self:
-            if track.url and isinstance(track.url, str):
-
-                parsed_url = urlparse(track.url)
-
-                if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
-                    raise ValidationError(_("The URL must be a valid YouTube URL."))
-
-    @api.onchange('cover')
-    def _validate_cover_image(self) -> dict[str, dict[str, str]] | None:
-        for track in self:
-            if track.cover and isinstance(track.cover, (str, bytes)):
-
-                image = base64.b64decode(track.cover)
-                mime_type = magic.from_buffer(image, mime=True)
-
-                if mime_type == 'image/webp':
-                    track.cover = False
-                    return {
-                        'warning': {
-                            'title': "Invalid file format",
-                            'message': "Sorry, actually WEBP image format is not admited: 'image/webp'."
-                        }
-                    }
-        return None
-
-    @api.model_create_multi
-    def create(self, list_vals: list[dict[str, Any]]):
-        for vals in list_vals:
-            self._process_cover_image(vals)
-
-        return super().create(list_vals)
-
-    def write(self, vals: dict[str, Any]) -> None:
-        self._process_cover_image(vals)
-        return super().write(vals)
 
     def _convert_to_mp3(self) -> None:
         for track in self:
@@ -204,6 +218,74 @@ class Track(Model):
                     raise ValidationError(
                         _("DownloadService Error: Sorry, something went wrong while validating URL.")
                     )
+
+    def _find_or_create_album(self, album_name: str) -> int | bool:
+
+        albums = self.env['music_manager.album']
+
+        if album_name and album_name.lower() != 'unknown':
+            album = albums.search([('name', 'ilike', album_name)], limit=1)
+
+            if album:
+                return album.id
+
+            else:
+                return albums.create({'name': album_name}).id
+
+        return False
+
+    def _find_or_create_artist(self, artist_names: str) -> list[tuple[int, int, list[int]]]:
+
+        artists = self.env['music_manager.artist']
+        artist_ids = []
+
+        if artist_names and artist_names.lower() != 'unknown':
+            names_list = (name.strip() for name in artist_names.split(','))
+
+            for name in names_list:
+                artist = artists.search([('name', 'ilike', name)], limit=1)
+
+                if artist:
+                    artist_ids.append(artist.id)
+
+                else:
+                    new_artist = artists.create({'name': name})
+                    artist_ids.append(new_artist.id)
+
+        return [(6, 0, artist_ids)]
+
+    def _find_or_create_genre(self, genre_name: str) -> int | bool:
+
+        genres = self.env['music_manager.genre']
+
+        if genre_name and genre_name.lower() != 'unknown':
+            genre = genres.search([('name', 'ilike', genre_name)], limit=1)
+
+            if genre:
+                return genre.id
+
+            else:
+                return genres.create({'name': genre_name}).id
+
+        return False
+
+    def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]) -> int | bool:
+
+        artists = self.env['music_manager.artist']
+
+        if artist_name and artist_name.lower() != 'unknown':
+            artist = artists.search([('name', 'ilike', artist_name)])
+
+            if artist:
+                return artist.id
+
+            else:
+                return artists.create({'name': artist_name}).id
+
+        elif fallback_ids:
+            return fallback_ids[0]
+
+        return False
 
     def _update_fields(self) -> None:
         for track in self:
@@ -246,73 +328,10 @@ class Track(Model):
                     _("MetadataServiceError: Sorry, something went wrong while loading metadata file.")
                 )
 
-    def _find_or_create_artist(self, artist_names: str) -> list[tuple[int, int, list[int]]]:
-
-        artists = self.env['music_manager.artist']
-        artist_ids = []
-
-        if artist_names and artist_names.lower() != 'unknown':
-            names_list = (name.strip() for name in artist_names.split(','))
-
-            for name in names_list:
-                artist = artists.search([('name', 'ilike', name)], limit=1)
-
-                if artist:
-                    artist_ids.append(artist.id)
-
-                else:
-                    new_artist = artists.create({'name': name})
-                    artist_ids.append(new_artist.id)
-
-        return [(6, 0, artist_ids)]
-
-    def _find_or_create_album(self, album_name: str) -> int | bool:
-
-        albums = self.env['music_manager.album']
-
-        if album_name and album_name.lower() != 'unknown':
-            album = albums.search([('name', 'ilike', album_name)], limit=1)
-
-            if album:
-                return album.id
-
-            else:
-                return albums.create({'name': album_name}).id
-
-        return False
-
-    def _find_or_create_genre(self, genre_name: str) -> int | bool:
-
-        genres = self.env['music_manager.genre']
-
-        if genre_name and genre_name.lower() != 'unknown':
-            genre = genres.search([('name', 'ilike', genre_name)], limit=1)
-
-            if genre:
-                return genre.id
-
-            else:
-                return genres.create({'name': genre_name}).id
-
-        return False
-
-    def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]) -> int | bool:
-
-        artists = self.env['music_manager.artist']
-
-        if artist_name and artist_name.lower() != 'unknown':
-            artist = artists.search([('name', 'ilike', artist_name)])
-
-            if artist:
-                return artist.id
-
-            else:
-                return artists.create({'name': artist_name}).id
-
-        elif fallback_ids:
-            return fallback_ids[0]
-
-        return False
+    @staticmethod
+    def _format_track_duration(duration: int) -> str:
+        minutes, seconds = divmod(duration, 60)
+        return f"{minutes:02}:{seconds:02}"
 
     @staticmethod
     def _process_cover_image(value: dict[str, Any]) -> None:
@@ -337,8 +356,3 @@ class Track(Model):
                 raise ValidationError(
                     _("ImageServiceError: Sorry, something went wrong while processing cover image")
                 )
-
-    @staticmethod
-    def _format_track_duration(duration: int) -> str:
-        minutes, seconds = divmod(duration, 60)
-        return f"{minutes:02}:{seconds:02}"
