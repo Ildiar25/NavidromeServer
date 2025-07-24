@@ -12,3 +12,5 @@
  - [x] **Arreglar botón 'Save'. Constrains detecta que no hay URL ni archivo y da error**
  - [ ] **Añadir excepciones específicas en los servicios**
  - [ ] **Crear test para revisar todos los servicios creados**
+ - [ ] **Actualizar 'makefile' y el módulo 'Utils.psm1' con el archivo 'permissions.sh'**
+ - [ ] **Arreglar el guardado de metadatos: Actualmente da problemas.**
