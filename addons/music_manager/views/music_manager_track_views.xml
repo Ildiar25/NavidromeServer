@@ -12,7 +12,7 @@
             <field name="name">music_manager.track.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <tree string="Songs" decoration-danger="not has_valid_path">
+                <tree string="Songs" decoration-danger="not is_saved">
                     <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Title"/>
                     <field name="original_artist_id" string="Original artist"/>
@@ -22,6 +22,7 @@
                     <field name="duration" string="Duration"/>
                     <field name="file_path" string="Path" optional="hide"/>
                     <field name="has_valid_path"/>
+                    <field name="is_saved"/>
                 </tree>
             </field>
         </record>
@@ -197,7 +198,7 @@
                                         <h1>Confirm! ✅ </h1>
                                     </header>
                                     <separator/>
-                                    <div style="height: 620px">
+                                    <div style="height: 640px">
                                         <div class="d-flex flex-row justify-content-around">
                                             <div class="w-50 mb-3">
                                                 <h3 class="text-muted">Add the file to Navidrome!💿</h3>
@@ -226,24 +227,46 @@
                                             <div class="d-flex flex-row justify-content-between w-100">
                                                 <div class="flex-grow-1 mx-3">
                                                     <group>
-
+                                                        <field name="name" string="Title" readonly="True"/>
+                                                        <field name="display_artist_names" string="Track artist(s)"/>
+                                                        <field name="album_id" string="Album" readonly="True"/>
+                                                        <field name="genre_id" string="Genre" readonly="True"/>
+                                                        <field name="file_path" string="Path"/>
+                                                        <field name="has_valid_path" invisible="True"/>
                                                     </group>
                                                 </div>
                                                 <div class="flex-grow-1 mx-3">
                                                     <group>
-
-                                                        <field name="file_path" string="Path"/>
+                                                        <field name="album_artist_id" string="Album artist" readonly="True"/>
+                                                        <field name="original_artist_id" string="Original artist" readonly="True"/>
+                                                        <field name="year" string="Year" readonly="True"/>
+                                                        <field name="track_no" string="Track" readonly="True"/>
+                                                        <field name="disk_no" string="Disk" readonly="True"/>
                                                     </group>
                                                 </div>
                                             </div>
                                         </div>
                                         <separator/>
                                         <div class="d-flex flex-row justify-content-around">
-                                            <div class="w-50 mb-3">
-                                                <p>
-
-                                                </p>
-                                                <button name="save_file" string="Save" type="object"/>
+                                            <div class="w-50 mb-3 text-align">
+                                                <div class="justify-content-center" invisible="has_valid_path">
+                                                    <h4>My gosh! 🙄</h4>
+                                                    <p>
+                                                        <em>There are some fields you need to check before save file!</em>
+                                                        <br/>
+                                                        This app needs to have a valid path to add the song into the
+                                                        library folder and we both actually know that condition is not
+                                                        true. Check <b>artist name</b>, <b>album name</b>,
+                                                        <b>track number</b> or <b>song title</b>. All are necessary!
+                                                    </p>
+                                                </div>
+                                                <div class="justify-content-center" invisible="not has_valid_path">
+                                                    <h4>Nice! Your song is ready to be added onto your library! 😍</h4>
+                                                    <p>
+                                                        <em>Just click the (there is!) 'Save' button.</em>
+                                                    </p>
+                                                </div>
+                                                <button name="save_file" string="Save" class="btn-outline-primary w-100" type="object" invisible="not has_valid_path"/>
                                             </div>
                                         </div>
                                     </div>
@@ -256,10 +279,34 @@
                                     </header>
                                     <separator/>
                                     <div style="height: 620px">
-                                        <group>
-                                            <field name="name" string="Title" readonly="True"/>
-                                            <button name="save_changes" string="Update" type="object"/>
-                                        </group>
+                                        <div class="d-flex flex-row justify-content-start">
+                                            <div class="mx-3">
+                                                <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}" readonly="True"/>
+                                            </div>
+                                            <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
+                                            <div class="d-flex flex-row justify-content-between w-100">
+                                                <div class="flex-grow-1 mx-3">
+                                                    <group>
+                                                        <field name="name" string="Title"/>
+                                                        <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
+                                                        <field name="album_id" string="Album"/>
+                                                        <field name="genre_id" string="Genre"/>
+                                                        <field name="file_path" string="Path"/>
+                                                        <field name="has_valid_path" invisible="True"/>
+                                                    </group>
+                                                </div>
+                                                <div class="flex-grow-1 mx-3">
+                                                    <group>
+                                                        <field name="album_artist_id" string="Album artist"/>
+                                                        <field name="original_artist_id" string="Original artist"/>
+                                                        <field name="year" string="Year"/>
+                                                        <field name="track_no" string="Track"/>
+                                                        <field name="disk_no" string="Disk"/>
+                                                    </group>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button name="save_changes" string="Update" type="object"/>
                                     </div>
                                 </section>
                             </div>
@@ -270,7 +317,7 @@
                                     <button name="action_back" string="Back" class="btn btn-outline-primary" type="object" invisible="state != 'done'"/>
                                 </div>
                                 <div class="w-100 d-flex flex-row justify-content-end">
-                                    <button name="action_next" string="Next" class="btn btn-outline-primary" type="object" invisible="state == 'added'"/>
+                                    <button name="action_next" string="Next" class="btn btn-outline-primary" type="object" invisible="state == 'added' or state == 'done'"/>
                                 </div>
                             </div>
                         </div>
