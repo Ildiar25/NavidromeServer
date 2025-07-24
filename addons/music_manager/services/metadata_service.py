@@ -2,6 +2,7 @@
 import io
 import logging
 from abc import ABC, abstractmethod
+from typing import Any
 
 # noinspection PyPackageRequirements
 import magic
@@ -30,9 +31,9 @@ class FileMetadata(ABC):
 
 class MP3File(FileMetadata):
 
-    def get_metadata(self, file_path: str | io.BytesIO) -> TrackMetadata:
+    def get_metadata(self, filething: str | io.BytesIO) -> TrackMetadata:
 
-        track = self.__load_track(file_path)
+        track = self.__load_track(filething)
 
         if not track.tags:
             return TrackMetadata()
@@ -68,11 +69,11 @@ class MP3File(FileMetadata):
         try:
             track_data.DUR = round(track.info.length)
 
-            if isinstance(file_path, io.BytesIO):
-                mime_type = magic.from_buffer(file_path.getvalue(), mime=True)
+            if isinstance(filething, io.BytesIO):
+                mime_type = magic.from_buffer(filething.getvalue(), mime=True)
 
             else:
-                mime_type = magic.from_file(file_path, mime=True)
+                mime_type = magic.from_file(filething, mime=True)
 
             track_data.MIME = mime_type
 
@@ -81,7 +82,7 @@ class MP3File(FileMetadata):
 
         return track_data
 
-    def set_metadata(self, file_path: str | io.BytesIO, new_data: TrackMetadata) -> None:
+    def set_metadata(self, filething: str | io.BytesIO, new_data: dict[str, Any]) -> None:
 
         tag_mapping = {
             'TIT2': tag_type.TIT2,
@@ -96,8 +97,10 @@ class MP3File(FileMetadata):
             'APIC': tag_type.APIC,
         }
 
-        track = self.__load_track(file_path)
-        self.__reset_metadata(track)
+        track = self.__load_track(filething)
+        self.__reset_metadata(track, filething)
+
+        new_data = TrackMetadata(**new_data)
 
         for name, tag in tag_mapping.items():
             value = getattr(new_data, name)
@@ -118,15 +121,25 @@ class MP3File(FileMetadata):
             elif isinstance(value, str):
                 track.tags.add(tag(encoding=3, text=value))
 
+        if isinstance(filething, io.BytesIO):
+            filething.seek(0)
+            track.save(filething=filething)
+            return
+
         track.save()
 
     @staticmethod
-    def __reset_metadata(track: MP3) -> None:
+    def __reset_metadata(track: MP3, filething: str | io.BytesIO) -> None:
         if track.tags:
             track.tags.clear()
 
         else:
             track.add_tags()
+
+        if isinstance(filething, io.BytesIO):
+            filething.seek(0)
+            track.save(filething=filething)
+            return
 
         track.save()
 
