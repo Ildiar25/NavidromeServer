@@ -17,6 +17,7 @@ from odoo.fields import Binary, Boolean, Char, Many2many, Many2one, Selection
 from odoo.models import Model
 
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
+from ..services.file_service import FileManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
 from ..utils.exceptions import DownloadServiceError, ImageServiceError, MetadataServiceError, MusicManagerError
@@ -58,13 +59,15 @@ class Track(Model):
     url = Char(string=_("Youtube URL"))
 
     # Computed fields
-    # display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
+    display_artist_names = Char(string=_("Display artist name"), compute='_compute_display_artist_name', store=True)
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
+    old_path = Char(string=_("Old path"), copy=False, store=True)
 
     # Related fields
 
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
+    is_saved = Boolean(string=_("Is saved"), default=False, readonly=True)
     state = Selection(
         selection=[
             ('start', _("Start")),
@@ -89,6 +92,15 @@ class Track(Model):
         self._process_cover_image(vals)
         return super().write(vals)
 
+    @api.depends('track_artist_ids')
+    def _compute_display_artist_name(self) -> None:
+        for track in self:
+            if not track.track_artist_ids:
+                continue
+
+            artist_names = track.track_artist_ids.mapped('name')
+            track.display_artist_names = ", ".join(artist_names if artist_names else "")
+
     @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
     def _compute_file_path(self) -> None:
         for track in self:
@@ -102,7 +114,7 @@ class Track(Model):
 
             title = self._clean_for_path(track.name or '')
 
-            track.file_path = f"/music/{artist}/{album}/{track_no}_-_{title}.mp3"
+            track.file_path = f"/music/{artist}/{album}/{track_no}_{title}.mp3"
 
     @api.constrains('file', 'url')
     def _check_fields(self) -> None:
@@ -120,67 +132,79 @@ class Track(Model):
 
     @api.constrains('file_path')
     def _validate_file_path(self) -> None:
+
+        artist = r'\w+'
+        album = r'\w+'
+        track_no = r'[0-9]{2}'
+        title = r'\w+'
+        extension = r'[a-zA-Z0-9]{3,4}$'
+
+        pattern = fr'^\/music\/{artist}\/{album}\/{track_no}_{title}\.{extension}'
+
         for track in self:
-            if track.file_path and isinstance(track.file_path, str):
+            if not (track.file_path and isinstance(track.file_path, str)):
+                continue
 
-                if re.match(pattern=r'^\/music\/\w+\/\w+\/\w+-\w+\.[a-zA-Z0-9]{3,4}$', string=track.file_path):
-                    track.has_valid_path = True
-
-                else:
-                    track.has_valid_path = False
+            track.has_valid_path = bool(re.match(pattern, track.file_path))
 
     @api.onchange('file')
     def _validate_file_type(self) -> dict[str, dict[str, str]] | None:
         for track in self:
-            if track.file and isinstance(track.file, bytes):
+            if not (track.file and isinstance(track.file, bytes)):
+                continue
 
-                file_data = base64.b64decode(track.file)
-                mime_type = magic.from_buffer(file_data, mime=True)
+            file_data = base64.b64decode(track.file)
+            mime_type = magic.from_buffer(file_data, mime=True)
 
-                if mime_type not in ["audio/mpeg", "audio/mpg", "audio/x-mpeg"]:
-                    track.file = False
-                    return {
-                        'warning': {
-                            'title': _("Wait a minute! 👮"),
-                            'message': _("\nActually only MP3 files are allowed. Don't f*ck the system: %s", mime_type)
-                        }
+            if mime_type not in ["audio/mpeg", "audio/mpg", "audio/x-mpeg"]:
+                track.file = False
+                return {
+                    'warning': {
+                        'title': _("Wait a minute! 👮"),
+                        'message': _("\nActually only MP3 files are allowed. Don't f*ck the system: %s", mime_type)
                     }
+                }
+
         return None
 
     @api.onchange('url')
     def _validate_url_path(self) -> dict[str, dict[str, str]] | None:
         for track in self:
-            if track.url and isinstance(track.url, str):
+            if not (track.url and isinstance(track.url, str)):
+                continue
 
-                parsed_url = urlparse(track.url)
+            parsed_url = urlparse(track.url)
 
-                if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
-                    return {
-                        'warning': {
-                            'title': _("C'mon dude! 🙄"),
-                            'message': _("\nThe web address has to be valid and we both know it isn't.")
-                        }
+            if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
+                return {
+                    'warning': {
+                        'title': _("C'mon dude! 🙄"),
+                        'message': _("\nThe web address has to be valid and we both know it isn't.")
                     }
+                }
+
         return None
 
     @api.onchange('cover')
     def _validate_cover_image(self) -> dict[str, dict[str, str]] | None:
         for track in self:
-            if track.cover and isinstance(track.cover, (str, bytes)):
+            if not (track.cover and isinstance(track.cover, (str, bytes))):
+                continue
 
-                image = base64.b64decode(track.cover)
-                mime_type = magic.from_buffer(image, mime=True)
+            image = base64.b64decode(track.cover)
+            mime_type = magic.from_buffer(image, mime=True)
 
-                if mime_type == 'image/webp':
-                    track.cover = False
-                    return {
-                        'warning': {
-                            'title': _("Not today! ❌"),
-                            'message': _(
-                                "\nI'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷", mime_type
-                            )
-                        }
+            if mime_type == 'image/webp':
+                track.cover = False
+                return {
+                    'warning': {
+                        'title': _("Not today! ❌"),
+                        'message': _(
+                            "\nI'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷", mime_type
+                        )
                     }
+                }
+
         return None
 
     def action_back(self) -> None:
@@ -204,49 +228,62 @@ class Track(Model):
                 case 'metadata':
                     track.state = 'done'
 
-                case 'done':
-                    track.state = 'added'
-
     def save_changes(self) -> None:
-        pass
+        for track in self:
+            if isinstance(track.file_path, str) and track.has_valid_path:
+
+                path = FileManager(track.file_path).create_folders()
+                song = path.load_file()
+
+                path.update_path(track.old_path)
+                track.old_path = track.file_path
 
     def save_file(self) -> None:
         for track in self:
-            if isinstance(track.file, bytes):
-                picture = base64.b64decode(track.file)
+            if not (isinstance(track.file, bytes) and track.has_valid_path):
+                continue
 
-                name = track.name
-                with open(f"/music/{name}.mp3", "wb") as file_test:
-                    file_test.write(picture)
+            song = base64.b64decode(track.file)
+            self._update_metadata(io.BytesIO(song))
+            FileManager(track.file_path).create_folders().save(song)
+
+            track.old_path = track.file_path
+            track.is_saved = True
+            track.state = 'added'
+
+            # INFO: Comprobar que cuando se elimine el 'file' después de guardar no salte el 'file & url'
+            #  constraint. Agregar PATH seguramente...
 
     def _convert_to_mp3(self) -> None:
         for track in self:
-            if track.url and isinstance(track.url, str):
-                try:
-                    buffer = io.BytesIO()
-                    adapter = YTDLPAdapter(url=track.url)
-                    downloader = YoutubeDownload()
+            if not (track.url and isinstance(track.url, str)):
+                continue
 
-                    bytes_file = downloader.set_stream_to_buffer(adapter, buffer)
-                    mime_type = magic.from_buffer(bytes_file, mime=True)
-                    _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}\n")
+            try:
+                buffer = io.BytesIO()
+                adapter = YTDLPAdapter(url=track.url)
+                downloader = YoutubeDownload()
 
-                    track.write(
-                        {
-                            'url': False,
-                            'file': base64.b64encode(bytes_file)
-                        }
-                    )
+                bytes_file = downloader.set_stream_to_buffer(adapter, buffer)
+                mime_type = magic.from_buffer(bytes_file, mime=True)
+                _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}\n")
 
-                except DownloadServiceError as video_error:
-                    _logger.error(f"Failed to process YouTube URL {track.url}: {video_error}")
-                    raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
+                track.write(
+                    {
+                        'url': False,
+                        'file': base64.b64encode(bytes_file)
+                    }
+                )
 
-                except MusicManagerError as unknown_error:
-                    _logger.error(f"Unexpected error while validating URL {track.url}: {unknown_error}")
-                    raise ValidationError(
-                        _("\nDownloadService Error: Sorry, something went wrong while validating URL.")
-                    )
+            except DownloadServiceError as video_error:
+                _logger.error(f"Failed to process YouTube URL {track.url}: {video_error}")
+                raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unexpected error while validating URL {track.url}: {unknown_error}")
+                raise ValidationError(
+                    _("\nDownloadService Error: Sorry, something went wrong while validating URL.")
+                )
 
     def _find_or_create_album(self, album_name: str) -> int | bool:
 
@@ -350,6 +387,33 @@ class Track(Model):
             except MetadataServiceError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
                 raise ValidationError(_("\nInvalid metadata founded on file."))
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
+                raise ValidationError(
+                    _("\nMetadataServiceError: Sorry, something went wrong while loading metadata file.")
+                )
+
+    def _update_metadata(self, data: io.BytesIO) -> None:
+        for track in self:
+            metadata = {
+                'TIT2': track.name,
+                'TPE1': track.display_artist_names,
+                'TPE2': track.album_artist_id,
+                'TOPE': track.original_artist_id,
+                'TALB': track.album_id,
+                'TRCK': (track.track_no, "1"),
+                'TPOS': (track.disk_no, "1"),
+                'TDRC': track.year,
+                'TCON': track.genre_id,
+                'APIC': base64.b64decode(track.cover) if track.cover else None,
+            }
+
+            try:
+                MP3File().set_metadata(data, metadata)
+
+            except MetadataServiceError as invalid_metadata:
+                _logger.error(f"Failed to process file metadata: {invalid_metadata}")
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
