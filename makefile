@@ -23,10 +23,10 @@ help: ## Show this help
 venv: ## Create new virtual environment
 	@echo "\n$(YELLOW)WARNING: Make sure 'Venv' is installed before create a new virtual environment!$(NC)"
 	@if [ ! -d $(VENV_DIR) ]; then \
-		echo "\n🛠️  Creating a new virtual environment with 'Venv'..."; \
+		echo "\n🛠  Creating a new virtual environment with 'Venv'..."; \
 		python3 -m venv $(VENV_DIR) && \
-		echo "✅️  Virtual environment ready to activate!" && \
-		echo "👉️  Please, run $(CYAN)'source $(VENV_DIR)/bin/activate'$(NC)...\n"; \
+		echo "✅  Virtual environment ready to activate!" && \
+		echo "👉  Please, run $(CYAN)'source $(VENV_DIR)/bin/activate'$(NC)...\n"; \
 	else \
 		echo "\n✅  '$(VENV_DIR)' already exists!"; \
 		echo "Make sure it is active! 😊\n"; \
@@ -39,19 +39,19 @@ install: ## Install project dependencies
 			echo "\n⏰  Preparing all requirements...\n"; \
 			$(VENV_DIR)/bin/pip install --upgrade pip -q; \
 			$(VENV_DIR)/bin/pip install -r requirements.txt && \
-			echo "\n📦️  All requirements ready!\n"; \
+			echo "\n📦  All requirements ready!\n"; \
 		else \
 			echo "\n⚠️  Activate virtual environment before install dependencies!"; \
-			echo "👉️  Please, run $(CYAN)'source $(VENV_DIR)/bin/activate'$(NC) to activate virtual environment...\n"; \
+			echo "👉  Please, run $(CYAN)'source $(VENV_DIR)/bin/activate'$(NC) to activate virtual environment...\n"; \
 		fi; \
 	else \
-		echo "\n$(YELLOW)WARNING: ℹ️  There is no requirements file! The program could fail while running... 😱️ Make sure it no needs any requirement before run!$(NC)\n"; \
+		echo "\n$(YELLOW)WARNING: ℹ  There is no requirements file! The program could fail while running... 😱 Make sure it no needs any requirement before run!$(NC)\n"; \
 	fi
 
 
 gitinit: ## Do first commit & push-it
 	@if [ $(remote) != 'none' ]; then \
-		echo "\n✅️  Starting version control..."; \
+		echo "\n✅  Starting version control..."; \
 		git init && \
 		git branch -M main && \
 		git add . && \
@@ -60,24 +60,24 @@ gitinit: ## Do first commit & push-it
 			git remote add origin $(remote); \
 			echo "\n🔗️  Git remote added!"; \
 		else \
-			echo "\nℹ️  Git remote already exists!"; \
+			echo "\nℹ  Git remote already exists!"; \
 		fi; \
-		echo "\n📤️ Ready to push!"; \
+		echo "\n📤 Ready to push!"; \
 		git push -u origin main && \
-		echo "\n🎉️🎉️ Congratulations! All elements uploaded! 🎉️🎉️\n"; \
+		echo "\n🎉🎉 Congratulations! All elements uploaded! 🎉🎉\n"; \
 	else \
 		echo "\n⚠️  No git remote added! The current variable is '$(remote)'..."; \
-		echo "👉️  Please, run the command as it follows:"; \
+		echo "👉  Please, run the command as it follows:"; \
 		echo "$(CYAN)    make gitinit remote=https://github.com/your_username/your_repo$(NC)\n"; \
 	fi
 
 
 gitcommit: ## Create new commit
 	@if [ -d '.git' ]; then \
-		echo "\n🏁️  creating new check-point!"; \
+		echo "\n🏁  creating new check-point!"; \
 		git add . && \
 		git commit -m "Check-point at $(shell date "+%d-%m-%Y %H:%M:%S")" --allow-empty && \
-		echo "🏁️  New check-point added!\n"; \
+		echo "🏁  New check-point added!\n"; \
 	else \
 		echo "\n⚠️  Ops! You need to initiate Git before create a new check-point!\n"; \
 		exit 1; \
@@ -85,38 +85,38 @@ gitcommit: ## Create new commit
 
 
 dkinit: ## Prepare docker
-	@echo "\n🚀️  Starting docker checker..."
+	@echo "\n🚀  Starting docker checker..."
 	@if ! command -v docker >/dev/null 2>&1; then \
-		echo "👉️  Ops! It seems Docker is not installed on your system. Please install it and come back again...\n"; \
+		echo "👉  Ops! It seems Docker is not installed on your system. Please install it and come back again...\n"; \
 		exit 1; \
 	else \
-		echo "Nice! Docker is installed! 😎️"; \
+		echo "Nice! Docker is installed! 😎"; \
 		echo "Docker commands are now available!\n"; \
 	fi
 
 
 dkup: dkinit ## Start docker services
 	@if [ $(dev) = 'True' ]; then \
-		echo "\n👀️  ...Starting docker services in DEBUG mode... 👀️"; \
+		echo "\n👀  ...Starting docker services in DEBUG mode... 👀"; \
 		docker compose -f compose.yaml up; \
 	else \
-		echo "\n🐋️  ...Starting docker services... 🐋️"; \
+		echo "\n🐋  ...Starting docker services... 🐋"; \
 		docker compose -f compose.yaml up -d; \
 	fi
 
 
 dkdown: dkinit ## Stop docker services
-	@echo "\n🐋️  ...Closing docker services... 🐋️"
+	@echo "\n🐋  ...Closing docker services... 🐋"
 	@docker compose -f compose.yaml down
 
 
 dkrestart: dkinit ## Restart docker services
-	@echo "\n👀️  Restarting docker services... \n"
+	@echo "\n👀  Restarting docker services... \n"
 	@$(MAKE) dkdown
 	@if [ $(dev) = 'True' ]; then \
-		echo "\n👀️  ...Starting docker services in DEBUG mode... 👀️"; \
+		echo "\n👀  ...Starting docker services in DEBUG mode... 👀"; \
 		docker compose -f compose.yaml up; \
 	else \
-		echo "\n🐋️  ...Starting docker services... 🐋️"; \
+		echo "\n🐋  ...Starting docker services... 🐋"; \
 		docker compose -f compose.yaml up -d; \
 	fi
