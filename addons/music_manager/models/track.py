@@ -244,7 +244,7 @@ class Track(Model):
                 continue
 
             song = base64.b64decode(track.file)
-            self._update_metadata(io.BytesIO(song))
+            # self._update_metadata(io.BytesIO(song))
             FileManager(track.file_path).create_folders().save(song)
 
             track.old_path = track.file_path

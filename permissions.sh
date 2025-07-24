@@ -18,7 +18,7 @@ if [ ! -d "$NAVIDROME_DIR" ]; then
     mkdir -p "$NAVIDROME_DIR"
 
     echo -e "Setting NAVIDROME permissions!\n"
-    chown 1000:1000 "$NAVIDROME_DIR"
+    sudo chown 1000:1000 "$NAVIDROME_DIR"
 fi
 
 # Odoo -> user_id:101 | group_id:101
@@ -27,7 +27,7 @@ if [ ! -d "$ODOO_DIR" ]; then
     mkdir -p "$ODOO_DIR"
 
     echo -e "Setting ODOO permissions!\n"
-    chown 101:101 "$ODOO_DIR"
+    sudo chown 101:101 "$ODOO_DIR"
 fi
 
 # Postgres -> user_id:999 | group_id:999
@@ -36,7 +36,7 @@ if [ ! -d "$POSTGRES_DIR" ]; then
     mkdir -p "$POSTGRES_DIR"
 
     echo -e "Setting POSTGRES permissions!\n"
-    chown 999:999 "$POSTGRES_DIR"
+    sudo chown 999:999 "$POSTGRES_DIR"
 fi
 
 # Music directory -> Owner = Odoo(101:101) | Read permissions = 755
@@ -45,8 +45,8 @@ if [ ! -d "$MUSIC_DIR" ]; then
     mkdir -p "$MUSIC_DIR"
 
     echo -e "Setting MUSIC permissions!\n"
-    chown 101:101 "$MUSIC_DIR"
-    chmod 755 "$MUSIC_DIR"
+    sudo chown 101:101 "$MUSIC_DIR"
+    sudo chmod 755 "$MUSIC_DIR"
 fi
 
 echo -e "✅  All volumes are ready!\n"
