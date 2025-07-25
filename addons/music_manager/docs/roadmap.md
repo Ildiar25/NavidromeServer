@@ -14,3 +14,7 @@
  - [ ] **Crear test para revisar todos los servicios creados**
  - [ ] **Actualizar 'makefile' y el módulo 'Utils.psm1' con el archivo 'permissions.sh'**
  - [x] **Arreglar el guardado de metadatos: Actualmente da problemas.**
+ - [ ] **Comprobar que el archivo se elimine al eliminar el registro.**
+ - [ ] **Por ahora no hay problemas de sobreescritura (comprobar al haber dos usuarios modificando el mismo archivo).**
+ - [ ] **Qué ocurre si la canción se elimina y el registro se mantiene: Comprobación del path una vez se abre el formulario.**
+ - [ ] **Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.**
