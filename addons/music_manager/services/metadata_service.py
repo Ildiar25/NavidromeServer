@@ -82,7 +82,7 @@ class MP3File(FileMetadata):
 
         return track_data
 
-    def set_metadata(self, filething: str | io.BytesIO, new_data: dict[str, Any]) -> None:
+    def set_metadata(self, filething: str, new_data: dict[str, Any]) -> None:
 
         tag_mapping = {
             'TIT2': tag_type.TIT2,
@@ -98,7 +98,7 @@ class MP3File(FileMetadata):
         }
 
         track = self.__load_track(filething)
-        self.__reset_metadata(track, filething)
+        self.__reset_metadata(track)
 
         new_data = TrackMetadata(**new_data)
 
@@ -121,25 +121,15 @@ class MP3File(FileMetadata):
             elif isinstance(value, str):
                 track.tags.add(tag(encoding=3, text=value))
 
-        if isinstance(filething, io.BytesIO):
-            filething.seek(0)
-            track.save(filething=filething)
-            return
-
         track.save()
 
     @staticmethod
-    def __reset_metadata(track: MP3, filething: str | io.BytesIO) -> None:
+    def __reset_metadata(track: MP3) -> None:
         if track.tags:
             track.tags.clear()
 
         else:
             track.add_tags()
-
-        if isinstance(filething, io.BytesIO):
-            filething.seek(0)
-            track.save(filething=filething)
-            return
 
         track.save()
 
