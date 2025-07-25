@@ -116,19 +116,19 @@ class Track(Model):
 
             track.file_path = f"/music/{artist}/{album}/{track_no}_{title}.mp3"
 
-    @api.constrains('file', 'url')
+    @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
         for track in self:
+            if not track.file_path:
+                if not track.file and not track.url:
+                    _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
+                    raise ValidationError(_("\nMust add an URL or update a file to proceed."))
 
-            if not track.file and not track.url:
-                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                raise ValidationError(_("\nMust add an URL or update a file to proceed."))
-
-            if track.file and track.url:
-                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                raise ValidationError(
-                    _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
-                )
+                if track.file and track.url:
+                    _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
+                    raise ValidationError(
+                        _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
+                    )
 
     @api.constrains('file_path')
     def _validate_file_path(self) -> None:
@@ -230,13 +230,13 @@ class Track(Model):
 
     def save_changes(self) -> None:
         for track in self:
-            if isinstance(track.file_path, str) and track.has_valid_path:
+            if not (isinstance(track.file_path, str) and track.has_valid_path):
+                continue
 
-                path = FileManager(track.file_path).create_folders()
-                song = path.load_file()
-
-                path.update_path(track.old_path)
-                track.old_path = track.file_path
+            path = FileManager(track.file_path).create_folders()
+            path.update_path(track.old_path)
+            self._update_metadata(track.file_path)
+            track.old_path = track.file_path
 
     def save_file(self) -> None:
         for track in self:
@@ -244,15 +244,13 @@ class Track(Model):
                 continue
 
             song = base64.b64decode(track.file)
-            # self._update_metadata(io.BytesIO(song))
             FileManager(track.file_path).create_folders().save(song)
+            self._update_metadata(track.file_path)
 
             track.old_path = track.file_path
             track.is_saved = True
             track.state = 'added'
-
-            # INFO: Comprobar que cuando se elimine el 'file' después de guardar no salte el 'file & url'
-            #  constraint. Agregar PATH seguramente...
+            track.file = False
 
     def _convert_to_mp3(self) -> None:
         for track in self:
@@ -394,23 +392,23 @@ class Track(Model):
                     _("\nMetadataServiceError: Sorry, something went wrong while loading metadata file.")
                 )
 
-    def _update_metadata(self, data: io.BytesIO) -> None:
+    def _update_metadata(self, path: str) -> None:
         for track in self:
             metadata = {
                 'TIT2': track.name,
                 'TPE1': track.display_artist_names,
-                'TPE2': track.album_artist_id,
-                'TOPE': track.original_artist_id,
-                'TALB': track.album_id,
+                'TPE2': track.album_artist_id.name,
+                'TOPE': track.original_artist_id.name,
+                'TALB': track.album_id.name,
                 'TRCK': (track.track_no, "1"),
                 'TPOS': (track.disk_no, "1"),
                 'TDRC': track.year,
-                'TCON': track.genre_id,
+                'TCON': track.genre_id.name,
                 'APIC': base64.b64decode(track.cover) if track.cover else None,
             }
 
             try:
-                MP3File().set_metadata(data, metadata)
+                MP3File().set_metadata(path, metadata)
 
             except MetadataServiceError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
