@@ -248,9 +248,13 @@ class Track(Model):
             self._update_metadata(track.file_path)
 
             track.old_path = track.file_path
-            track.is_saved = True
-            track.state = 'added'
-            track.file = False
+            track.write(
+                {
+                    'is_saved': True,
+                    'state': 'added',
+                    'file': False,
+                }
+            )
 
     def _convert_to_mp3(self) -> None:
         for track in self:
