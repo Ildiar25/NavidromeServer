@@ -39,6 +39,8 @@ class Track(Model):
     duration = Char(string=_("Duration (min)"), readonly=True)
     file_type = Char(string=_("Type"), readonly=True)
     name = Char(string=_("Title"))
+    total_disk = Char(string=_("Total disk no"))
+    total_track = Char(string=_("Total track no"))
     track_no = Char(string=_("Track no"))
     year = Char(string=_("Year"))
 
@@ -370,7 +372,9 @@ class Track(Model):
                     'tmp_original_artist': metadata.TOPE,
                     'year': metadata.TDRC,
                     'track_no': metadata.TRCK[0],
+                    'total_track': metadata.TRCK[1],
                     'disk_no': metadata.TPOS[0],
+                    'total_disk': metadata.TPOS[1],
                     'file_type': metadata.MIME,
                 }
 
@@ -404,8 +408,8 @@ class Track(Model):
                 'TPE2': track.album_artist_id.name,
                 'TOPE': track.original_artist_id.name,
                 'TALB': track.album_id.name,
-                'TRCK': (track.track_no, "1"),
-                'TPOS': (track.disk_no, "1"),
+                'TRCK': (track.track_no, track.total_track),
+                'TPOS': (track.disk_no, track.total_disk),
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,
                 'APIC': base64.b64decode(track.cover) if track.cover else None,

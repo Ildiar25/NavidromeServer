@@ -46,7 +46,7 @@
                                     <div style="height: 620px">
                                         <div class="d-flex flex-row justify-content-around">
                                             <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Ready to upload your next hit?🎧</h3>
+                                                <h3 class="text-muted">Ready to upload your next hit? 🎧</h3>
                                                 <p>
                                                     <em>This is your personal music manager!</em>
                                                     <br/>
@@ -91,7 +91,7 @@
                                     <div style="height: 620px">
                                         <div class="d-flex flex-row justify-content-around">
                                             <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Here is the metadata founded!🏷️</h3>
+                                                <h3 class="text-muted">Here is the metadata founded! 🏷</h3>
                                                 <p>
                                                     <b>Metadata</b> is the hidden information embedded inside your
                                                     music files, such as the title, artist, album, year, genre, and
@@ -128,7 +128,9 @@
                                                         <field name="tmp_original_artist" string="Original artist" readonly="True"/>
                                                         <field name="year" string="Year" readonly="True"/>
                                                         <field name="track_no" string="Track" readonly="True"/>
+                                                        <field name="total_track" string="Total track" readonly="True"/>
                                                         <field name="disk_no" string="Disk" readonly="True"/>
+                                                        <field name="total_disk" string="Total disk" readonly="True"/>
                                                     </group>
                                                 </div>
                                             </div>
@@ -139,13 +141,13 @@
                                 <!-- Update metadata -->
                                 <section invisible="state != 'metadata'">
                                     <header>
-                                        <h1>Editing! ✏️ </h1>
+                                        <h1>Editing! 📝 </h1>
                                     </header>
                                     <separator/>
                                     <div style="height: 820px">
                                         <div class="d-flex flex-row justify-content-around">
                                             <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Polishing your track details!📝️</h3>
+                                                <h3 class="text-muted">Polishing your track details! ✨</h3>
                                                 <p>
                                                     You can update or correct the metadata before saving your track
                                                     on your <b>library</b>. This includes fixing typos, updating the
@@ -183,9 +185,17 @@
                                                         <field name="album_artist_id" string="Album artist"/>
                                                         <field name="original_artist_id" string="Original artist"/>
                                                         <field name="year" string="Year"/>
-                                                        <field name="track_no" string="Track"/>
-                                                        <field name="disk_no" string="Disk"/>
                                                     </group>
+                                                    <div class="d-flex flex-row">
+                                                        <group>
+                                                            <field name="track_no" string="Track"/>
+                                                            <field name="disk_no" string="Disk"/>
+                                                        </group>
+                                                        <group>
+                                                            <field name="total_track" string="Total track"/>
+                                                            <field name="total_disk" string="Total disk"/>
+                                                        </group>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -201,7 +211,7 @@
                                     <div style="height: 640px">
                                         <div class="d-flex flex-row justify-content-around">
                                             <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Add the file to Navidrome!💿</h3>
+                                                <h3 class="text-muted">Add the file to Navidrome! 💿</h3>
                                                 <p>
                                                     When you click on 'Save', the file will be moved to your main
                                                     music folder used by <b>Navidrome</b>, and the updated metadata
@@ -263,7 +273,7 @@
                                                 <div class="justify-content-center" invisible="not has_valid_path">
                                                     <h4>Nice! Your song is ready to be added onto your library! 😍</h4>
                                                     <p>
-                                                        <em>Just click the (there is!) 'Save' button.</em>
+                                                        <em>Now it's time! Just click the 'Save' button!</em>
                                                     </p>
                                                 </div>
                                                 <button name="save_file" string="Save" class="btn-outline-primary w-100" type="object" invisible="not has_valid_path"/>
@@ -306,7 +316,9 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <button name="save_changes" string="Update" type="object"/>
+                                        <div class="d-flex flex-row justify-content-center">
+                                            <button name="save_changes" string="Update" type="object"/>
+                                        </div>
                                     </div>
                                 </section>
                             </div>
