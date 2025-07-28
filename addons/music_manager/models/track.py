@@ -3,7 +3,6 @@ import base64
 import io
 import logging
 import re
-from unidecode import unidecode
 from typing import Any
 
 # noinspection PyPackageRequirements
@@ -17,7 +16,7 @@ from odoo.fields import Binary, Boolean, Char, Many2many, Many2one, Selection
 from odoo.models import Model
 
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
-from ..services.file_service import FileManager
+from ..services.file_service import FolderManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
 from ..utils.exceptions import DownloadServiceError, ImageServiceError, MetadataServiceError, MusicManagerError
@@ -106,17 +105,13 @@ class Track(Model):
     @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
     def _compute_file_path(self) -> None:
         for track in self:
-            artist = self._clean_for_path(track.album_artist_id.name or '')
-            album = self._clean_for_path(track.album_id.name or '')
 
-            if track.track_no and len(track.track_no) == 1:
-                track_no = f"0{self._clean_for_path(track.track_no)}"
-            else:
-                track_no = self._clean_for_path(track.track_no or '')
-
-            title = self._clean_for_path(track.name or '')
-
-            track.file_path = f"/music/{artist}/{album}/{track_no}_{title}.mp3"
+            track.file_path = FolderManager().set_path(
+                artist=track.album_artist_id.name or '',
+                album=track.album_id.name or '',
+                track=track.track_no or '',
+                title=track.name or '',
+            )
 
     @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
@@ -235,8 +230,8 @@ class Track(Model):
             if not (isinstance(track.file_path, str) and track.has_valid_path):
                 continue
 
-            path = FileManager(track.file_path).create_folders()
-            path.update_path(track.old_path)
+            path = FolderManager(track.file_path).create_folders()
+            path.update_file_path(track.old_path)
             self._update_metadata(track.file_path)
             track.old_path = track.file_path
 
@@ -246,7 +241,7 @@ class Track(Model):
                 continue
 
             song = base64.b64decode(track.file)
-            FileManager(track.file_path).create_folders().save(song)
+            FolderManager(track.file_path).create_folders().save(song)
             self._update_metadata(track.file_path)
 
             track.old_path = track.file_path
@@ -426,12 +421,6 @@ class Track(Model):
                 raise ValidationError(
                     _("\nMetadataServiceError: Sorry, something went wrong while loading metadata file.")
                 )
-
-    @staticmethod
-    def _clean_for_path(text: str) -> str:
-        text = unidecode(text).lower()
-        text = re.sub(pattern=r'[^a-z0-9]', repl='_', string=text)
-        return re.sub(pattern=r'_+', repl='_', string=text).strip('_')
 
     @staticmethod
     def _format_track_duration(duration: int) -> str:

@@ -291,7 +291,7 @@
                                     <div style="height: 620px">
                                         <div class="d-flex flex-row justify-content-start">
                                             <div class="mx-3">
-                                                <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}" readonly="True"/>
+                                                <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
                                             </div>
                                             <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                                             <div class="d-flex flex-row justify-content-between w-100">
@@ -310,9 +310,17 @@
                                                         <field name="album_artist_id" string="Album artist"/>
                                                         <field name="original_artist_id" string="Original artist"/>
                                                         <field name="year" string="Year"/>
-                                                        <field name="track_no" string="Track"/>
-                                                        <field name="disk_no" string="Disk"/>
                                                     </group>
+                                                    <div class="d-flex flex-row">
+                                                        <group>
+                                                            <field name="track_no" string="Track"/>
+                                                            <field name="disk_no" string="Disk"/>
+                                                        </group>
+                                                        <group>
+                                                            <field name="total_track" string="Total track"/>
+                                                            <field name="total_disk" string="Total disk"/>
+                                                        </group>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
