@@ -32,7 +32,6 @@ class Track(Model):
     _description = 'track_table'
 
     # Basic fields
-    bpm = Char(string=_("BTM"), readonly=True)
     cover = Binary(string=_("Cover"), attachment=True)
     disk_no = Char(string=_("Disk no"))
     duration = Char(string=_("Duration (min)"), readonly=True)
@@ -70,8 +69,6 @@ class Track(Model):
     is_deleted = Boolean(string=_("Is deleted"), compute='_compute_file_is_deleted', store=False)
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
     old_path = Char(string=_("Old path"), copy=False, store=True)
-
-    # Related fields
 
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
@@ -131,16 +128,18 @@ class Track(Model):
     @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
         for track in self:
-            if not track.file_path:
-                if not track.file and not track.url:
-                    _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                    raise ValidationError(_("\nMust add an URL or update a file to proceed."))
+            if track.file_path:
+                continue
 
-                if track.file and track.url:
-                    _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                    raise ValidationError(
-                        _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
-                    )
+            if not track.file and not track.url:
+                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
+                raise ValidationError(_("\nMust add an URL or upload a file to proceed."))
+
+            if track.file and track.url:
+                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
+                raise ValidationError(
+                    _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
+                )
 
     @api.constrains('file_path')
     def _validate_file_path(self) -> None:
