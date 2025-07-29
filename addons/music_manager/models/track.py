@@ -2,6 +2,7 @@
 import base64
 import io
 import logging
+import os
 import re
 from typing import Any
 
@@ -32,7 +33,6 @@ class Track(Model):
 
     # Basic fields
     bpm = Char(string=_("BTM"), readonly=True)
-    collection = Boolean(string=_("Part of a collection"))
     cover = Binary(string=_("Cover"), attachment=True)
     disk_no = Char(string=_("Disk no"))
     duration = Char(string=_("Duration (min)"), readonly=True)
@@ -60,7 +60,14 @@ class Track(Model):
     url = Char(string=_("Youtube URL"))
 
     # Computed fields
+    collection = Boolean(
+        string=_("Part of a collection"),
+        compute='_compute_collection_value',
+        inverse='_inverse_collection_value',
+        default=False,
+    )
     display_artist_names = Char(string=_("Display artist name"), compute='_compute_display_artist_name', store=True)
+    is_deleted = Boolean(string=_("Is deleted"), compute='_compute_file_is_deleted', store=False)
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
     old_path = Char(string=_("Old path"), copy=False, store=True)
 
@@ -101,6 +108,13 @@ class Track(Model):
 
             artist_names = track.track_artist_ids.mapped('name')
             track.display_artist_names = ", ".join(artist_names if artist_names else "")
+
+    @api.constrains('file_path')
+    def _compute_file_is_deleted(self) -> None:
+        for track in self:
+            if track.file_path and isinstance(track.file_path, str):
+                track.is_deleted = not os.path.isfile(track.file_path)
+                # FIXME: Cuando se cambia el path del archivo salta brevemente. Buscar otra forma.
 
     @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
     def _compute_file_path(self) -> None:
@@ -203,6 +217,27 @@ class Track(Model):
                 }
 
         return None
+
+    @api.onchange('album_artist_id')
+    def _compute_collection_value(self) -> None:
+        for track in self:
+            if track.album_artist_id and track.album_artist_id.name.lower() == 'various artists':
+                track.collection = True
+
+            else:
+                track.collection = False
+
+    def _inverse_collection_value(self) -> None:
+        for track in self:
+            if track.collection:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
+
+            else:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist(
+                    track.original_artist_id.name, track.track_artist_ids
+                )
 
     def action_back(self) -> None:
         for track in self:
@@ -376,6 +411,9 @@ class Track(Model):
                 for attr_name, value in mapping_fields.items():
                     setattr(track, attr_name, value)
 
+                if metadata.TPE2 and metadata.TPE2.lower() == 'various artists':
+                    track.collection = True
+
                 if metadata.APIC:
                     track.cover = base64.b64encode(metadata.APIC)
 
@@ -400,7 +438,7 @@ class Track(Model):
             metadata = {
                 'TIT2': track.name,
                 'TPE1': track.display_artist_names,
-                'TPE2': track.album_artist_id.name,
+                'TPE2': "Various Artists" if track.collection else track.album_artist_id.name,
                 'TOPE': track.original_artist_id.name,
                 'TALB': track.album_id.name,
                 'TRCK': (track.track_no, track.total_track),

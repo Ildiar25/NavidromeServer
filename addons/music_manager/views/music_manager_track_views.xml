@@ -12,7 +12,7 @@
             <field name="name">music_manager.track.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <tree string="Songs" decoration-danger="not is_saved">
+                <tree string="Songs" decoration-danger="not is_saved" decoration-bf="is_deleted" decoration-muted="is_deleted">
                     <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Title"/>
                     <field name="original_artist_id" string="Original artist"/>
@@ -21,8 +21,9 @@
                     <field name="genre_id" string="Genre"/>
                     <field name="duration" string="Duration"/>
                     <field name="file_path" string="Path" optional="hide"/>
-                    <field name="has_valid_path"/>
-                    <field name="is_saved"/>
+                    <field name="has_valid_path" column_invisible="True"/>
+                    <field name="is_saved" column_invisible="True"/>
+                    <field name="is_deleted" column_invisible="True"/>
                 </tree>
             </field>
         </record>
@@ -34,6 +35,7 @@
             <field name="arch" type="xml">
                 <form string="Track">
                     <field name="state" string="" widget="statusbar"/>
+                    <field name="is_deleted" invisible="True"/>
                     <sheet>
                         <div class="d-flex flex-column justify-content-between">
                             <div>
@@ -182,9 +184,10 @@
                                                         <field name="genre_id" string="Genre"/>
                                                     </group>
                                                     <group>
-                                                        <field name="album_artist_id" string="Album artist"/>
+                                                        <field name="album_artist_id" string="Album artist" />
                                                         <field name="original_artist_id" string="Original artist"/>
                                                         <field name="year" string="Year"/>
+                                                        <field name="collection" string="Part of a collection"/>
                                                     </group>
                                                     <div class="d-flex flex-row">
                                                         <group>
@@ -285,47 +288,52 @@
                                 <!-- Main form -->
                                 <section invisible="state != 'added'">
                                     <header>
-                                        <h1><field name="name"/> 🎵 </h1>
+                                        <h1>🎯 Edit song metadata</h1>
                                     </header>
                                     <separator/>
-                                    <div style="height: 620px">
-                                        <div class="d-flex flex-row justify-content-start">
-                                            <div class="mx-3">
-                                                <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
-                                            </div>
-                                            <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                            <div class="d-flex flex-row justify-content-between w-100">
-                                                <div class="flex-grow-1 mx-3">
-                                                    <group>
-                                                        <field name="name" string="Title"/>
-                                                        <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
-                                                        <field name="album_id" string="Album"/>
-                                                        <field name="genre_id" string="Genre"/>
-                                                        <field name="file_path" string="Path"/>
-                                                        <field name="has_valid_path" invisible="True"/>
-                                                    </group>
+                                    <div style="height: 320px">
+                                        <div>
+                                            <div class="d-flex flex-row justify-content-start">
+                                                <div class="mx-3">
+                                                    <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
                                                 </div>
-                                                <div class="flex-grow-1 mx-3">
-                                                    <group>
-                                                        <field name="album_artist_id" string="Album artist"/>
-                                                        <field name="original_artist_id" string="Original artist"/>
-                                                        <field name="year" string="Year"/>
-                                                    </group>
-                                                    <div class="d-flex flex-row">
+                                                <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
+                                                <div class="d-flex flex-row justify-content-between w-100">
+                                                    <div class="flex-grow-1 mx-3">
                                                         <group>
-                                                            <field name="track_no" string="Track"/>
-                                                            <field name="disk_no" string="Disk"/>
+                                                            <field name="name" string="Title"/>
+                                                            <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
+                                                            <field name="album_id" string="Album"/>
+                                                            <field name="genre_id" string="Genre"/>
+                                                            <field name="collection" string="Part of a collection"/>
+                                                            <field name="file_path" string="Path"/>
+                                                            <field name="has_valid_path" invisible="True"/>
                                                         </group>
+                                                    </div>
+                                                    <div class="flex-grow-1 mx-3">
                                                         <group>
-                                                            <field name="total_track" string="Total track"/>
-                                                            <field name="total_disk" string="Total disk"/>
+                                                            <field name="album_artist_id" string="Album artist" edit="collection"/>
+                                                            <field name="original_artist_id" string="Original artist"/>
+                                                            <field name="year" string="Year"/>
                                                         </group>
+                                                        <div class="d-flex flex-row">
+                                                            <group>
+                                                                <field name="track_no" string="Track"/>
+                                                                <field name="disk_no" string="Disk"/>
+                                                            </group>
+                                                            <group>
+                                                                <field name="total_track" string="Total track"/>
+                                                                <field name="total_disk" string="Total disk"/>
+                                                            </group>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="d-flex flex-row justify-content-center">
-                                            <button name="save_changes" string="Update" type="object"/>
+                                            <separator/>
+                                            <div class="d-flex flex-row justify-content-center">
+                                                <h3 invisible="not is_deleted">😱 MY GOSH! It is impossible to find this song. Add it again!</h3>
+                                                <button name="save_changes" string="Update" class="btn-outline-success w-50" type="object" invisible="is_deleted"/>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>

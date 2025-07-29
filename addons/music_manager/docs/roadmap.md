@@ -18,3 +18,4 @@
  - [ ] **Por ahora no hay problemas de sobreescritura (comprobar al haber dos usuarios modificando el mismo archivo).**
  - [ ] **Qué ocurre si la canción se elimina y el registro se mantiene: Comprobación del path una vez se abre el formulario.**
  - [ ] **Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.**
+ - [ ] **Implementar lógica que controle 'collection': Si se marca, various artists, si no que calcule según artista original.**
