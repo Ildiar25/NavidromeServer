@@ -109,12 +109,13 @@ class Track(Model):
             artist_names = track.track_artist_ids.mapped('name')
             track.display_artist_names = ", ".join(artist_names if artist_names else "")
 
-    @api.constrains('file_path')
+    @api.depends('old_path')
     def _compute_file_is_deleted(self) -> None:
         for track in self:
-            if track.file_path and isinstance(track.file_path, str):
-                track.is_deleted = not os.path.isfile(track.file_path)
-                # FIXME: Cuando se cambia el path del archivo salta brevemente. Buscar otra forma.
+            if track.old_path and isinstance(track.old_path, str):
+                track.is_deleted = not os.path.isfile(track.old_path)
+            else:
+                track.is_deleted = False
 
     @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
     def _compute_file_path(self) -> None:
@@ -218,7 +219,19 @@ class Track(Model):
 
         return None
 
-    @api.onchange('album_artist_id')
+    @api.onchange('collection')
+    def _display_album_artist_changes(self) -> None:
+        for track in self:
+            if track.collection:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
+            else:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist(
+                    track.original_artist_id.name, track.track_artist_ids
+                )
+
+    @api.depends('album_artist_id')
     def _compute_collection_value(self) -> None:
         for track in self:
             if track.album_artist_id and track.album_artist_id.name.lower() == 'various artists':

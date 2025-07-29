@@ -16,6 +16,6 @@
  - [x] **Arreglar el guardado de metadatos: Actualmente da problemas.**
  - [ ] **Comprobar que el archivo se elimine al eliminar el registro.**
  - [ ] **Por ahora no hay problemas de sobreescritura (comprobar al haber dos usuarios modificando el mismo archivo).**
- - [ ] **Qué ocurre si la canción se elimina y el registro se mantiene: Comprobación del path una vez se abre el formulario.**
- - [ ] **Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.**
- - [ ] **Implementar lógica que controle 'collection': Si se marca, various artists, si no que calcule según artista original.**
+ - [x] **Qué ocurre si la canción se elimina y el registro se mantiene: Comprobación del path una vez se abre el formulario.**
+ - [x] **Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.**
+ - [x] **Implementar lógica que controle 'collection': Si se marca, various artists, si no que calcule según artista original.**
