@@ -3,7 +3,6 @@ import base64
 import io
 import logging
 import os
-import re
 from typing import Any
 
 # noinspection PyPackageRequirements
@@ -91,11 +90,24 @@ class Track(Model):
         for vals in list_vals:
             self._process_cover_image(vals)
 
-        return super().create(list_vals)
+        tracks = super().create(list_vals)
 
-    def write(self, vals: dict[str, Any]) -> None:
+        for track in tracks:
+            # noinspection PyProtectedMember
+            track._sync_album_with_artist()
+
+        return tracks
+
+    def write(self, vals: dict[str, Any]):
         self._process_cover_image(vals)
-        return super().write(vals)
+
+        res = super().write(vals)
+
+        for track in self:
+            # noinspection PyProtectedMember
+            track._sync_album_with_artist()
+
+        return res
 
     @api.depends('track_artist_ids')
     def _compute_display_artist_name(self) -> None:
@@ -144,19 +156,11 @@ class Track(Model):
     @api.constrains('file_path')
     def _validate_file_path(self) -> None:
 
-        artist = r'\w+'
-        album = r'\w+'
-        track_no = r'[0-9]{2}'
-        title = r'\w+'
-        extension = r'[a-zA-Z0-9]{3,4}$'
-
-        pattern = fr'^\/music\/{artist}\/{album}\/{track_no}_{title}\.{extension}'
-
         for track in self:
             if not (track.file_path and isinstance(track.file_path, str)):
                 continue
 
-            track.has_valid_path = bool(re.match(pattern, track.file_path))
+            track.has_valid_path = FolderManager().is_valid_path(track.file_path)
 
     @api.onchange('file')
     def _validate_file_type(self) -> dict[str, dict[str, str]] | None:
@@ -398,6 +402,14 @@ class Track(Model):
             return fallback_ids[0]
 
         return False
+
+    def _sync_album_with_artist(self) -> None:
+        self.ensure_one()
+        if self.album_id and self.album_artist_id:
+            if self.album_id.album_artist_id != self.album_artist_id:
+                self.album_id.write(
+                    {'album_artist_id': self.album_artist_id.id}
+                )
 
     def _update_fields(self) -> None:
         for track in self:

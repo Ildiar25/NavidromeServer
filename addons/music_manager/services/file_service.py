@@ -85,6 +85,19 @@ class FolderManager:
         self._clean_empty_dirs(current_path.parent)
 
     @staticmethod
+    def is_valid_path(path: str) -> bool:
+
+        artist = r'\w+'
+        album = r'\w+'
+        track_no = r'[0-9]{2}'
+        title = r'\w+'
+        extension = r'[a-zA-Z0-9]{3,4}$'
+
+        pattern = fr'^\/music\/{artist}\/{album}\/{track_no}_{title}\.{extension}'
+
+        return bool(re.match(pattern, path))
+
+    @staticmethod
     def __clean_path_name(name: str) -> str:
         name = unidecode(name).lower()
         name = re.sub(pattern=r'[^a-z0-9]', repl='_', string=name)
