@@ -8,7 +8,6 @@ from typing import Any
 # noinspection PyPackageRequirements
 import magic
 from urllib.parse import urlparse
-
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import ValidationError
@@ -140,7 +139,7 @@ class Track(Model):
     @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
         for track in self:
-            if track.file_path:
+            if track.file_path and track.has_valid_path:
                 continue
 
             if not track.file and not track.url:
@@ -500,7 +499,7 @@ class Track(Model):
                     if mime_type == 'image/webp':
                         raise ValidationError(_("\nThis track cover has an invalid format: %s", mime_type))
 
-                    cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=200, height=200).build()
+                    cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=350, height=350).build()
                     value['cover'] = base64.b64encode(cover)
 
             except ImageServiceError as service_error:
