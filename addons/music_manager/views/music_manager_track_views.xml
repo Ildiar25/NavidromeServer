@@ -15,7 +15,7 @@
                 <tree string="Songs" decoration-danger="not is_saved" decoration-bf="is_deleted" decoration-muted="is_deleted">
                     <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Title"/>
-                    <field name="original_artist_id" string="Original artist"/>
+                    <field name="display_artist_names" string="Artist(s)"/>
                     <field name="album_id" string="Album"/>
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
