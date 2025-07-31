@@ -48,6 +48,23 @@
         </record>
 
         <!-- Tree view -->
+        <record id="music_manager_artist_view_tree" model="ir.ui.view">
+            <field name="name">music_manager.view.tree</field>
+            <field name="model">music_manager.artist</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="picture" string="Picture" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
+                    <field name="name" string="Name"/>
+                    <field name="real_name" string="Real name"/>
+                    <field name="birthdate" string="Birthdate" optional="hide"/>
+                    <field name="track_amount" string="Total tracks"/>
+                    <field name="album_amount" string="Total albums"/>
+                    <field name="is_favorite" column_invisible="True"/>
+                    <button name="set_favorite" type="object" class="oe_stat_button" help="Set favorite" icon="fa-heart text-danger" invisible="is_favorite == False"/>
+                    <button name="set_favorite" type="object" class="oe_stat_button" help="Set favorite" icon="fa-heart-o" invisible="is_favorite == True"/>
+                </tree>
+            </field>
+        </record>
 
         <!-- Form view -->
         <record id="music_manager_artist_view_form" model="ir.ui.view">
