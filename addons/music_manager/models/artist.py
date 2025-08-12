@@ -27,7 +27,7 @@ class Artist(Model):
     birthdate = Date(string=_("Birthdate"))
     name = Char(string=_("Name"))
     picture = Binary(string=_("Profile"))
-    real_name = Char(string=_("Real name"), compute='_compute_artist_name', default="Unknown", readonly=False)
+    real_name = Char(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
     is_favorite = Boolean(string=_("Favorite"), default=False)
 
     # Relational fields
@@ -35,9 +35,9 @@ class Artist(Model):
     track_ids = Many2many(comodel_name='music_manager.track', string=_("Track(s)"))
 
     # Computed fields
-    album_amount = Integer(string=_("Album amount"), compute='_compute_album_amount', default=0, store=True)
+    album_amount = Integer(string=_("Album amount"), compute='_compute_album_amount', default=0, store=False)
     display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
-    track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0, store=True)
+    track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0, store=False)
 
     # Technical fields
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
@@ -56,12 +56,7 @@ class Artist(Model):
     @api.depends('album_ids')
     def _compute_album_amount(self) -> None:
         for artist in self:
-            artist.album_amount = len(artist.album_ids)
-
-    @api.depends('name')
-    def _compute_artist_name(self) -> None:
-        for artist in self:
-            artist.real_name = artist.name
+            artist.album_amount = len(artist.album_ids) if artist.album_ids else 0
 
     @api.depends('name')
     def _compute_display_title_form(self) -> None:
@@ -74,7 +69,13 @@ class Artist(Model):
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:
         for artist in self:
-            artist.track_amount = len(artist.track_ids)
+            artist.track_amount = len(artist.track_ids) if artist.track_ids else 0
+
+    @api.depends('name')
+    def _compute_artist_name(self) -> None:
+        for artist in self:
+            if isinstance(artist.name, str):
+                artist.real_name = artist.name
 
     @api.onchange('picture')
     def _validate_picture_image(self) -> dict[str, dict[str, str]] | None:
