@@ -28,6 +28,9 @@
                                 </div>
                                 <hr class="mb-2"/>
                                 <div class="o_kanban_content d-flex flex-row">
+                                    <div class="oe_kanban_image d-flex align-items-center justify-content-start" style="height: 125px; width: 100%; overflow: hidden">
+                                        <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [125]}"/>
+                                    </div>
                                     <div class="oe_kanban_details flex-grow-1">
                                         <ul>
                                             <li><i class="fa fa-user me-2" title="User icon"/><field name="real_name"/></li>
@@ -35,9 +38,6 @@
                                             <li><i class="fa fa-dot-circle-o me-2" title="Disk icon"/><field name="album_amount"/></li>
                                             <li><i class="fa fa-music me-2" title="Music icon"/><field name="track_amount"/></li>
                                         </ul>
-                                    </div>
-                                    <div class="oe_kanban_image d-flex align-items-center justify-content-center" style="height: 125px; width: 100%; overflow: hidden">
-                                        <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [125]}"/>
                                     </div>
                                 </div>
                             </div>
