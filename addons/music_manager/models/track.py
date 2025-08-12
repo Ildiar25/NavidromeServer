@@ -42,7 +42,7 @@ class Track(Model):
 
     # Relational fields
     album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
-    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"))
+    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"), ondelete='cascade')
     genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
     original_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
     track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
@@ -108,6 +108,22 @@ class Track(Model):
 
         return res
 
+    def unlink(self):
+        check_albums = self.mapped('album_id')
+        check_genres = self.mapped('genre_id')
+
+        res = super().unlink()
+
+        for album in check_albums:
+            if not self.env['music_manager.track'].search([('album_id', '=', album.id)]):
+                album.unlink()
+
+        for genre in check_genres:
+            if not self.env['music_manager.track'].search([('genre_id', '=', genre.id)]):
+                genre.unlink()
+
+        return res
+
     @api.depends('track_artist_ids')
     def _compute_display_artist_name(self) -> None:
         for track in self:
@@ -135,6 +151,27 @@ class Track(Model):
                 track=track.track_no or '',
                 title=track.name or '',
             )
+
+    @api.depends('album_artist_id')
+    def _compute_collection_value(self) -> None:
+        for track in self:
+            if track.album_artist_id and track.album_artist_id.name.lower() == 'various artists':
+                track.collection = True
+
+            else:
+                track.collection = False
+
+    def _inverse_collection_value(self) -> None:
+        for track in self:
+            if track.collection:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
+
+            else:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist(
+                    track.original_artist_id.name, track.track_artist_ids
+                )
 
     @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
@@ -227,27 +264,6 @@ class Track(Model):
             if track.collection:
                 # noinspection PyProtectedMember
                 track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
-            else:
-                # noinspection PyProtectedMember
-                track.album_artist_id = track._find_or_create_single_artist(
-                    track.original_artist_id.name, track.track_artist_ids
-                )
-
-    @api.depends('album_artist_id')
-    def _compute_collection_value(self) -> None:
-        for track in self:
-            if track.album_artist_id and track.album_artist_id.name.lower() == 'various artists':
-                track.collection = True
-
-            else:
-                track.collection = False
-
-    def _inverse_collection_value(self) -> None:
-        for track in self:
-            if track.collection:
-                # noinspection PyProtectedMember
-                track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
-
             else:
                 # noinspection PyProtectedMember
                 track.album_artist_id = track._find_or_create_single_artist(
