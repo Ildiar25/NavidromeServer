@@ -34,6 +34,28 @@
         </record>
 
         <!-- Form view -->
+        <record id="music_manager_album_view_form" model="ir.ui.view">
+            <field name="name">music_manager.album.view.form</field>
+            <field name="model">music_manager.album</field>
+            <field name="arch" type="xml">
+                <form string="Album">
+                    <sheet>
+                        <div class="d-flex flex-column justify-content-between">
+                            <div class="d-flex flex-row justify-content-start">
+                                <div class="mx-3">
+                                    <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
+                                </div>
+                                <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
+                                <div>
+                                    <h1><field name="name"/></h1>
+                                    <field name="year"/>
+                                </div>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
 
     </data>
 </odoo>
