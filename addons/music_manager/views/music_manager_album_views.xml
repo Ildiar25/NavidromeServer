@@ -13,18 +13,12 @@
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
                 <kanban>
+                    <field name="name"/>
                     <template>
                         <t t-name="kanban-box">
-                            <div class="oe_kanban_global_click d-flex flex-column h-100">
+                            <div class="oe_kanban_global_click d-flex flex-column h-100" t-att-title="record.name.value">
                                 <div class="oe_kanban_image d-flex align-items-center justify-content-center" style="width: 100%; overflow: hidden; background: #f8f9fa;">
                                     <field name="cover" string="" widget="image" style="max-height: 100%; max-width: 100%;" options="{'preview_image': 'cover'}"/>
-                                </div>
-                                <hr class="mb-2"/>
-                                <div class="o_kanban_record_title">
-                                    <div class="d-flex flex-row justify-content-between">
-                                        <field name="name"/>
-                                        <field name="disk_amount"/>
-                                    </div>
                                 </div>
                             </div>
                         </t>

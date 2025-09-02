@@ -12,7 +12,7 @@
             <field name="name">music_manager.track.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <tree string="Songs" decoration-danger="not is_saved" decoration-bf="is_deleted" decoration-muted="is_deleted">
+                <tree string="Songs" decoration-danger="is_deleted" decoration-warning="not is_saved">
                     <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Title"/>
                     <field name="display_artist_names" string="Artist(s)"/>
