@@ -109,6 +109,7 @@ class Track(Model):
         return res
 
     def unlink(self):
+        file_paths = [(track.file_path, track.is_deleted) for track in self]
         check_albums = self.mapped('album_id')
         check_genres = self.mapped('genre_id')
 
@@ -121,6 +122,11 @@ class Track(Model):
         for genre in check_genres:
             if not self.env['music_manager.track'].search([('genre_id', '=', genre.id)]):
                 genre.unlink()
+
+        for path, is_deleted in file_paths:
+            if not is_deleted and self.env.uid == 2:
+                if os.path.exists(path):
+                    os.remove(path)
 
         return res
 
