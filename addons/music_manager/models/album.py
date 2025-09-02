@@ -58,6 +58,13 @@ class Album(Model):
 
         return super().write(vals)
 
+    def unlink(self):
+
+        for album in self:
+            album.track_ids.unlink()
+
+        return super().unlink()
+
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:
         for album in self:
