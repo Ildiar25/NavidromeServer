@@ -61,6 +61,9 @@ class FolderManager:
         self._clean_empty_dirs(old_path.parent)
         return self
 
+    def delete_file(self, path: str) -> None:
+        pass
+
     def _clean_empty_dirs(self, path: Path) -> None:
 
         current_path = path
