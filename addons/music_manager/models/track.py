@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import ValidationError
-from odoo.fields import Binary, Boolean, Char, Many2many, Many2one, Selection
+from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
@@ -31,13 +31,13 @@ class Track(Model):
 
     # Basic fields
     cover = Binary(string=_("Cover"), attachment=True)
-    disk_no = Char(string=_("Disk no"))
+    disk_no = Integer(string=_("Disk no"))
     duration = Char(string=_("Duration (min)"), readonly=True)
     file_type = Char(string=_("Type"), readonly=True)
     name = Char(string=_("Title"))
-    total_disk = Char(string=_("Total disk no"))
-    total_track = Char(string=_("Total track no"))
-    track_no = Char(string=_("Track no"))
+    total_disk = Integer(string=_("Total disk no"))
+    total_track = Integer(string=_("Total track no"))
+    track_no = Integer(string=_("Track no"))
     year = Char(string=_("Year"))
 
     # Relational fields
@@ -153,7 +153,7 @@ class Track(Model):
             track.file_path = FolderManager().set_path(
                 artist=track.album_artist_id.name or '',
                 album=track.album_id.name or '',
-                track=track.track_no or '',
+                track=str(track.track_no) or '',
                 title=track.name or '',
             )
 
@@ -235,7 +235,7 @@ class Track(Model):
                 return {
                     'warning': {
                         'title': _("C'mon dude! 🙄"),
-                        'message': _("\nThe web address has to be valid and we both know it isn't.")
+                        'message': _("\nThe web address has to be valid and we both know it is not.")
                     }
                 }
 
@@ -256,7 +256,7 @@ class Track(Model):
                     'warning': {
                         'title': _("Not today! ❌"),
                         'message': _(
-                            "\nI'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷", mime_type
+                            "\nI'm sooo sorry but, actually WEBP image format is not allowed: %s. 🤷", mime_type
                         )
                     }
                 }

@@ -52,14 +52,14 @@ class MP3File(FileMetadata):
                         trck_no, total = self.__parse_track_string(value.text[0])
                         metadata['TRCK'] = trck_no, total
                     else:
-                        metadata['TRCK'] = value.text[0], "1"
+                        metadata['TRCK'] = int(value.text[0]) if value.text[0].isdigit() else 1, 1
 
                 elif key == 'TPOS':
                     if '/' in value.text[0]:
                         dsk_no, total = self.__parse_track_string(value.text[0])
                         metadata['TPOS'] = dsk_no, total
                     else:
-                        metadata['TPOS'] = value.text[0], "1"
+                        metadata['TPOS'] = int(value.text[0]) if value.text[0].isdigit() else 1, 1
 
                 else:
                     metadata[key] = value.text[0]
@@ -151,11 +151,12 @@ class MP3File(FileMetadata):
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __parse_track_string(data: str) -> tuple[str, str]:
+    def __parse_track_string(data: str) -> tuple[int, int]:
         track, total_track = data.split("/")
-        return track, total_track
+        return int(track), int(total_track)
 
     @staticmethod
-    def __format_track_tuple(track_tuple: tuple[str, str]) -> str:
-        data = "/".join(track_tuple)
+    def __format_track_tuple(track_tuple: tuple[int, int]) -> str:
+        str_tuple = map(str, track_tuple)
+        data = "/".join(str_tuple)
         return data
