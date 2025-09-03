@@ -125,8 +125,7 @@ class Track(Model):
 
         for path, is_deleted in file_paths:
             if not is_deleted and self.env.uid == 2:
-                if os.path.exists(path):
-                    os.remove(path)
+                FolderManager().delete_file(path)
 
         return res
 

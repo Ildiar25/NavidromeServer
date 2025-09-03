@@ -62,10 +62,29 @@ class FolderManager:
         return self
 
     def delete_file(self, path: str) -> None:
-        pass
+        file_path = Path(path)
+
+        try:
+            if not file_path.is_file():
+                return
+
+            file_path.unlink()
+
+        except FileNotFoundError as not_found:
+            _logger.error(f"Try to delete file but not found: {not_found}")
+            return
+
+        except PermissionError as no_permission:
+            _logger.error(f"Do not have permissions to delete files: {no_permission}")
+            return
+
+        except Exception as unknown_error:
+            _logger.error(f"Something went wrong while deleting file: {unknown_error}")
+            return
+
+        self._clean_empty_dirs(file_path.parent)
 
     def _clean_empty_dirs(self, path: Path) -> None:
-
         current_path = path
 
         if current_path == self.__root_folder:
@@ -89,7 +108,6 @@ class FolderManager:
 
     @staticmethod
     def is_valid_path(path: str) -> bool:
-
         artist = r'\w+'
         album = r'\w+'
         track_no = r'[0-9]{2}'
