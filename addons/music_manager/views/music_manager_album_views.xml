@@ -45,6 +45,8 @@
                                     <field name="year"/>
                                 </div>
                             </div>
+                            <separator string="Songs"/>
+                            <field name="track_ids"/>
                         </div>
                     </sheet>
                 </form>

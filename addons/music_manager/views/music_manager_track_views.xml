@@ -17,6 +17,8 @@
                     <field name="name" string="Title"/>
                     <field name="display_artist_names" string="Artist(s)"/>
                     <field name="album_id" string="Album"/>
+                    <field name="track_no" string="Track no"/>
+                    <field name="disk_no" string="Disk no" optional="hide"/>
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
                     <field name="duration" string="Duration"/>
