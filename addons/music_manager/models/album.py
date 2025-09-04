@@ -23,6 +23,7 @@ class Album(Model):
 
     _name = 'music_manager.album'
     _description = 'album_table'
+    _order = 'name'
 
     # Basic fields
     name = Char(string=_("Album title"))

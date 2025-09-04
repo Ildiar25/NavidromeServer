@@ -28,6 +28,7 @@ class Track(Model):
 
     _name = 'music_manager.track'
     _description = 'track_table'
+    _order = 'album_name, disk_no, track_no'
 
     # Basic fields
     cover = Binary(string=_("Cover"), attachment=True)
@@ -67,6 +68,9 @@ class Track(Model):
     is_deleted = Boolean(string=_("Is deleted"), compute='_compute_file_is_deleted', store=False)
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
     old_path = Char(string=_("Old path"), copy=False, store=True)
+
+    # Related fields
+    album_name = Char(string="Album name", related='album_id.name', store=True)
 
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)

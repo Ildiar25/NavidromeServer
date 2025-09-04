@@ -8,6 +8,7 @@ from odoo.fields import Char, One2many
 class Genre(Model):
 
     _name = 'music_manager.genre'
+    _order = 'name'
 
     # Default fields
     name = Char(string=_("Name"))
