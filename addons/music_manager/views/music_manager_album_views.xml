@@ -42,11 +42,11 @@
                                 <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                                 <div>
                                     <h1><field name="name"/></h1>
-                                    <field name="year"/>
+                                    <field name="year" string="Year"/>
                                 </div>
                             </div>
                             <separator string="Songs"/>
-                            <field name="track_ids"/>
+                            <field name="track_ids" readonly="True"/>
                         </div>
                     </sheet>
                 </form>

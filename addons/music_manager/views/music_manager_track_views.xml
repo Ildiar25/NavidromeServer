@@ -14,11 +14,11 @@
             <field name="arch" type="xml">
                 <tree string="Songs" decoration-danger="is_deleted" decoration-warning="not is_saved">
                     <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
+                    <field name="disk_no" string="Disk no" optional="hide"/>
+                    <field name="track_no" string="Track no" optional="hide"/>
                     <field name="name" string="Title"/>
                     <field name="display_artist_names" string="Artist(s)"/>
                     <field name="album_id" string="Album"/>
-                    <field name="track_no" string="Track no"/>
-                    <field name="disk_no" string="Disk no" optional="hide"/>
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
                     <field name="duration" string="Duration"/>
