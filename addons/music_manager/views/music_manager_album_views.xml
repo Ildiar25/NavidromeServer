@@ -40,12 +40,12 @@
                                     <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
                                 </div>
                                 <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                <div class="d-flex flex-column justify-content-start">
-                                    <h1><field name="name"/></h1>
-                                    <field name="year" string="Year"/>
-                                    <field name="album_artist_id" string="Album artist"/>
-                                    <field name="genre_id" string="Genre"/>
-                                    <button name="update_songs" string="Update metadata" class="btn-outline-primary w-100" type="object"/>
+                                <div class="d-flex flex-column justify-content-between w-100">
+                                    <h1 class="form_title"><field name="name"/></h1>
+                                    <field name="year" string="Year" class="w-25"/>
+                                    <field name="album_artist_id" string="Album artist" class="w-25"/>
+                                    <field name="genre_id" string="Genre" class="w-25"/>
+                                    <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
                                 </div>
                             </div>
                             <separator string="Songs"/>

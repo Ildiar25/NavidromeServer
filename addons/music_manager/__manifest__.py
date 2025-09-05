@@ -15,7 +15,13 @@
     'website': "",
     'depends': [
         "base",
+        "web"
     ],
+    'assets': {
+        'web.assets_backend': [
+            'music_manager/static/src/css/styles.css'
+        ]
+    },
     'data': [
         # Security
         "security/music_manager_groups.xml",
