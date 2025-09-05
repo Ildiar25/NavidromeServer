@@ -52,12 +52,41 @@ class Album(Model):
         for vals in list_vals:
             self._process_cover_image(vals)
 
-        return super().create(list_vals)
+        albums = super().create(list_vals)
+
+        for album in albums:
+            if album.track_ids:
+                update_vals = {}
+
+                if album.genre_id:
+                    update_vals['genre_id'] = album.genre_id.id
+
+                if album.album_artist_id:
+                    update_vals['album_artist_id'] = album.album_artist_id.id
+
+                if update_vals:
+                    album.track_ids.write(update_vals)
+
+        return albums
 
     def write(self, vals: dict[str, Any]):
         self._process_cover_image(vals)
 
-        return super().write(vals)
+        res = super().write(vals)
+
+        for album in self:
+            update_vals = {}
+
+            if 'genre_id' in vals:
+                update_vals['genre_id'] = vals['genre_id']
+
+            if 'album_artist_id' in vals:
+                update_vals['album_artist_id'] = vals['album_artist_id']
+
+            if update_vals and album.track_ids:
+                album.track_ids.write(update_vals)
+
+        return res
 
     def unlink(self):
 
@@ -127,6 +156,11 @@ class Album(Model):
                 }
 
         return None
+
+    def update_songs(self) -> None:
+        for album in self:
+            if album.track_ids:
+                album.track_ids.save_changes()
 
     @staticmethod
     def _process_cover_image(value: dict[str, Any]) -> None:

@@ -40,13 +40,26 @@
                                     <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
                                 </div>
                                 <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                <div>
+                                <div class="d-flex flex-column justify-content-start">
                                     <h1><field name="name"/></h1>
                                     <field name="year" string="Year"/>
+                                    <field name="album_artist_id" string="Album artist"/>
+                                    <field name="genre_id" string="Genre"/>
+                                    <button name="update_songs" string="Update metadata" class="btn-outline-primary w-100" type="object"/>
                                 </div>
                             </div>
                             <separator string="Songs"/>
-                            <field name="track_ids" readonly="True"/>
+                            <field name="track_ids" readonly="True">
+                                <tree>
+                                    <field name="track_no" string="Track no" optional="hide"/>
+                                    <field name="name" string="Title"/>
+                                    <field name="album_artist_id" string="Album artist"/>
+                                    <field name="album_id" string="Album"/>
+                                    <field name="year" string="Year"/>
+                                    <field name="genre_id" string="Genre"/>
+                                    <field name="duration" string="Duration"/>
+                                </tree>
+                            </field>
                         </div>
                     </sheet>
                 </form>
