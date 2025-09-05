@@ -98,6 +98,8 @@ class Track(Model):
         for track in tracks:
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
+            # noinspection PyProtectedMember
+            track._sync_album_with_genre()
 
         return tracks
 
@@ -109,6 +111,8 @@ class Track(Model):
         for track in self:
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
+            # noinspection PyProtectedMember
+            track._sync_album_with_genre()
 
         return res
 
@@ -433,6 +437,14 @@ class Track(Model):
             if self.album_id.album_artist_id != self.album_artist_id:
                 self.album_id.write(
                     {'album_artist_id': self.album_artist_id.id}
+                )
+
+    def _sync_album_with_genre(self) -> None:
+        self.ensure_one()
+        if self.album_id and self.genre_id:
+            if self.album_id.genre_id != self.genre_id:
+                self.album_id.write(
+                    {'genre_id': self.genre_id.id}
                 )
 
     def _update_fields(self) -> None:
