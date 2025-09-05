@@ -160,7 +160,8 @@ class Album(Model):
     def update_songs(self) -> None:
         for album in self:
             if album.track_ids:
-                album.track_ids.save_changes()
+                for track in album.track_ids:
+                    track.save_changes()
 
     @staticmethod
     def _process_cover_image(value: dict[str, Any]) -> None:
