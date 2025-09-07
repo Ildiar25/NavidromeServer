@@ -52,7 +52,7 @@
                             </div>
                             <separator string="Songs"/>
                             <field name="track_ids" readonly="True">
-                                <tree>
+                                <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
                                     <field name="track_no" string="Track no" optional="hide"/>
                                     <field name="name" string="Title"/>
                                     <field name="album_artist_id" string="Album artist"/>
@@ -60,6 +60,8 @@
                                     <field name="year" string="Year"/>
                                     <field name="genre_id" string="Genre"/>
                                     <field name="duration" string="Duration"/>
+                                    <field name="is_saved" column_invisible="True"/>
+                                    <field name="is_deleted" column_invisible="True"/>
                                 </tree>
                             </field>
                         </div>
@@ -68,5 +70,24 @@
             </field>
         </record>
 
+        <!-- Searchbar -->
+        <record id="music_manager_album_searchbar" model="ir.ui.view">
+            <field name="name">music_manager.album.searchbar</field>
+            <field name="model">music_manager.album</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <!-- Custom fields -->
+                    <field name="name" string="by album title"/>
+                    <field name="album_artist_id" string="by album artist"/>
+
+                    <!-- Custom groups -->
+                    <group string="Group by" expand="1">
+                        <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
+                        <filter name="year" string="Year" context="{'group_by': 'year'}"/>
+                        <filter name="genre_id" string="Genre" context="{'group_by': 'genre_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
     </data>
 </odoo>

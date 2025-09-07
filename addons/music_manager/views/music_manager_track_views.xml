@@ -357,6 +357,26 @@
         </record>
 
         <!-- Searchbar -->
+        <record id="music_manager_track_searchbar" model="ir.ui.view">
+            <field name="name">music_manager.track.searchbar</field>
+            <field name="model">music_manager.track</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <!-- Custom fields -->
+                    <field name="name" string="by track title"/>
+                    <field name="display_artist_names" string="by artist name"/>
+                    <field name="album_id" string="by album title"/>
 
+                    <!-- Custom filters -->
+                    <filter name="by_saved" string="Not saved" domain="[('is_saved', '=', False)]"/>
+
+                    <!-- Custom groups -->
+                    <group string="Group by" expand="1">
+                        <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
+                        <filter name="year" string="Year" context="{'group_by': 'year'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
     </data>
 </odoo>
