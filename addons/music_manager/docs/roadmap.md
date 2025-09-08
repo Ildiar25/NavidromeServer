@@ -19,3 +19,5 @@
  - [x] **Qué ocurre si la canción se elimina y el registro se mantiene: Comprobación del path una vez se abre el formulario.**
  - [x] **Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.**
  - [x] **Implementar lógica que controle 'collection': Si se marca, various artists, si no que calcule según artista original.**
+ - [ ] **Cuando se agrega un archivo desde un USB no se calcula su diración. Tener en cuenta al momento de desplegar el proyecto.**
+ - [ ] **.**
