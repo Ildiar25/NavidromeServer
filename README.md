@@ -20,14 +20,14 @@ El módulo `music_manager` permite crear, editar y administrar tu catálogo musi
 
 ## ⚙️ Instalación
 
-### 1️⃣ Clonar el repositorio
+### 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/Ildiar25/NavidromeServer
 cd NavidromeServer
 ```
 
-### 2️⃣ Configurar y levantar los contenedores (Compatibilidad Linux vs Windows)
+### 2. Configurar y levantar los contenedores (Compatibilidad Linux vs Windows)
 
 Para que el proyecto funcione correctamente, se manejan las carpetas de manera diferente según el sistema operativo:
 
@@ -57,13 +57,13 @@ DkUp
 make dkup
 ```
 
-Esto levantará:
+Para ambos casos esto levantará:
 
  * Base de datos PostgreSQL
  * Odoo con configuración personalizada y módulo `music_manager`
  * Navidrome, apuntando al directorio de música
 
-### 3️⃣ Acceso
+### 3. Acceso
 
 | Servicio  | URL                                             | Usuario inicial                      |
 |-----------|-------------------------------------------------|--------------------------------------|
