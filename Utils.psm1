@@ -206,7 +206,7 @@ function DkUp {
             DkInit
         }
         else {
-            Write-Host "`n$(_SetEmoji $EmojiDict['winking_face'])  I understand, jave a nice day! $(_SetEmoji $EmojiDict['top_hat'])`n"
+            Write-Host "`n$(_SetEmoji $EmojiDict['winking_face'])  I understand, have a nice day! $(_SetEmoji $EmojiDict['top_hat'])`n"
         }
     }
 }
@@ -231,7 +231,7 @@ function DkDown {
             DkInit
         }
         else {
-            Write-Host "`n$(_SetEmoji $EmojiDict['winking_face'])  I understand, jave a nice day! $(_SetEmoji $EmojiDict['top_hat'])`n"
+            Write-Host "`n$(_SetEmoji $EmojiDict['winking_face'])  I understand, have a nice day! $(_SetEmoji $EmojiDict['top_hat'])`n"
         }
     }
 }
@@ -269,7 +269,7 @@ function DkRestart {
             DkInit
         }
         else {
-            Write-Host "`n$(_SetEmoji $EmojiDict['winking_face'])  I understand, jave a nice day! $(_SetEmoji $EmojiDict['top_hat'])`n"
+            Write-Host "`n$(_SetEmoji $EmojiDict['winking_face'])  I understand, have a nice day! $(_SetEmoji $EmojiDict['top_hat'])`n"
         }
     }
 }

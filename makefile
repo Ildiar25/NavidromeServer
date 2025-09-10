@@ -10,7 +10,7 @@ VENV_DIR:=.venv
 YELLOW:=\033[33m
 
 
-.PHONY: help venv install gitinit gitcommit dkinit dkup dkdown dkrestart
+.PHONY: help venv install permissions gitinit gitcommit dkinit dkup dkdown dkrestart
 
 
 # Set main functions
@@ -48,6 +48,9 @@ install: ## Install project dependencies
 		echo "\n$(YELLOW)WARNING: ℹ  There is no requirements file! The program could fail while running... 😱 Make sure it no needs any requirement before run!$(NC)\n"; \
 	fi
 
+permissions: ## Create necessary folders & set permissions
+	@echo "\n🔑  Setting up permissions..."
+	@./permissions.sh && echo "✅  Starting project...\n"
 
 gitinit: ## Do first commit & push-it
 	@if [ $(remote) != 'none' ]; then \
@@ -84,7 +87,7 @@ gitcommit: ## Create new commit
 	fi
 
 
-dkinit: ## Prepare docker
+dkinit: permissions ## Prepare docker
 	@echo "\n🚀  Starting docker checker..."
 	@if ! command -v docker >/dev/null 2>&1; then \
 		echo "👉  Ops! It seems Docker is not installed on your system. Please install it and come back again...\n"; \

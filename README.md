@@ -13,7 +13,7 @@ El módulo `music_manager` permite crear, editar y administrar tu catálogo musi
 
 - 🐳 **Docker & Docker Compose** — Orquestación de contenedores
 - 🐘 **PostgreSQL** — Base de datos principal de Odoo
-- 🟠 **Odoo 17** — Framework ERP y backend principal
+- 🟣 **Odoo 17** — Framework ERP y backend principal
 - 🎧 **Navidrome** — Servidor de música ligero compatible con Subsonic
 
 ---
@@ -23,14 +23,38 @@ El módulo `music_manager` permite crear, editar y administrar tu catálogo musi
 ### 1️⃣ Clonar el repositorio
 
 ```bash
-git clone <url-del-repo>
-cd <repo>
+git clone https://github.com/Ildiar25/NavidromeServer
+cd NavidromeServer
 ```
 
-### 2️⃣ Configurar y levantar los contenedores
+### 2️⃣ Configurar y levantar los contenedores (Compatibilidad Linux vs Windows)
+
+Para que el proyecto funcione correctamente, se manejan las carpetas de manera diferente según el sistema operativo:
+
+#### Windows
+
+ * No se requieren permisos especiales.
+ * Si las carpetas no existen, **Docker Compose las crea automáticamente** al levantar los contenedores.
+ * No es necesario ejecutar ningún script adicional.
+
+Primero importamos el módulo
+```bash
+Import-Module ./Utils.psm1
+```
+
+Después, utilizamos los scripts necesarios
+```bash
+DkUp
+```
+
+#### Linux
+
+ * Las carpetas necesarias (`./data/*` y `./music`) **deben existir antes de levantar Docker**.
+ * El archivo `permissions.sh` se encarga de crearlas y asignar los permisos correctos a cada contenedor para evitar errores de *permission denied*.
+ * Utilizaremos el propio `makefile` integrado
 
 ```bash
-docker compose up --build
+make dkup
 ```
 
 Esto levantará:
@@ -41,10 +65,10 @@ Esto levantará:
 
 ### 3️⃣ Acceso
 
-| Servicio  | URL                                            | Usuario inicial                      |
-|-----------|------------------------------------------------|--------------------------------------|
-| Odoo      | [http://localhost:8069](http://localhost:8069) | `admin` (definir en primer arranque) |
-| Navidrome | [http://localhost:4533](http://localhost:4533) | `admin` / `admin` (por defecto)      |
+| Servicio  | URL                                             | Usuario inicial                      |
+|-----------|-------------------------------------------------|--------------------------------------|
+| Odoo      | [http://localhost:8069](http://localhost:8069)  | `admin` / `admin` (por defecto)      |
+| Navidrome | [http://localhost:4533](http://localhost:4533)  | `admin` (definir en primer arranque) |
 
 ---
 
@@ -55,6 +79,7 @@ Esto levantará:
 ├── data/                   # Datos persistentes (db, configs, etc.)
 ├── dockerfile.odoo         # Imagen customizada de Odoo
 ├── entrypoint.sh           # Script de entrada para inicialización db
+├── permissions.sh          # Script de creación de carpetas y asignación de permisos (Linux)
 ├── compose.yaml            # Docker Compose config
 ├── requirements.txt        # Requisitos Python adicionales para Odoo
 └── README.md               # Este archivo
@@ -81,8 +106,9 @@ Si quieres limpiar todo y empezar de cero:
 docker compose down
 rm -rf ./data/*
 docker volume prune -f
-docker compose up --build
 ```
+
+Y volver al punto de [configuración](#2-configurar-y-levantar-los-contenedores-compatibilidad-linux-vs-windows).
 
 ---
 

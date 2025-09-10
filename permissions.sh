@@ -10,41 +10,41 @@ POSTGRES_DIR="${ROOT_DIR}/data/postgres_db"
 MUSIC_DIR="${ROOT_DIR}/music"
 
 
-echo -e "\n📦️  Preparing persistent volumes...\n"
+echo -e "\n📦️  Preparing persistent volumes..."
 
 # Navidrome -> user_id:1000 | group_id:1000
 if [ ! -d "$NAVIDROME_DIR" ]; then
-    echo "Creating $NAVIDROME_DIR dir!"
+    echo "    ➡  Creating $NAVIDROME_DIR dir!"
     mkdir -p "$NAVIDROME_DIR"
 
-    echo -e "Setting NAVIDROME permissions!\n"
+    echo -e "Setting NAVIDROME permissions! 💿️ \n"
     sudo chown 1000:1000 "$NAVIDROME_DIR"
 fi
 
 # Odoo -> user_id:101 | group_id:101
 if [ ! -d "$ODOO_DIR" ]; then
-    echo "Creating $ODOO_DIR dir!"
+    echo "    ➡  Creating $ODOO_DIR dir!"
     mkdir -p "$ODOO_DIR"
 
-    echo -e "Setting ODOO permissions!\n"
+    echo -e "Setting ODOO permissions! 🟣 \n"
     sudo chown 101:101 "$ODOO_DIR"
 fi
 
 # Postgres -> user_id:999 | group_id:999
 if [ ! -d "$POSTGRES_DIR" ]; then
-    echo "Creating $POSTGRES_DIR dir!"
+    echo "    ➡  Creating $POSTGRES_DIR dir!"
     mkdir -p "$POSTGRES_DIR"
 
-    echo -e "Setting POSTGRES permissions!\n"
+    echo -e "Setting POSTGRES permissions! 🐘 \n"
     sudo chown 999:999 "$POSTGRES_DIR"
 fi
 
 # Music directory -> Owner = Odoo(101:101) | Read permissions = 755
 if [ ! -d "$MUSIC_DIR" ]; then
-    echo "Creating $MUSIC_DIR dir!"
+    echo "    ➡  Creating $MUSIC_DIR dir!"
     mkdir -p "$MUSIC_DIR"
 
-    echo -e "Setting MUSIC permissions!\n"
+    echo -e "Setting MUSIC permissions! 🎵 \n"
     sudo chown 101:101 "$MUSIC_DIR"
     sudo chmod 755 "$MUSIC_DIR"
 fi
