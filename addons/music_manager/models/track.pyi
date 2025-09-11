@@ -13,7 +13,8 @@ from ..utils.custom_types import CustomMessage, ReplaceItemCommand, TrackVals
 
 class Track:
     """
-
+    Represents a Track model into the system.
+    Manage basic track data like cover, track no, album_id, file_path & others.
     """
 
     _name: Final[str]
@@ -57,158 +58,163 @@ class Track:
     user_id: Users
 
     def create(self, list_vals: list[TrackVals]) -> Self:
-        """
-        :param list_vals:
-        :return:
+        """Overrides 'create' method to process cover track & syncronizes with album & artist ids.
+        :param list_vals: Dictionary list with track information to create new records.
+        :return: Created track records.
         """
 
     def write(self, vals: TrackVals) -> bool:
-        """
-        :param vals:
-        :return:
+        """Overrides 'write' method to update cover track & syncronizes with album & artist ids.
+        :param vals: Dictionary with track values to update.
+        :return: Confirms updated album record.
         """
 
     def unlink(self) -> Self:
-        """
-        :return:
+        """Overrides the 'unlink' method to delete all linked albums and genres that no longer have
+        associated tracks. It also deletes the track's file path before the record itself is deleted.
+        The MP3 file is also removed if the user has the necessary permissions.
+        :return: Deleted records.
         """
 
     def _compute_display_artist_name(self: Iterable[Self]) -> None:
-        """
+        """Calculates artist names separated by commas.
         :return: None
         """
 
     def _compute_file_is_deleted(self: Iterable[Self]) -> None:
-        """
+        """Determines if the file no longer exists.
         :return: None
         """
 
     def _compute_file_path(self: Iterable[Self]) -> None:
-        """
+        """Calculates file path according to artist name, album title, track number & track name.
         :return: None
         """
 
     def _compute_collection_value(self: Iterable[Self]) -> None:
-        """
+        """Toggles `collection` field according to artist name.
         :return: None
         """
 
     def _inverse_collection_value(self: Iterable[Self]) -> None:
-        """
+        """Sets artist name as 'various artists' if `collection` field is True.
         :return: None
         """
 
     def _check_fields(self: Iterable[Self]) -> None:
-        """
+        """Checks if there is at least one of both fields (`file` or `url`) before proceed.
         :return: None
         """
 
     def _validate_file_path(self: Iterable[Self]) -> None:
-        """
+        """Toggles `has_valid_path` field according to a given pattern.
         :return: None
         """
 
     def _validate_file_type(self: Iterable[Self]) -> CustomMessage | None:
-        """
-        :return:
+        """Checks if file has a valid format. If file is not MP3 format, clears the field `file`
+        and returns a warning message.
+        :return: Warning Message (dict) | None
         """
 
     def _validate_url_path(self: Iterable[Self]) -> CustomMessage | None:
-        """
-        :return:
+        """Checks if url path has a valid pattern. If URL pattern does not belong to YouTube,
+        clears the field `url_path` and returns a warning message.
+        :return: Warning Message (dict) | None
         """
 
     def _validate_cover_image(self: Iterable[Self]) -> CustomMessage | None:
-        """
-        :return:
+        """Checks cover image format. If image is WEBP format, clears the field `cover` and returns a warning message.
+        :return: Warning Message (dict) | None
         """
 
     def _display_album_artist_changes(self: Iterable[Self]) -> None:
-        """
+        """Updates album artist name visuals.
         :return: None
         """
 
     def action_back(self) -> None:
-        """
+        """Changes work flow steps (`state` field) to backward when the user click on the back button.
         :return: None
         """
 
     def action_next(self) -> None:
-        """
+        """Changes work flow steps (`state` field) to forward when the user click on the next button.
         :return: None
         """
 
     def save_changes(self) -> None:
-        """
+        """Updates track metadata & path file.
         :return: None
         """
 
     def save_file(self) -> None:
-        """
+        """Saves file into necessary folders & updates metadata track.
         :return: None
         """
 
     def _convert_to_mp3(self: Iterable[Self]) -> None:
-        """
+        """Downloads & converts a YouTube video to MP3 format.
         :return: None
         """
 
     def _find_or_create_album(self, album_name: str) -> int | bool:
-        """
-        :param album_name:
-        :return:
+        """Tries to find a given album name. If there is not any, creates new record.
+        :param album_name: Album name
+        :return: Album ID (created or finded) | False if there is not any name
         """
 
     def _find_or_create_artist(self, artist_names: str) -> list[ReplaceItemCommand]:
-        """
-        :param artist_names:
-        :return:
+        """Tries to find a given artist names. If there is not any, creates new record.
+        :param artist_names: Artist names (individual or names separated by commas)
+        :return: Artist IDs (created or finded) | False if there is not any name
         """
 
     def _find_or_create_genre(self, genre_name: str) -> int | bool:
-        """
-        :param genre_name:
-        :return:
+        """Tries to find a given genre name. If there is not any, creates new record.
+        :param genre_name: Genre name
+        :return: Genre ID (created or finded) | False if there is not any name
         """
 
     def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]) -> int | bool:
-        """
-        :param artist_name:
-        :param fallback_ids:
-        :return:
+        """Tries to find a given single artist name. If there is not any, sets the first one finded on fall back list.
+        :param artist_name: Artist name
+        :param fallback_ids: A list with various artist IDs
+        :return: Artist ID (created or finded) | False if there is not any name
         """
 
     def _sync_album_with_artist(self) -> None:
-        """
+        """Syncronizes album ID with artist ID.
         :return: None
         """
 
     def _sync_album_with_genre(self) -> None:
-        """
+        """Syncronizes album ID with genre ID.
         :return: None
         """
 
     def _update_fields(self) -> None:
-        """
+        """Updates form fields according to track metadata.
         :return: None
         """
 
     def _update_metadata(self: Iterable[Self], path: str) -> None:
-        """
+        """Updates track metadata according to field values.
         :param path:
         :return: None
         """
 
     @staticmethod
     def _format_track_duration(duration: int) -> str:
-        """
-        :param duration:
-        :return:
+        """Gives a format to track duration.
+        :param duration: Total seconds
+        :return: An string with MM:SS format
         """
 
     @staticmethod
     def _process_cover_image(value: TrackVals) -> None:
-        """
-        :param value:
+        """Process & normalize cover image before create or update records. It converts the image into PNG format,
+        center it & scale it to 350x350 px. An error is raised if image has an invalid format.
+        :param value: Dictionary with track values, 'cover' field could be included.
         :return: None
         """

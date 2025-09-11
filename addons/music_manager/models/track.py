@@ -279,6 +279,7 @@ class Track(Model):
             if track.collection:
                 # noinspection PyProtectedMember
                 track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
+
             else:
                 # noinspection PyProtectedMember
                 track.album_artist_id = track._find_or_create_single_artist(
@@ -366,7 +367,6 @@ class Track(Model):
                 )
 
     def _find_or_create_album(self, album_name: str) -> int | bool:
-
         albums = self.env['music_manager.album']
 
         if album_name and album_name.lower() != 'unknown':
@@ -382,7 +382,6 @@ class Track(Model):
         return False
 
     def _find_or_create_artist(self, artist_names: str) -> list[ReplaceItemCommand]:
-
         artists = self.env['music_manager.artist']
         artist_ids = []
 
@@ -404,7 +403,6 @@ class Track(Model):
         return [(6, 0, artist_ids)]
 
     def _find_or_create_genre(self, genre_name: str) -> int | bool:
-
         genres = self.env['music_manager.genre']
 
         if genre_name and genre_name.lower() != 'unknown':
@@ -420,7 +418,6 @@ class Track(Model):
         return False
 
     def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]) -> int | bool:
-
         artists = self.env['music_manager.artist']
 
         if artist_name and artist_name.lower() != 'unknown':
