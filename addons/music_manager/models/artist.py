@@ -2,8 +2,8 @@
 import base64
 import io
 import logging
-from typing import Any
 
+# noinspection PyPackageRequirements
 import magic
 # noinspection PyProtectedMember
 from odoo import _, api
@@ -12,6 +12,7 @@ from odoo.models import Model
 from odoo.fields import Binary, Boolean, Char, Date, Integer, Many2many, Many2one, One2many
 
 from ..services.image_service import ImageToPNG
+from ..utils.custom_types import CustomMessage, ArtistVals
 from ..utils.exceptions import ImageServiceError, MusicManagerError
 
 
@@ -44,13 +45,13 @@ class Artist(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.model_create_multi
-    def create(self, list_vals: list[dict[str, Any]]):
+    def create(self, list_vals: list[ArtistVals]):
         for vals in list_vals:
             self._process_picture_image(vals)
 
         return super().create(list_vals)
 
-    def write(self, vals: dict[str, Any]):
+    def write(self, vals: ArtistVals):
         self._process_picture_image(vals)
         return super().write(vals)
 
@@ -64,6 +65,7 @@ class Artist(Model):
         for artist in self:
             if not artist.id:
                 artist.display_title = _("Edit artist")
+
             else:
                 artist.display_title = _("Artist - %s", artist.name)
 
@@ -79,7 +81,7 @@ class Artist(Model):
                 artist.real_name = artist.name
 
     @api.onchange('picture')
-    def _validate_picture_image(self) -> dict[str, dict[str, str]] | None:
+    def _validate_picture_image(self) -> CustomMessage | None:
         for artist in self:
             if not (artist.picture and isinstance(artist.picture, (str, bytes))):
                 continue
@@ -105,7 +107,7 @@ class Artist(Model):
             artist.is_favorite = not artist.is_favorite
 
     @staticmethod
-    def _process_picture_image(value: dict[str, Any]) -> None:
+    def _process_picture_image(value: ArtistVals) -> None:
         if 'picture' in value and value['picture']:
             try:
                 if isinstance(value['picture'], (str, bytes)):

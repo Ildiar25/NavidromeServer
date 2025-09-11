@@ -2,7 +2,6 @@
 import base64
 import io
 import logging
-from typing import Any
 
 # noinspection PyPackageRequirements
 import magic
@@ -13,6 +12,7 @@ from odoo.models import Model
 from odoo.fields import Binary, Char, Integer, Many2one, One2many
 
 from ..services.image_service import ImageToPNG
+from ..utils.custom_types import CustomMessage, AlbumVals
 from ..utils.exceptions import ImageServiceError, MusicManagerError
 
 
@@ -48,13 +48,14 @@ class Album(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.model_create_multi
-    def create(self, list_vals: list[dict[str, Any]]):
+    def create(self, list_vals: list[AlbumVals]) -> 'Album':
         for vals in list_vals:
             self._process_cover_image(vals)
 
+        # noinspection PyNoneFunctionAssignment
         albums = super().create(list_vals)
 
-        for album in albums:
+        for album in albums:  # type:ignore
             if album.track_ids:
                 update_vals = {}
 
@@ -69,12 +70,12 @@ class Album(Model):
 
         return albums
 
-    def write(self, vals: dict[str, Any]):
+    def write(self, vals: AlbumVals) -> 'Album':
         self._process_cover_image(vals)
 
         res = super().write(vals)
 
-        for album in self:
+        for album in self:  # type: ignore
             update_vals = {}
 
             if 'genre_id' in vals:
@@ -88,7 +89,7 @@ class Album(Model):
 
         return res
 
-    def unlink(self):
+    def unlink(self) -> 'Album':
 
         for album in self:
             album.track_ids.unlink()
@@ -104,7 +105,6 @@ class Album(Model):
     def _compute_disk_amount(self) -> None:
         for album in self:
             disk_amount = album.track_ids.mapped('total_disk')
-
             album.disk_amount = max(disk_amount) if disk_amount else 0
 
     @api.depends('track_ids', 'track_ids.cover')
@@ -118,6 +118,7 @@ class Album(Model):
         for album in self:
             if album.cover:
                 album.track_ids.write({'cover': album.cover})
+
             else:
                 album.track_ids.write({'cover': False})
 
@@ -132,11 +133,12 @@ class Album(Model):
         for album in self:
             if album.year:
                 album.track_ids.write({'year': album.year})
+
             else:
                 album.track_ids.write({'year': False})
 
     @api.onchange('cover')
-    def _validate_cover_image(self) -> dict[str, dict[str, str]] | None:
+    def _validate_cover_image(self) -> CustomMessage | None:
         for album in self:
             if not (album.cover and isinstance(album.cover, (str, bytes))):
                 continue
@@ -164,7 +166,7 @@ class Album(Model):
                     track.save_changes()
 
     @staticmethod
-    def _process_cover_image(value: dict[str, Any]) -> None:
+    def _process_cover_image(value: AlbumVals) -> None:
         if 'cover' in value and value['cover']:
             try:
                 if isinstance(value['cover'], (str, bytes)):

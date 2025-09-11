@@ -18,6 +18,7 @@ from ..services.download_service import YTDLPAdapter, YoutubeDownload
 from ..services.file_service import FolderManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
+from ..utils.custom_types import CustomMessage, ReplaceItemCommand, TrackVals
 from ..utils.exceptions import DownloadServiceError, ImageServiceError, MetadataServiceError, MusicManagerError
 
 
@@ -89,13 +90,14 @@ class Track(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
-    def create(self, list_vals: list[dict[str, Any]]):
+    def create(self, list_vals: list[TrackVals]):
         for vals in list_vals:
             self._process_cover_image(vals)
 
+        # noinspection PyNoneFunctionAssignment
         tracks = super().create(list_vals)
 
-        for track in tracks:
+        for track in tracks:  #type:ignore
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
@@ -103,12 +105,12 @@ class Track(Model):
 
         return tracks
 
-    def write(self, vals: dict[str, Any]):
+    def write(self, vals: TrackVals):
         self._process_cover_image(vals)
 
         res = super().write(vals)
 
-        for track in self:
+        for track in self:  #type:ignore
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
@@ -117,7 +119,7 @@ class Track(Model):
         return res
 
     def unlink(self):
-        file_paths = [(track.file_path, track.is_deleted) for track in self]
+        file_paths = [(track.file_path, track.is_deleted) for track in self]  #type:ignore
         check_albums = self.mapped('album_id')
         check_genres = self.mapped('genre_id')
 
@@ -151,6 +153,7 @@ class Track(Model):
         for track in self:
             if track.old_path and isinstance(track.old_path, str):
                 track.is_deleted = not os.path.isfile(track.old_path)
+
             else:
                 track.is_deleted = False
 
@@ -204,7 +207,6 @@ class Track(Model):
 
     @api.constrains('file_path')
     def _validate_file_path(self) -> None:
-
         for track in self:
             if not (track.file_path and isinstance(track.file_path, str)):
                 continue
@@ -212,7 +214,7 @@ class Track(Model):
             track.has_valid_path = FolderManager().is_valid_path(track.file_path)
 
     @api.onchange('file')
-    def _validate_file_type(self) -> dict[str, dict[str, str]] | None:
+    def _validate_file_type(self) -> CustomMessage | None:
         for track in self:
             if not (track.file and isinstance(track.file, bytes)):
                 continue
@@ -232,7 +234,7 @@ class Track(Model):
         return None
 
     @api.onchange('url')
-    def _validate_url_path(self) -> dict[str, dict[str, str]] | None:
+    def _validate_url_path(self) -> CustomMessage | None:
         for track in self:
             if not (track.url and isinstance(track.url, str)):
                 continue
@@ -250,7 +252,7 @@ class Track(Model):
         return None
 
     @api.onchange('cover')
-    def _validate_cover_image(self) -> dict[str, dict[str, str]] | None:
+    def _validate_cover_image(self) -> CustomMessage | None:
         for track in self:
             if not (track.cover and isinstance(track.cover, (str, bytes))):
                 continue
@@ -284,12 +286,12 @@ class Track(Model):
                 )
 
     def action_back(self) -> None:
-        for track in self:
+        for track in self:  #type:ignore
             if track.state == 'done':
                 track.state = 'metadata'
 
     def action_next(self) -> None:
-        for track in self:
+        for track in self:  #type:ignore
             match track.state:
                 case 'start':
                     track.state = 'uploaded'
@@ -305,7 +307,7 @@ class Track(Model):
                     track.state = 'done'
 
     def save_changes(self) -> None:
-        for track in self:
+        for track in self:  #type:ignore
             if not (isinstance(track.file_path, str) and track.has_valid_path):
                 continue
 
@@ -315,7 +317,7 @@ class Track(Model):
             track.old_path = track.file_path
 
     def save_file(self) -> None:
-        for track in self:
+        for track in self:  #type:ignore
             if not (isinstance(track.file, bytes) and track.has_valid_path):
                 continue
 
@@ -368,17 +370,18 @@ class Track(Model):
         albums = self.env['music_manager.album']
 
         if album_name and album_name.lower() != 'unknown':
+            # noinspection PyNoneFunctionAssignment
             album = albums.search([('name', 'ilike', album_name)], limit=1)
 
             if album:
                 return album.id
 
             else:
-                return albums.create({'name': album_name}).id
+                return albums.create([{'name': album_name}]).id
 
         return False
 
-    def _find_or_create_artist(self, artist_names: str) -> list[tuple[int, int, list[int]]]:
+    def _find_or_create_artist(self, artist_names: str) -> list[ReplaceItemCommand]:
 
         artists = self.env['music_manager.artist']
         artist_ids = []
@@ -387,13 +390,15 @@ class Track(Model):
             names_list = (name.strip() for name in artist_names.split(','))
 
             for name in names_list:
+                # noinspection PyNoneFunctionAssignment
                 artist = artists.search([('name', 'ilike', name)], limit=1)
 
                 if artist:
                     artist_ids.append(artist.id)
 
                 else:
-                    new_artist = artists.create({'name': name})
+                    # noinspection PyNoneFunctionAssignment
+                    new_artist = artists.create([{'name': name}])
                     artist_ids.append(new_artist.id)
 
         return [(6, 0, artist_ids)]
@@ -403,13 +408,14 @@ class Track(Model):
         genres = self.env['music_manager.genre']
 
         if genre_name and genre_name.lower() != 'unknown':
+            # noinspection PyNoneFunctionAssignment
             genre = genres.search([('name', 'ilike', genre_name)], limit=1)
 
             if genre:
                 return genre.id
 
             else:
-                return genres.create({'name': genre_name}).id
+                return genres.create([{'name': genre_name}]).id
 
         return False
 
@@ -418,13 +424,14 @@ class Track(Model):
         artists = self.env['music_manager.artist']
 
         if artist_name and artist_name.lower() != 'unknown':
+            # noinspection PyNoneFunctionAssignment
             artist = artists.search([('name', 'ilike', artist_name)])
 
             if artist:
                 return artist.id
 
             else:
-                return artists.create({'name': artist_name}).id
+                return artists.create([{'name': artist_name}]).id
 
         elif fallback_ids:
             return fallback_ids[0]
@@ -448,7 +455,7 @@ class Track(Model):
                 )
 
     def _update_fields(self) -> None:
-        for track in self:
+        for track in self:  #type:ignore
             try:
                 metadata = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
 
