@@ -97,7 +97,7 @@ class Track(Model):
         # noinspection PyNoneFunctionAssignment
         tracks = super().create(list_vals)
 
-        for track in tracks:  #type:ignore
+        for track in tracks:  # type:ignore
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
@@ -110,7 +110,7 @@ class Track(Model):
 
         res = super().write(vals)
 
-        for track in self:  #type:ignore
+        for track in self:  # type:ignore
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
@@ -119,7 +119,7 @@ class Track(Model):
         return res
 
     def unlink(self):
-        file_paths = [(track.file_path, track.is_deleted) for track in self]  #type:ignore
+        file_paths = [(track.file_path, track.is_deleted) for track in self]  # type:ignore
         check_albums = self.mapped('album_id')
         check_genres = self.mapped('genre_id')
 
@@ -287,12 +287,12 @@ class Track(Model):
                 )
 
     def action_back(self) -> None:
-        for track in self:  #type:ignore
+        for track in self:  # type:ignore
             if track.state == 'done':
                 track.state = 'metadata'
 
     def action_next(self) -> None:
-        for track in self:  #type:ignore
+        for track in self:  # type:ignore
             match track.state:
                 case 'start':
                     track.state = 'uploaded'
@@ -308,7 +308,7 @@ class Track(Model):
                     track.state = 'done'
 
     def save_changes(self) -> None:
-        for track in self:  #type:ignore
+        for track in self:  # type:ignore
             if not (isinstance(track.file_path, str) and track.has_valid_path):
                 continue
 
@@ -318,7 +318,7 @@ class Track(Model):
             track.old_path = track.file_path
 
     def save_file(self) -> None:
-        for track in self:  #type:ignore
+        for track in self:  # type:ignore
             if not (isinstance(track.file, bytes) and track.has_valid_path):
                 continue
 
@@ -452,7 +452,7 @@ class Track(Model):
                 )
 
     def _update_fields(self) -> None:
-        for track in self:  #type:ignore
+        for track in self:  # type:ignore
             try:
                 metadata = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
 

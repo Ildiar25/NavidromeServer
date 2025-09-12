@@ -32,6 +32,8 @@ class GenreVals(TypedDict, total=False):
     name: str
     track_ids: Sequence[int]
     album_ids: Sequence[int]
+    track_amount: int
+    disk_amount: int
 
 
 class TrackVals(TypedDict, total=False):

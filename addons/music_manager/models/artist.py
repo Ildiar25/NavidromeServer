@@ -23,7 +23,7 @@ class Artist(Model):
 
     _name = 'music_manager.artist'
     _description = 'artist_table'
-    _order = 'is_favorite, name'
+    _order = 'is_favorite desc, name'
 
     # Basic fields
     birthdate = Date(string=_("Birthdate"))
