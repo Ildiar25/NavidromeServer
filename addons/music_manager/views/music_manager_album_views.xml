@@ -71,8 +71,8 @@
         </record>
 
         <!-- Searchbar -->
-        <record id="music_manager_album_searchbar" model="ir.ui.view">
-            <field name="name">music_manager.album.searchbar</field>
+        <record id="music_manager_album_view_searchbar" model="ir.ui.view">
+            <field name="name">music_manager.album.view.searchbar</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
                 <search string="Search">

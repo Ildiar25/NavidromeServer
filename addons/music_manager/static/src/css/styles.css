@@ -2,3 +2,13 @@
 .form_title {
     width: 100%;
 }
+
+.genre-form-title {
+    height: 250px;
+    background: url("/music_manager/static/src/img/form-bg.png") no-repeat top right;
+    background-size: 620px;
+}
+
+.big-title {
+    font-size: 45px;
+}

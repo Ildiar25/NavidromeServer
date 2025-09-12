@@ -6,5 +6,64 @@
             <field name="res_model">music_manager.genre</field>
             <field name="view_mode">tree,form</field>
         </record>
+
+        <!-- Tree View -->
+        <record id="music_manager_genre_view_tree" model="ir.ui.view">
+            <field name="name">music_manager.genre.view.tree</field>
+            <field name="model">music_manager.genre</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" string="Name"/>
+                    <field name="track_amount" string="Track amount"/>
+                    <field name="disk_amount" string="Disk amount"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="music_manager_genre_view_form" model="ir.ui.view">
+            <field name="name">music_manager.genre.view.form</field>
+            <field name="model">music_manager.genre</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="d-flex flex-column justify-content-between w-100 genre-form-title">
+                            <h1 class="big-title"><field name="name"/></h1>
+                            <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
+                        </div>
+                        <notebook>
+                            <page string="Albums">
+                                <field name="album_ids" readonly="True">
+                                    <tree>
+                                        <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}"/>
+                                        <field name="name" string="Title"/>
+                                        <field name="album_artist_id" string="Album artist"/>
+                                        <field name="track_amount" string="Track amount"/>
+                                        <field name="disk_amount" string="Disk amount" optional="hide"/>
+                                        <field name="genre_id" string="Genre"/>
+                                        <field name="year" string="Year"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Tracks">
+                                <field name="track_ids" readonly="True">
+                                    <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
+                                        <field name="track_no" string="Track no" optional="hide"/>
+                                        <field name="name" string="Title"/>
+                                        <field name="album_artist_id" string="Album artist"/>
+                                        <field name="album_id" string="Album"/>
+                                        <field name="year" string="Year"/>
+                                        <field name="genre_id" string="Genre"/>
+                                        <field name="duration" string="Duration"/>
+                                        <field name="is_saved" column_invisible="True"/>
+                                        <field name="is_deleted" column_invisible="True"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
     </data>
 </odoo>

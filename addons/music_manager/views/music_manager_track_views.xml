@@ -8,8 +8,8 @@
         </record>
 
         <!-- Tree view -->
-        <record id="music_manager_track_tree_view" model="ir.ui.view">
-            <field name="name">music_manager.track.tree</field>
+        <record id="music_manager_track_view_tree" model="ir.ui.view">
+            <field name="name">music_manager.track.view.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
                 <tree string="Songs" decoration-danger="is_deleted" decoration-warning="not is_saved">
@@ -31,8 +31,8 @@
         </record>
 
         <!-- Form view -->
-        <record id="music_manager_track_form_view" model="ir.ui.view">
-            <field name="name">music_manager.track.form</field>
+        <record id="music_manager_track_view_form" model="ir.ui.view">
+            <field name="name">music_manager.track.view.form</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
                 <form string="Track">
@@ -357,8 +357,8 @@
         </record>
 
         <!-- Searchbar -->
-        <record id="music_manager_track_searchbar" model="ir.ui.view">
-            <field name="name">music_manager.track.searchbar</field>
+        <record id="music_manager_track_view_searchbar" model="ir.ui.view">
+            <field name="name">music_manager.track.view.searchbar</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
                 <search string="Search">
