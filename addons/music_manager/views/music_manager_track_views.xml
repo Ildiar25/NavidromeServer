@@ -272,7 +272,7 @@
                                                         This app needs to have a valid path to add the song into the
                                                         library folder and we both actually know that condition is not
                                                         true. Check <b>artist name</b>, <b>album name</b>,
-                                                        <b>track number</b> or <b>song title</b>. All are necessary!
+                                                        <b>track number</b> and <b>track title</b>. All are necessary!
                                                     </p>
                                                 </div>
                                                 <div class="justify-content-center" invisible="not has_valid_path">

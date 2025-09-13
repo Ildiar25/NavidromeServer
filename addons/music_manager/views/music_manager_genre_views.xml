@@ -25,12 +25,13 @@
             <field name="name">music_manager.genre.view.form</field>
             <field name="model">music_manager.genre</field>
             <field name="arch" type="xml">
-                <form>
+                <form string="Genre">
                     <sheet>
                         <div class="d-flex flex-column justify-content-between w-100 genre-form-title">
                             <h1 class="big-title"><field name="name"/></h1>
                             <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
                         </div>
+                        <separator/>
                         <notebook>
                             <page string="Albums">
                                 <field name="album_ids" readonly="True">
