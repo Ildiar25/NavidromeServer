@@ -12,7 +12,7 @@ from odoo.models import Model
 from odoo.fields import Binary, Boolean, Char, Date, Integer, Many2many, Many2one, One2many
 
 from ..services.image_service import ImageToPNG
-from ..utils.custom_types import CustomMessage, ArtistVals
+from ..utils.custom_types import CustomWarningMessage, ArtistVals
 from ..utils.exceptions import ImageServiceError, MusicManagerError
 
 
@@ -24,10 +24,13 @@ class Artist(Model):
     _name = 'music_manager.artist'
     _description = 'artist_table'
     _order = 'is_favorite desc, name'
+    _sql_constraints = [
+        ('check_artist_name', 'UNIQUE(name)', _("The artist name must be unique.")),
+    ]
 
     # Basic fields
     birthdate = Date(string=_("Birthdate"))
-    name = Char(string=_("Name"))
+    name = Char(string=_("Name"), required=True)
     picture = Binary(string=_("Profile"))
     real_name = Char(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
     is_favorite = Boolean(string=_("Favorite"), default=False)
@@ -45,13 +48,13 @@ class Artist(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.model_create_multi
-    def create(self, list_vals: list[ArtistVals]):
+    def create(self, list_vals: list[ArtistVals]) -> 'Artist':
         for vals in list_vals:
             self._process_picture_image(vals)
 
         return super().create(list_vals)
 
-    def write(self, vals: ArtistVals):
+    def write(self, vals: ArtistVals) -> bool:
         self._process_picture_image(vals)
         return super().write(vals)
 
@@ -81,7 +84,7 @@ class Artist(Model):
                 artist.real_name = artist.name
 
     @api.onchange('picture')
-    def _validate_picture_image(self) -> CustomMessage | None:
+    def _validate_picture_image(self) -> CustomWarningMessage | None:
         for artist in self:
             if not (artist.picture and isinstance(artist.picture, (str, bytes))):
                 continue
@@ -105,6 +108,37 @@ class Artist(Model):
     def set_favorite(self) -> None:
         for artist in self:
             artist.is_favorite = not artist.is_favorite
+
+    def update_songs(self):
+        if not self.track_ids:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _("Music Manager says:"),
+                    'message': _("There are not any tracks to update!"),
+                    'type': 'info',
+                    'sticky': False,
+                }
+            }
+
+        for artist in self:  # type:ignore
+            if artist.track_ids:
+                for track in artist.track_ids:
+                    track.save_changes()
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _("Music Manager says:"),
+                    'message': _("All metadata tracks are been updated!"),
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+
+        return None
 
     @staticmethod
     def _process_picture_image(value: ArtistVals) -> None:

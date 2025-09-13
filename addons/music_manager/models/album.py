@@ -12,7 +12,7 @@ from odoo.models import Model
 from odoo.fields import Binary, Char, Integer, Many2one, One2many
 
 from ..services.image_service import ImageToPNG
-from ..utils.custom_types import CustomMessage, AlbumVals
+from ..utils.custom_types import CustomWarningMessage, AlbumVals
 from ..utils.exceptions import ImageServiceError, MusicManagerError
 
 
@@ -24,9 +24,12 @@ class Album(Model):
     _name = 'music_manager.album'
     _description = 'album_table'
     _order = 'name'
+    _sql_constraints = [
+        ('check_album_title', 'UNIQUE(name)', _("The album title must be unique.")),
+    ]
 
     # Basic fields
-    name = Char(string=_("Album title"))
+    name = Char(string=_("Album title"), required=True)
 
     # Relational fields
     album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
@@ -70,7 +73,7 @@ class Album(Model):
 
         return albums
 
-    def write(self, vals: AlbumVals) -> 'Album':
+    def write(self, vals: AlbumVals) -> bool:
         self._process_cover_image(vals)
 
         res = super().write(vals)
@@ -138,7 +141,7 @@ class Album(Model):
                 album.track_ids.write({'year': False})
 
     @api.onchange('cover')
-    def _validate_cover_image(self) -> CustomMessage | None:
+    def _validate_cover_image(self) -> CustomWarningMessage | None:
         for album in self:
             if not (album.cover and isinstance(album.cover, (str, bytes))):
                 continue
@@ -159,11 +162,36 @@ class Album(Model):
 
         return None
 
-    def update_songs(self) -> None:
-        for album in self:
+    def update_songs(self):
+        if not self.track_ids:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _("Music Manager says:"),
+                    'message': _("There are not any tracks to update!"),
+                    'type': 'info',
+                    'sticky': False,
+                }
+            }
+
+        for album in self:  # type:ignore
             if album.track_ids:
                 for track in album.track_ids:
                     track.save_changes()
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _("Music Manager says:"),
+                    'message': _("All metadata tracks are been updated!"),
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+
+        return None
 
     @staticmethod
     def _process_cover_image(value: AlbumVals) -> None:

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from typing import Final, Iterable, Optional, Self, Sequence
+from typing import Final, Iterable, Optional, Self, Sequence, Literal
 
 from odoo.addons.base.models.res_users import Users
 
 from .artist import Artist
 from .genre import Genre
 from .track import Track
-from ..utils.custom_types import AlbumVals, CustomMessage
+from ..utils.custom_types import AlbumVals, CustomWarningMessage, DisplayNotification
 
 
 class Album:
@@ -18,6 +18,7 @@ class Album:
     _name: Final[str]
     _description: str | None
     _order: str | None
+    _sql_constraints: list[tuple[str, str, str]] | None
     id: int
 
     name: str
@@ -36,7 +37,7 @@ class Album:
         :return: Created album records.
         """
 
-    def write(self, vals: AlbumVals) -> bool:
+    def write(self, vals: AlbumVals) -> Literal[True]:
         """Overrides 'write' method to update cover album & propagate to linked tracks, genre, or artist records.
         :param vals: Dictionary with album values to update.
         :return: Confirms updated album record.
@@ -83,14 +84,14 @@ class Album:
         :return: None
         """
 
-    def _validate_cover_image(self: Iterable[Self]) -> CustomMessage | None:
+    def _validate_cover_image(self: Iterable[Self]) -> CustomWarningMessage | None:
         """Checks cover image format. If image is WEBP format, clears the field `cover` and returns a warning message.
         :return: Warning Message (dict) | None
         """
 
-    def update_songs(self: Iterable[Self]) -> None:
+    def update_songs(self) -> DisplayNotification | None:
         """Update track metadata linked to this album. It calls to the `save_changes()` method for each track.
-        :return: None
+        :return: None | Dictionary with UI information
         """
 
     @staticmethod

@@ -18,7 +18,7 @@ from ..services.download_service import YTDLPAdapter, YoutubeDownload
 from ..services.file_service import FolderManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
-from ..utils.custom_types import CustomMessage, ReplaceItemCommand, TrackVals
+from ..utils.custom_types import CustomWarningMessage, ReplaceItemCommand, TrackVals
 from ..utils.exceptions import DownloadServiceError, ImageServiceError, MetadataServiceError, MusicManagerError
 
 
@@ -30,6 +30,9 @@ class Track(Model):
     _name = 'music_manager.track'
     _description = 'track_table'
     _order = 'album_name, disk_no, track_no'
+    _sql_constraints = [
+        ('check_track_title', 'UNIQUE(name)', _("The track title must be unique."))
+    ]
 
     # Basic fields
     cover = Binary(string=_("Cover"), attachment=True)
@@ -65,7 +68,7 @@ class Track(Model):
         inverse='_inverse_collection_value',
         default=False,
     )
-    display_artist_names = Char(string=_("Display artist name"), compute='_compute_display_artist_name', store=True)
+    display_artist_names = Char(string=_("Display artist name"), compute='_compute_display_artist_name', store=False)
     is_deleted = Boolean(string=_("Is deleted"), compute='_compute_file_is_deleted', store=False)
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
     old_path = Char(string=_("Old path"), copy=False, store=True)
@@ -90,7 +93,7 @@ class Track(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
-    def create(self, list_vals: list[TrackVals]):
+    def create(self, list_vals: list[TrackVals]) -> 'Track':
         for vals in list_vals:
             self._process_cover_image(vals)
 
@@ -105,7 +108,7 @@ class Track(Model):
 
         return tracks
 
-    def write(self, vals: TrackVals):
+    def write(self, vals: TrackVals) -> bool:
         self._process_cover_image(vals)
 
         res = super().write(vals)
@@ -118,7 +121,7 @@ class Track(Model):
 
         return res
 
-    def unlink(self):
+    def unlink(self) -> 'Track':
         file_paths = [(track.file_path, track.is_deleted) for track in self]  # type:ignore
         check_albums = self.mapped('album_id')
         check_genres = self.mapped('genre_id')
@@ -139,14 +142,11 @@ class Track(Model):
 
         return res
 
-    @api.depends('track_artist_ids')
+    @api.depends('track_artist_ids.name')
     def _compute_display_artist_name(self) -> None:
         for track in self:
-            if not track.track_artist_ids:
-                continue
-
             artist_names = track.track_artist_ids.mapped('name')
-            track.display_artist_names = ", ".join(artist_names if artist_names else "")
+            track.display_artist_names = ", ".join(artist_names) if artist_names else ""
 
     @api.depends('old_path')
     def _compute_file_is_deleted(self) -> None:
@@ -214,7 +214,7 @@ class Track(Model):
             track.has_valid_path = FolderManager().is_valid_path(track.file_path)
 
     @api.onchange('file')
-    def _validate_file_type(self) -> CustomMessage | None:
+    def _validate_file_type(self) -> CustomWarningMessage | None:
         for track in self:
             if not (track.file and isinstance(track.file, bytes)):
                 continue
@@ -234,7 +234,7 @@ class Track(Model):
         return None
 
     @api.onchange('url')
-    def _validate_url_path(self) -> CustomMessage | None:
+    def _validate_url_path(self) -> CustomWarningMessage | None:
         for track in self:
             if not (track.url and isinstance(track.url, str)):
                 continue
@@ -252,7 +252,7 @@ class Track(Model):
         return None
 
     @api.onchange('cover')
-    def _validate_cover_image(self) -> CustomMessage | None:
+    def _validate_cover_image(self) -> CustomWarningMessage | None:
         for track in self:
             if not (track.cover and isinstance(track.cover, (str, bytes))):
                 continue
@@ -307,15 +307,35 @@ class Track(Model):
                 case 'metadata':
                     track.state = 'done'
 
-    def save_changes(self) -> None:
+    def save_changes(self):
         for track in self:  # type:ignore
             if not (isinstance(track.file_path, str) and track.has_valid_path):
-                continue
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _("Music Manager says:"),
+                        'message': _("Some metadata has not been changed!"),
+                        'type': 'warning',
+                        'sticky': False,
+                    }
+                }
 
             path = FolderManager(track.file_path).create_folders()
             path.update_file_path(track.old_path)
             self._update_metadata(track.file_path)
             track.old_path = track.file_path
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Music Manager says:"),
+                'message': _("All metadata tracks are been updated!"),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
 
     def save_file(self) -> None:
         for track in self:  # type:ignore

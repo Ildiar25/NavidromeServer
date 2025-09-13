@@ -8,7 +8,7 @@ from odoo.addons.base.models.res_users import Users
 from .album import Album
 from .artist import Artist
 from .genre import Genre
-from ..utils.custom_types import CustomMessage, ReplaceItemCommand, TrackVals
+from ..utils.custom_types import CustomWarningMessage, DisplayNotification, ReplaceItemCommand, TrackVals
 
 
 class Track:
@@ -63,7 +63,7 @@ class Track:
         :return: Created track records.
         """
 
-    def write(self, vals: TrackVals) -> bool:
+    def write(self, vals: TrackVals) -> Literal[True]:
         """Overrides 'write' method to update cover track & syncronizes with album & artist ids.
         :param vals: Dictionary with track values to update.
         :return: Confirms updated album record.
@@ -111,19 +111,19 @@ class Track:
         :return: None
         """
 
-    def _validate_file_type(self: Iterable[Self]) -> CustomMessage | None:
+    def _validate_file_type(self: Iterable[Self]) -> CustomWarningMessage | None:
         """Checks if file has a valid format. If file is not MP3 format, clears the field `file`
         and returns a warning message.
         :return: Warning Message (dict) | None
         """
 
-    def _validate_url_path(self: Iterable[Self]) -> CustomMessage | None:
+    def _validate_url_path(self: Iterable[Self]) -> CustomWarningMessage | None:
         """Checks if url path has a valid pattern. If URL pattern does not belong to YouTube,
         clears the field `url_path` and returns a warning message.
         :return: Warning Message (dict) | None
         """
 
-    def _validate_cover_image(self: Iterable[Self]) -> CustomMessage | None:
+    def _validate_cover_image(self: Iterable[Self]) -> CustomWarningMessage | None:
         """Checks cover image format. If image is WEBP format, clears the field `cover` and returns a warning message.
         :return: Warning Message (dict) | None
         """
@@ -143,7 +143,7 @@ class Track:
         :return: None
         """
 
-    def save_changes(self) -> None:
+    def save_changes(self) -> DisplayNotification:
         """Updates track metadata & path file.
         :return: None
         """

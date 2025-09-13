@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-from typing import Final, Iterable, Self, Sequence
+from typing import Final, Iterable, Optional, Self, Sequence
 
 from .album import Album
 from .track import Track
+from ..utils.custom_types import DisplayNotification
 
 
 class Genre:
 
     _name: Final[str]
     _order: str | None
+    _sql_constraints: list[tuple[str, str, str]] | None
     id: int
 
     name: str
@@ -29,7 +31,7 @@ class Genre:
         :return: None
         """
 
-    def update_songs(self: Iterable[Self]) -> None:
+    def update_songs(self) -> DisplayNotification | None:
         """Update track metadata linked to this genre. It calls to the `save_changes()` method for each track.
-        :return: None
+        :return: None | Dictionary with UI information
         """

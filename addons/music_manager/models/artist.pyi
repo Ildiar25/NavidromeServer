@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from datetime import date
-from typing import Final, Iterable, Self, Sequence
+from typing import Final, Iterable, Self, Sequence, Literal
 
 from odoo.addons.base.models.res_users import Users
 
 from .album import Album
 from .track import Track
-from ..utils.custom_types import ArtistVals, CustomMessage
+from ..utils.custom_types import ArtistVals, DisplayNotification, CustomWarningMessage
 
 
 class Artist:
@@ -18,6 +18,7 @@ class Artist:
     _name: Final[str]
     _description: str | None
     _order: str | None
+    _sql_constraints: list[tuple[str, str, str]] | None
     id: int
 
     birthdate: date | None
@@ -38,7 +39,7 @@ class Artist:
         :return: Created artist records.
         """
 
-    def write(self, vals: ArtistVals) -> bool:
+    def write(self, vals: ArtistVals) -> Literal[True]:
         """Overrides 'write' method to process the profile picture if it exists before
         update an artist record.
         :param vals: Dictionary with artist values to update.
@@ -68,7 +69,7 @@ class Artist:
         :return: None
         """
 
-    def _validate_picture_image(self: Iterable[Self]) -> CustomMessage | None:
+    def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
         """Checks profile image format. If image is WEBP format, clears the field `picture`
         and returns a warning message.
         :return: Warning Message (dict) | None
@@ -77,6 +78,11 @@ class Artist:
     def set_favorite(self: Iterable[Self]) -> None:
         """Toggles the 'is_favorite' field for each artist.
         :return: None
+        """
+
+    def update_songs(self) -> DisplayNotification | None:
+        """Update track metadata linked to this artist. It calls to the `save_changes()` method for each track.
+        :return: None | Dictionary with UI information
         """
 
     @staticmethod

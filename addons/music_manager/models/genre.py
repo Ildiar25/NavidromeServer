@@ -9,9 +9,12 @@ class Genre(Model):
 
     _name = 'music_manager.genre'
     _order = 'name'
+    _sql_constraints = [
+        ('check_genre_name', 'UNIQUE(name)', _("The genre name must be unique.")),
+    ]
 
     # Default fields
-    name = Char(string=_("Name"))
+    name = Char(string=_("Name"), required=True)
 
     # Relationships
     track_ids = One2many(comodel_name='music_manager.track', inverse_name='genre_id', string=_("Song(s)"))
@@ -31,8 +34,33 @@ class Genre(Model):
         for genre in self:
             genre.disk_amount = len(genre.album_ids) if genre.album_ids else 0
 
-    def update_songs(self) -> None:
-        for genre in self:
+    def update_songs(self):
+        if not self.track_ids:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _("Music Manager says:"),
+                    'message': _("There are not any tracks to update!"),
+                    'type': 'info',
+                    'sticky': False,
+                }
+            }
+
+        for genre in self:  # type:ignore
             if genre.track_ids:
                 for track in genre.track_ids:
                     track.save_changes()
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _("Music Manager says:"),
+                    'message': _("All metadata tracks are been updated!"),
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+
+        return None
