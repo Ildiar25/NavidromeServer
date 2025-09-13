@@ -21,3 +21,4 @@
  - [x] **Implementar lógica que controle 'collection': Si se marca, various artists, si no que calcule según artista original.**
  - [ ] **Cuando se agrega un archivo desde un USB no se calcula su diración. Tener en cuenta al momento de desplegar el proyecto.**
  - [x] **Añadir documentacióny tipado de los modelos.**
+ - [ ] **Añadir textos informativos al actualizar los metadatos de las canciones.**
