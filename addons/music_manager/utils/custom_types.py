@@ -1,5 +1,6 @@
 from datetime import date
-from typing import Literal, Sequence, TypedDict
+from typing import Dict, List, Literal, Sequence, Tuple, TypeAlias, TypedDict
+
 
 
 class AlbumVals(TypedDict, total=False):
@@ -71,5 +72,6 @@ class TrackVals(TypedDict, total=False):
 
 
 # Custom types
-CustomMessage = dict[str, dict[str, str]]
-ReplaceItemCommand = tuple[int, int, list[int]]
+CustomWarningMessage: TypeAlias = Dict[str, Dict[str, str]]
+DisplayNotification: TypeAlias = Dict[str, str | Dict[str, str | bool]]
+ReplaceItemCommand: TypeAlias = Tuple[int, int, List[int]]
