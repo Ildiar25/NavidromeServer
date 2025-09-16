@@ -3,7 +3,6 @@ import base64
 import io
 import logging
 import os
-from typing import Any
 
 # noinspection PyPackageRequirements
 import magic
@@ -30,9 +29,6 @@ class Track(Model):
     _name = 'music_manager.track'
     _description = 'track_table'
     _order = 'album_name, disk_no, track_no'
-    _sql_constraints = [
-        ('check_track_title', 'UNIQUE(name)', _("The track title must be unique."))
-    ]
 
     # Basic fields
     cover = Binary(string=_("Cover"), attachment=True)
@@ -46,7 +42,7 @@ class Track(Model):
     year = Char(string=_("Year"))
 
     # Relational fields
-    album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
+    album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"), copy=False)
     album_id = Many2one(comodel_name='music_manager.album', string=_("Album"), ondelete='cascade')
     genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
     original_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
@@ -205,6 +201,23 @@ class Track(Model):
                     _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
                 )
 
+    @api.constrains('name', 'track_artist_ids')
+    def _check_track_name(self) -> None:
+        for current_track in self:  # type:ignore
+            if not current_track.track_artist_ids:
+                continue
+
+            existing_tracks = self.search([
+                ('name', '=', current_track.name),
+                ('id', '!=', current_track.id)
+            ])
+
+            for track in existing_tracks:  # type:ignore
+                if set(current_track.track_artist_ids.ids) == set(track.track_artist_ids.ids):
+                    raise ValidationError(
+                        _("\nThe track '%s' already exists with the same artist(s).", current_track.name)
+                    )
+
     @api.constrains('file_path')
     def _validate_file_path(self) -> None:
         for track in self:
@@ -331,7 +344,7 @@ class Track(Model):
             'tag': 'display_notification',
             'params': {
                 'title': _("Music Manager says:"),
-                'message': _("All metadata tracks are been updated!"),
+                'message': _("All metadata are been updated!"),
                 'type': 'success',
                 'sticky': False,
             }
@@ -514,7 +527,7 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
                 raise ValidationError(
-                    _("\nMetadataServiceError: Sorry, something went wrong while loading metadata file.")
+                    _("\nMetadataServiceError: Sorry, something went wrong while updating metadata fields.")
                 )
 
     def _update_metadata(self, path: str) -> None:
@@ -541,7 +554,7 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
                 raise ValidationError(
-                    _("\nMetadataServiceError: Sorry, something went wrong while loading metadata file.")
+                    _("\nMetadataServiceError: Sorry, something went wrong while updating metadata.")
                 )
 
     @staticmethod
@@ -550,7 +563,7 @@ class Track(Model):
         return f"{minutes:02}:{seconds:02}"
 
     @staticmethod
-    def _process_cover_image(value: dict[str, Any]) -> None:
+    def _process_cover_image(value: TrackVals) -> None:
         if 'cover' in value and value['cover']:
             try:
                 if isinstance(value['cover'], (str, bytes)):

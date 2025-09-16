@@ -9,7 +9,7 @@ import magic
 from odoo import _, api
 from odoo.exceptions import ValidationError
 from odoo.models import Model
-from odoo.fields import Binary, Boolean, Char, Date, Integer, Many2many, Many2one, One2many
+from odoo.fields import Binary, Boolean, Char, Date, Integer, Many2many, Many2one, One2many, Text
 
 from ..services.image_service import ImageToPNG
 from ..utils.custom_types import CustomWarningMessage, ArtistVals
@@ -32,7 +32,7 @@ class Artist(Model):
     birthdate = Date(string=_("Birthdate"))
     name = Char(string=_("Name"), required=True)
     picture = Binary(string=_("Profile"))
-    real_name = Char(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
+    real_name = Text(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
     is_favorite = Boolean(string=_("Favorite"), default=False)
 
     # Relational fields

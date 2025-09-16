@@ -24,6 +24,7 @@ class Track:
     env: Environment
     mapped: Callable[[str], Iterable[Self]]
     ensure_one: Callable[[], Self]
+    search: Callable[..., Self]
 
     cover: bytes | None
     disk_no: int | None
@@ -103,6 +104,11 @@ class Track:
 
     def _check_fields(self: Iterable[Self]) -> None:
         """Checks if there is at least one of both fields (`file` or `url`) before proceed.
+        :return: None
+        """
+
+    def _check_track_name(self) -> None:
+        """Checks track title & track artist to avoid duplicates.
         :return: None
         """
 

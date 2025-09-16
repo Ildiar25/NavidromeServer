@@ -8,6 +8,7 @@ from odoo.fields import Char, Integer, One2many
 class Genre(Model):
 
     _name = 'music_manager.genre'
+    _description = 'genre_table'
     _order = 'name'
     _sql_constraints = [
         ('check_genre_name', 'UNIQUE(name)', _("The genre name must be unique.")),

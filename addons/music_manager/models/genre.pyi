@@ -9,6 +9,7 @@ from ..utils.custom_types import DisplayNotification
 class Genre:
 
     _name: Final[str]
+    _description: str | None
     _order: str | None
     _sql_constraints: list[tuple[str, str, str]] | None
     id: int
