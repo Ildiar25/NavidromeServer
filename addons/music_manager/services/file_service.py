@@ -56,15 +56,29 @@ class FolderManager:
         return str(self.__root_folder / clean_artist / clean_album / f"{clean_track}_{clean_title}.{self.__extension}")
 
     def update_file_path(self, path: str) -> 'FolderManager':
-        old_path = Path(path)
-        old_path.replace(self.file_path)
+        try:
+            old_path = Path(path)
+            old_path.replace(self.file_path)
+
+        except FileNotFoundError as not_found:
+            _logger.error(f"Try to update file but not found: {not_found}")
+            return self
+
+        except PermissionError as no_permission:
+            _logger.error(f"Do not have permissions to delete files: {no_permission}")
+            return self
+
+        except Exception as unknown_error:
+            _logger.error(f"Something went wrong while deleting file: {unknown_error}")
+            return self
+
         self._clean_empty_dirs(old_path.parent)
         return self
 
     def delete_file(self, path: str) -> None:
-        file_path = Path(path)
-
         try:
+            file_path = Path(path)
+
             if not file_path.is_file():
                 return
 
