@@ -131,6 +131,8 @@ Puedes ver el archivo [`LICENSE`](LICENSE.txt) para más detalles.
  * **Navidrome**: GPL-3.0 (se utiliza como servicio externo, no modificado)
 
 ## Alguna pregunta?
+
+[![Static Badge](https://img.shields.io/badge/Env%C3%ADame_un_correo-%23EA4335?logo=gmail&logoColor=%23EA4335&labelColor=black)](mailto:j.pastor1591@gmail.com)
+
 [![Pregunta a DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ildiar25/NavidromeServer)
-[![Static Badge]([https://img.shields.io/badge/Envíame_un_correo-%23EA4335?logo=gmail&logoColor=%23EA4335&labelColor=black
-](mailto:j.pastor1591@gmail.com)
+
