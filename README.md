@@ -20,10 +20,13 @@ Y el proyecto completo aquí: <br/>
 	<ol>
 		<li><a href="#tecnologías">Tecnologías</a></li>
 		<ul>
-            <li><a href="#como-agregar-canciones">Tecnologías</a></li>
+            <li></li>
         </ul>
+		<li><a href="#%EF%B8%8F-guía-de-instalación">Guía de instalación</a></li>
 	</ol>
 </details>
+
+[Cómo agregar canciones](#cómo-agregar-canciones)
 
 ---
 
