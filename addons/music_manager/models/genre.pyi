@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Final, Iterable, Optional, Self, Sequence
+from typing import Final, Iterable, Self, Sequence
 
 from .album import Album
 from .track import Track

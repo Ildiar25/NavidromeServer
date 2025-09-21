@@ -336,18 +336,15 @@ Puedes ver el archivo [`LICENSE`](LICENSE.txt) para más detalles.
 
 ## Para más información
 
-<div style="center">
-    <img src="https://avatars.githubusercontent.com/u/147839908?v=4" alt="Avatar" hspace="20" vspace="10" style="width:100px; height:100px; border-radius:25%; float: left;">
-    <p>
-        ¡Hola! ¡Mi nombre es Joan y este es mi segundo gran proyecto! Estoy estudiando programación desde 2024, habiendo 
-        empezado con Python. Estoy más que contento de poder compartir con todos vosotros mi progreso y mis ideas. Espero 
-        que disfrutes del proyecto tanto como yo disfruté al programarlo y si quieres darme feedback, por favor, siéntete 
-        libre de hacerlo porque es muy importante para mí. ¡Nos vemos en el siguiente proyecto! <br/>
-        ¡Un abrazo!
-    </p>
+<div align="center">
+    <img src="https://avatars.githubusercontent.com/u/147839908?v=4" alt="Avatar" style="width:120px; height:120px; border-radius:25%;">
 </div>
 
-<br/>
+¡Hola! ¡Mi nombre es Joan y este es mi segundo gran proyecto! Estoy estudiando programación desde 2023, habiendo 
+empezado con Python. Estoy más que contento de poder compartir con todos vosotros mi progreso y mis ideas. Espero 
+que disfrutes del proyecto tanto como yo disfruté al programarlo y si quieres darme feedback, por favor, siéntete 
+libre de hacerlo porque es muy importante para mí. ¡Nos vemos en el siguiente proyecto! <br/>
+¡Un abrazo! <br/>
 <br/>
 Joan <br/>
 PD: ¡Te dejo enlaces de interés aquí abajo!
