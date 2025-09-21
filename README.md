@@ -18,15 +18,33 @@ Y el proyecto completo aquí: <br/>
 <details>
 	<summary>Índice</summary>
 	<ol>
-		<li><a href="#tecnologías">Tecnologías</a></li>
+		<li><a href="#-tecnologías">Tecnologías</a></li>
+		<li><a href="#-guía-de-usuario">Guía de Usuario</a></li>
 		<ul>
-            <li></li>
+            <li><a href="#cómo-agregar-canciones">Cómo agregar canciones</a></li>
+			<li><a href="#cómo-actualizar-los-metadatos">Cómo actualizar los metadatos</a></li>
+			<li><a href="#cómo-añadir-imágenes">Cómo añadir imágenes</a></li>
+			<li><a href="#cómo-actualizar-varias-canciones">Cómo actualizar varias canciones</a></li>
+			<li><a href="#cómo-eliminar-registros">Cómo eliminar registros</a></li>
         </ul>
 		<li><a href="#%EF%B8%8F-guía-de-instalación">Guía de instalación</a></li>
+		<ul>
+			<li><a href="#-crea-tu-carpeta-principal">Crea tu carpeta principal</a></li>
+			<li><a href="#-clona-el-repositorio">Clona el repositorio</a></li>
+			<li><a href="#-crea-el-entorno-virtual">Crea el entorno virtual</a></li>
+			<li><a href="#-instala-las-dependencias">Instala las dependencias</a></li>
+			<li><a href="#-configurar-y-levantar-los-contenedores-compatibilidad-linux-vs-windows">Levanta los contenedores</a></li>
+			<li><a href="#-accede-a-los-servicios">Accede a los servicios</a></li>
+		</ul>
+		<li><a href="#-estructura">Estructura</a></li>
+		<li><a href="#-música">Música</a></li>
+		<li><a href="#-reseteo-completo-desarrollo">Reseteo completo (desarrollo)</a></li>
+		<li><a href="#-módulo-music-manager">Módulo Music Manager</a></li>
+		<li><a href="#-licencia">Licencia</a></li>
+		<li><a href="#-créditos-y-licencias-de-dependencias">Créditos y licencias de dependencias</a></li>
+		<li><a href="#para-más-información">Para más información</a></li>
 	</ol>
 </details>
-
-[Cómo agregar canciones](#cómo-agregar-canciones)
 
 ---
 
@@ -157,7 +175,7 @@ source .venv/bin/activate
 
 ---
 
-### 🔹 Instalar dependencias
+### 🔹 Instala las dependencias
 
 Este proyecto utiliza sus propias dependencias que se pueden encontrar en el archivo `requirements.txt`. Los puedes 
 instalar automáticamente ejecutando el siguiente comando:
@@ -171,7 +189,7 @@ pip install -r requirements.txt
 
 ---
 
-### 🔹 Configurar y levantar los contenedores (Compatibilidad Linux vs. Windows)
+### 🔹 Configura y levanta los contenedores (Compatibilidad Linux vs. Windows)
 
 Para facilitar el despliegue del proyecto, se incluyen dos archivos que manejan el mismo según el sistema operativo. 
 Se puede encontrar un `Makefile` que muestra los comandos necesarios para **Linux** y un módulo de **PowerShell** 
@@ -227,7 +245,7 @@ Para ambos casos esto levantará:
 
 ---
 
-### 🔹 Acceso
+### 🔹 Accede a los servicios
 
 Una vez los contenedores estén operativos, se podrá acceder a los servicios gracias a la siguiente tabla:
 
