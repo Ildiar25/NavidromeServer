@@ -53,6 +53,7 @@ Este roadmap refleja la evolución del proyecto según los commits del repositor
 - Implementar tests automatizados.
 - Optimizar el rendimiento para colecciones grandes de música.
 - Preparar una versión beta pública.
+- Soporte Multilenguaje
 
 ---
 
@@ -90,3 +91,8 @@ Este roadmap refleja la evolución del proyecto según los commits del repositor
  - [ ] **Cuando se agrega un archivo desde un USB no se calcula su duración. Tener en cuenta al momento de desplegar el proyecto.**
  - [x] Añadir documentación y tipado de los modelos.
  - [x] Añadir textos informativos al actualizar los metadatos de las canciones.
+ - [ ] **Implementar multilenguaje.**
+   - [x] Inglés.
+   - [ ] **Francés.**
+   - [ ] **Español.**
+   - [ ] **Catalán.**
