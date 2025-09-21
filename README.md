@@ -33,7 +33,7 @@ Y el proyecto completo aquí: <br/>
 			<li><a href="#-clona-el-repositorio">Clona el repositorio</a></li>
 			<li><a href="#-crea-el-entorno-virtual">Crea el entorno virtual</a></li>
 			<li><a href="#-instala-las-dependencias">Instala las dependencias</a></li>
-			<li><a href="#-configurar-y-levantar-los-contenedores-compatibilidad-linux-vs-windows">Levanta los contenedores</a></li>
+			<li><a href="#-configura-y-levanta-los-contenedores-compatibilidad-linux-vs-windows">Levanta los contenedores</a></li>
 			<li><a href="#-accede-a-los-servicios">Accede a los servicios</a></li>
 		</ul>
 		<li><a href="#-estructura">Estructura</a></li>
