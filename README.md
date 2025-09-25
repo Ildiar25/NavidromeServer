@@ -8,7 +8,7 @@ Navidrome gestiona la reproducción y el streaming. <br/>
 Dicho módulo permite crear, editar y administrar tu catálogo musical directamente desde Odoo.
 
 Puedes ver el *roadmap* aquí: <br/>
-[![Static Badge](https://img.shields.io/badge/Music_Manager_(Roadmap)-FB9820?logo=maplibre&labelColor=black)](addons/music_manager/docs/roadmap.md)
+[![Static Badge](https://img.shields.io/badge/Music_Manager_(Roadmap)-FB9820?logo=maplibre&labelColor=black)](docs/ROADMAP.md)
 
 
 Y el proyecto completo aquí: <br/>
@@ -42,7 +42,7 @@ Y el proyecto completo aquí: <br/>
 		<li><a href="#-módulo-music-manager">Módulo Music Manager</a></li>
 		<li><a href="#-licencia">Licencia</a></li>
 		<li><a href="#-créditos-y-licencias-de-dependencias">Créditos y licencias de dependencias</a></li>
-		<li><a href="#para-más-información">Para más información</a></li>
+		<li><a href="#para-más-información">Contacto</a></li>
 	</ol>
 </details>
 
@@ -157,14 +157,13 @@ Esto ocurre porque **Windows** trae la ejecución de *Scripts* desactivada por d
 Puedes solucionar el problema abriendo el **PowerShell** de **Windows** en modo *Administrador* y ejecutando el
 siguiente comando:
 ```bash
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 ```
 
-> [!CAUTION]
-> Esta acción permitirá que cualquier script de **PowerShell** se ejecute, sin importar si ha sido firmado digitalmente 
-> o si no es de una fuente confiable. Esto es útil para desarrolladores o administradores que necesitan ejecutar 
-> scripts locales sin bloqueos, pero también puede ser un riesgo si ejecutas accidentalmente un script malicioso.
-> ¡Utilízalo solo bajo tu propio criterio!
+> [!NOTE]
+> Este comando establece la política de ejecución a 'Bypass' solo para la sesión actual de PowerShell 
+> (`-Scope Process`). Una vez que cierres la ventana, la configuración de seguridad volverá a la configuración 
+> global de tu sistema.
 
 Ahora ya puedes activar tu entorno virtual.
 
@@ -302,7 +301,7 @@ rm -rf ./data/*
 docker volume prune -f
 ```
 
-Y volver al punto de [configuración]().
+Y volver al punto de [configuración](#-configura-y-levanta-los-contenedores-compatibilidad-linux-vs-windows).
 
 <p align="right"><a href="#readme-top">Volver ⏫</a></p>
 
