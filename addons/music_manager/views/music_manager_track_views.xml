@@ -372,6 +372,7 @@
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
+                        <filter name="user_id" string="Owner" context="{'group_by': 'user_id'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                     </group>
