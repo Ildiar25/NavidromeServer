@@ -24,9 +24,6 @@ class Artist(Model):
     _name = 'music_manager.artist'
     _description = 'artist_table'
     _order = 'is_favorite desc, name'
-    _sql_constraints = [
-        ('check_artist_name', 'UNIQUE(name)', _("The artist name must be unique.")),
-    ]
 
     # Basic fields
     birthdate = Date(string=_("Birthdate"))
@@ -45,7 +42,7 @@ class Artist(Model):
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0, store=False)
 
     # Technical fields
-    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
+    # user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.model_create_multi
     def create(self, list_vals: list[ArtistVals]) -> 'Artist':

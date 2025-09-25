@@ -24,9 +24,6 @@ class Album(Model):
     _name = 'music_manager.album'
     _description = 'album_table'
     _order = 'name'
-    _sql_constraints = [
-        ('check_album_title', 'UNIQUE(name)', _("The album title must be unique.")),
-    ]
 
     # Basic fields
     name = Char(string=_("Album title"), required=True)

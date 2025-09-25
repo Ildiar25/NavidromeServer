@@ -201,15 +201,16 @@ class Track(Model):
                     _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
                 )
 
-    @api.constrains('name', 'track_artist_ids')
+    @api.constrains('name', 'track_artist_ids', 'user_id')
     def _check_track_name(self) -> None:
         for current_track in self:  # type:ignore
             if not current_track.track_artist_ids:
                 continue
 
             existing_tracks = self.search([
+                ('id', '!=', current_track.id),
                 ('name', '=', current_track.name),
-                ('id', '!=', current_track.id)
+                ('user_id', '=', current_track.user_id.id)
             ])
 
             for track in existing_tracks:  # type:ignore
