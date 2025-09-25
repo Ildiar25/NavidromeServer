@@ -35,11 +35,11 @@
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
         </record>
 
-        <record id="rule_music_manager_own_artists" model="ir.rule">
-            <field name="name">Music Manager: Own Artists</field>
-            <field name="model_id" ref="music_manager.model_music_manager_artist"/>
-            <field name="domain_force">[('user_id', '=', user.id)]</field>
-            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
-        </record>
+<!--        <record id="rule_music_manager_own_artists" model="ir.rule">-->
+<!--            <field name="name">Music Manager: Own Artists</field>-->
+<!--            <field name="model_id" ref="music_manager.model_music_manager_artist"/>-->
+<!--            <field name="domain_force">[('user_id', '=', user.id)]</field>-->
+<!--            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>-->
+<!--        </record>-->
     </data>
 </odoo>
