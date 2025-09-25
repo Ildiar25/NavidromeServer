@@ -10,8 +10,6 @@ archivo o la descarga del mismo) y guarda el archivo final de forma ordenada en 
 Puedes ver la lista de tareas aquí: <br/>
 [![Static Badge](https://img.shields.io/badge/Tareas_Pendientes-2684FC?logo=googletasks&labelColor=black)](docs/TODO.md)
 
-<!-- Tabla de contenido -->
-
 ---
 
 ## 🎯 Objetivo
@@ -39,8 +37,8 @@ Puedes descargarlos desde los siguientes enlaces:
 [![Static Badge](https://img.shields.io/badge/Descargar_Odoo-714B67?logo=odoo&labelColor=black)](https://www.odoo.com/documentation/17.0/developer/tutorials/setup_guide.html)
 
 > [!NOTE]
-> Solo sigue los dos primeros pasos si necesitas el módulo en otro proyecto. El proyecto principal ya se encarga de 
-> la correcta instalación del mismo.
+> Para instalar el módulo desde el proyecto **NavidromeServer**, sigue los pasos a partir de la 
+> [instalación del módulo](#-instalación-del-módulo).
 
 ### 🔹 Copia el módulo
 
@@ -68,7 +66,7 @@ Habilita el modo desarrollador en la página principal de **Odoo** para poder ac
 
 Al realizar este paso, la aplicación debería aparecer en la lista de aplicaciones que se pueden instalar.
 
-...
+![How to activate developer mode](docs/img/developer-mode.gif "Developer mode")
 
 ---
 
@@ -76,7 +74,7 @@ Al realizar este paso, la aplicación debería aparecer en la lista de aplicacio
 
 Busca la aplicación *Music Manager* y pulsa el botón **Activar**.
 
-...
+![How to activate the app](docs/img/activate-module.gif "Module activation")
 
 Como este módulo crea dos grupos específicos de Usuario, deberás ir a *'Settings'*, y en *'Manage Users'* asignar los 
 permisos a cada usuario.
@@ -92,7 +90,7 @@ permisos a cada usuario.
 
 > [!IMPORTANT]
 > Para poder ver el módulo activo, deberás asignar el grupo a tu usuario. ¡De lo contrario, **Music Manager** 
-> no se mostrará!
+> no se mostrará! Una vez asignes los roles a los usuarios, tan solo necesitarás refrescar la página.
 
 ...
 
@@ -163,8 +161,8 @@ Representa el género de una canción o álbum
 
 ## 📝 Licencia
 
-Este módulo está licenciado bajo la **GNU LGPL v3.0**. <br/>
-Puedes consultar el archivo [`LICENSE`](../../LICENSE.txt) para más información.
+Este módulo está protegido bajo la licencia **GNU LGPL v3.0**. <br/>
+Puedes consultar el archivo [LICENSE](../../LICENSE.txt) para más información.
 
 ---
 
