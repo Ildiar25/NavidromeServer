@@ -92,8 +92,6 @@ permisos a cada usuario.
 > Para poder ver el módulo activo, deberás asignar el grupo a tu usuario. ¡De lo contrario, **Music Manager** 
 > no se mostrará! Una vez asignes los roles a los usuarios, tan solo necesitarás refrescar la página.
 
-...
-
 <p align="right"><a href="#readme-top">Volver ⏫</a></p>
 
 ---

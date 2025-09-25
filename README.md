@@ -42,7 +42,7 @@ Y el proyecto completo aquí: <br/>
 		<li><a href="#-módulo-music-manager">Módulo Music Manager</a></li>
 		<li><a href="#-licencia">Licencia</a></li>
 		<li><a href="#-créditos-y-licencias-de-dependencias">Créditos y licencias de dependencias</a></li>
-		<li><a href="#para-más-información">Contacto</a></li>
+		<li><a href="#-contacto">Contacto</a></li>
 	</ol>
 </details>
 
@@ -278,7 +278,8 @@ La estructura principal del proyecto se puede observar en el siguiente árbol:
 ## 💿 Música
 
 > [!WARNING]
-> El directorio `./music` no debe ser modificado manualmente!
+> **¡NO MODIFICAR MANUALMENTE!** El directorio `./music` es un volumen de Docker gestionado exclusivamente por 
+> el módulo **Music Manager** de Odoo.
 
 Los datos agregados desde Odoo se almacenarán en el directorio compartido entre servicios llamado `music`. Este 
 directorio será escaneado por Navidrome cada hora para buscar cambios en el mismo y que queden reflejados en su base 
@@ -318,7 +319,7 @@ La descripción detallada del módulo `music_manager` está en su [README](addon
 ## 📝 Licencia
 
 Este proyecto está licenciado bajo la licencia **GNU LGPL v3.0**.
-Puedes ver el archivo [`LICENSE`](LICENSE.txt) para más detalles.
+Puedes ver el archivo [LICENSE](LICENSE.txt) para más detalles.
 
 <p align="right"><a href="#readme-top">Volver ⏫</a></p>
 
@@ -333,7 +334,7 @@ Puedes ver el archivo [`LICENSE`](LICENSE.txt) para más detalles.
 
 ---
 
-## Para más información
+## 💬 Contacto
 
 <div align="center">
     <img src="https://avatars.githubusercontent.com/u/147839908?v=4" alt="Avatar" style="width:120px; height:120px; border-radius:25%;">
