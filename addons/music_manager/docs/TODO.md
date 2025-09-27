@@ -8,6 +8,7 @@
 ### Modelos
 
  - [ ] **Añadir campo que almacene a extensión de archivo.**
+ - [ ] **Evitar la eliminación de los campos género o artista si el usuario no es Admin u ocultar el mismo si se elimina.**
 
 ### Servicios
 
