@@ -35,7 +35,7 @@
             <field name="name">music_manager.track.view.form</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <form string="Track">
+                <form string="Track" disable_autofocus="True">
                     <field name="state" string="" widget="statusbar"/>
                     <field name="is_deleted" invisible="True"/>
                     <sheet>
