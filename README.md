@@ -63,31 +63,58 @@ Y el proyecto completo aquí: <br/>
 
 ### Cómo agregar canciones
 
-...
+Para agregar una canción a la biblioteca, tan solo hay que subir el archivo en formato MP3 y seguir los pasos del 
+formulario. El propio módulo se encarga de guardar el archivo en la carpeta clave y de actualizar los metadatos.
+
+![How to upload a song](docs/img/upload-song.gif "Uploading new song")
+
+> [!NOTE]
+> Ten en cuenta que si no se pulsa en guardar, el registro permanecerá almacenado en tu base de datos pero la canción
+> no se almacenará en la carpeta music.
 
 ---
 
 ### Cómo actualizar los metadatos
 
-...
+Para actualizar los metadatos de una canción, simplemente hay que cambiar los datos de los campos necesarios y guardar
+los cambios. Una vez se comprueben los datos y estén actualizados, pulsa sobre el botón `Update Metadata`.
+
+![How to update metadata](docs/img/update-metadata.gif "Update Metadata")
 
 ---
 
 ### Cómo añadir imágenes
 
-...
+Para añadir una imagen, se debe eliminar la anterior (si se encuentra). Después, el servicio se encarga de convertir
+su formato y su tamaño al necesario.
+
+![How to update picture](docs/img/update-picture.gif "Upload picture")
+
+> [!IMPORTANT]
+> Esta versión del programa no acepta imágenes en formato WEBP por ahora.
 
 ---
 
 ### Cómo actualizar varias canciones
 
-...
+Para actualizar varias canciones a la vez, se recomienda hacerlo desde las pestañas _Albums_ (para modificar los
+metadatos de las canciones de un álbum en particular), _Artists_ (para modificar todas las canciones asociadas a un 
+artista) o _Genres_ (para actualizar todas las canciones asociadas a un género).
+
+![How to upload all tracks](docs/img/update-all-tracks.gif "Update all tracks")
 
 ---
 
 ### Cómo eliminar registros
 
-...
+Para eliminar registros, tan solo hace falta seleccionar los registros deseados y eliminarlos. El módulo se encarga de 
+comprobar si no hay más registros antes de eliminar el álbum asociado.
+
+![How to delete records](docs/img/delete-records.gif "Delete records")
+
+> [!IMPORTANT]
+> Los registros pertenecientes a _Artista_ y a _Género_ se mantendrán visibles, puesto que son registros compartidos
+> entre usuarios.
 
 <p align="right"><a href="#readme-top">Volver ⏫</a></p>
 
