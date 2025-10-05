@@ -38,3 +38,5 @@
    - [ ] **Francés.**
    - [ ] **Español.**
    - [ ] **Catalán.**
+ - [ ] **Cuando se elimine un registro (user general), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.**
+ - [ ] **Error al eliminar Genero y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.**
