@@ -16,6 +16,7 @@
                     <field name="name" string="Name"/>
                     <field name="track_amount" string="Track amount"/>
                     <field name="disk_amount" string="Disk amount"/>
+                    <field name="user_id" string="Added by"/>
                 </tree>
             </field>
         </record>
