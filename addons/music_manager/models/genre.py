@@ -2,7 +2,7 @@
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.models import Model
-from odoo.fields import Char, Integer, One2many
+from odoo.fields import Char, Integer, One2many, Many2one
 
 
 class Genre(Model):
@@ -24,6 +24,9 @@ class Genre(Model):
     # Computed fields
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
+
+    # Technical fields
+    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:

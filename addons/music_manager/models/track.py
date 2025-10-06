@@ -120,7 +120,6 @@ class Track(Model):
     def unlink(self) -> 'Track':
         file_paths = [(track.file_path, track.is_deleted) for track in self]  # type:ignore
         check_albums = self.mapped('album_id')
-        check_genres = self.mapped('genre_id')
 
         res = super().unlink()
 
@@ -128,13 +127,18 @@ class Track(Model):
             if not self.env['music_manager.track'].search([('album_id', '=', album.id)]):
                 album.unlink()
 
-        for genre in check_genres:
-            if not self.env['music_manager.track'].search([('genre_id', '=', genre.id)]):
-                genre.unlink()
+        is_admin = self.env.user.has_group('music_manager.group_music_manager_user_admin')
 
         for path, is_deleted in file_paths:
-            if not is_deleted and self.env.uid == 2:
-                FolderManager().delete_file(path)
+            if not is_deleted:
+                if is_admin:
+                    FolderManager().delete_file(path)
+
+                else:
+                    still_used = self.env['music_manager.track'].sudo().search_count([('file_path', '=', path)])
+
+                    if still_used == 0:
+                        FolderManager().delete_file(path)
 
         return res
 

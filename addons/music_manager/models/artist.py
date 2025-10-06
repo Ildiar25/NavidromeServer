@@ -42,7 +42,7 @@ class Artist(Model):
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0, store=False)
 
     # Technical fields
-    # user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
+    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.model_create_multi
     def create(self, list_vals: list[ArtistVals]) -> 'Artist':
