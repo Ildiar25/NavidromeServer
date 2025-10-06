@@ -7,7 +7,7 @@
 
 ### Modelos
 
- - [ ] **Añadir campo que almacene a extensión de archivo.**
+ - [ ] **Añadir campo que almacene la extensión del archivo.**
  - [ ] **Evitar la eliminación de los campos género o artista si el usuario no es Admin u ocultar el mismo si se elimina.**
 
 ### Servicios
@@ -40,3 +40,4 @@
    - [ ] **Catalán.**
  - [ ] **Cuando se elimine un registro (user general), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.**
  - [ ] **Error al eliminar Genero y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.**
+ - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
