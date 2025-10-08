@@ -62,6 +62,7 @@
                     <field name="is_favorite" column_invisible="True"/>
                     <button name="set_favorite" type="object" class="oe_stat_button" help="Set favorite" icon="fa-heart text-danger" invisible="is_favorite == False"/>
                     <button name="set_favorite" type="object" class="oe_stat_button" help="Set favorite" icon="fa-heart-o" invisible="is_favorite == True"/>
+                    <field name="user_id" string="Added by"/>
                 </tree>
             </field>
         </record>
