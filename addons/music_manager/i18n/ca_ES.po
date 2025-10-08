@@ -1,0 +1,1191 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* music_manager
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0-20250710\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-08 08:55+0000\n"
+"PO-Revision-Date: 2025-10-08 18:25+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Actually only MP3 files are allowed. Don't f*ck the system: %s"
+msgstr ""
+"\n"
+"Actualment sols es permeten fitxers MP3. No f*tis el sistema: %s"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"DownloadService Error: Sorry, something went wrong while validating URL."
+msgstr ""
+"\n"
+"DownloadService Error: Vaja, ha sorgit un problema al validar l'URL."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#, python-format
+msgid ""
+"\n"
+"I'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷"
+msgstr ""
+"\n"
+"Ho sento mooolt però, actualment el format WEBP no s'admet: %s. 🤷"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"I'm sooo sorry but, actually WEBP image format is not allowed: %s. 🤷"
+msgstr ""
+"\n"
+"Ho sento mooolt però, actualment el format WEBP no està permés: %s. 🤷"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"ImageServiceError: Sorry, something went wrong while processing cover image"
+msgstr ""
+"\n"
+"ImageServiceError: Vaja, ha sorgit un problema al processar l'imatge de portada"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Invalid YouTube URL or video is not accessible."
+msgstr ""
+"\n"
+"L'URL de YouTube és invàlid o no es pot accedir al video."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Invalid metadata founded on file."
+msgstr ""
+"\n"
+"S'han trobat metadades no vàlides al fitxer."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"MetadataServiceError: Sorry, something went wrong while updating metadata fields."
+msgstr ""
+"\n"
+"MetadataServiceError: Vaja, ha sorgit un problema mentre s'actualitzaven els camps de les metadades."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"MetadataServiceError: Sorry, something went wrong while updating metadata."
+msgstr ""
+"\n"
+"MetadataServiceError: Vaja, ha sorgit un problema mentre s'actualitzaven les metadades."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Must add an URL or upload a file to proceed."
+msgstr ""
+"\n"
+"Has d'afegir un adreça URL o pujar un fitxer per a continuar."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Only one field can be added at the same time. Please, delete one of them to continue."
+msgstr ""
+"\n"
+"Només es pot afegir un camp alhora. Si us plau, elimina un dels dos per a continuar."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Something went wrong while processing cover image: %s"
+msgstr ""
+"\n"
+"Ha sorgit un problema al processar l'imatge de portada: %s"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"The track '%s' already exists with the same artist(s)."
+msgstr ""
+"\n"
+"La cançó '%s' ja existeix amb el(s) mateix(os) artista(es)."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"The web address has to be valid and we both know it is not."
+msgstr ""
+"\n"
+"L'adreça web ha de ser una adreça vàlida i tots dos sabem que no és així."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#, python-format
+msgid ""
+"\n"
+"This artist picture has an invalid format: %s"
+msgstr ""
+"\n"
+"Aquesta foto de l'artista té un format invàlid: %s"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"This track cover has an invalid format: %s"
+msgstr ""
+"\n"
+"Aquesta portada per a la cançó té un format invàlid: %s"
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "<b>MP3 file</b>"
+msgstr "<b>Fitxer MP3</b>"
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid ""
+"<b>Metadata</b> is the hidden information embedded inside your\n"
+"                                                    music files, such as the title, artist, album, year, genre, and\n"
+"                                                    even cover images. These details help music players and libraries\n"
+"                                                    like <b>Navidrome</b> to display and organize your songs properly.\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    Here we show you what we found in your file!\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    <em>Review it carefully before moving forward!</em>"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "<b>YouTube URL</b>"
+msgstr "<b>URL de YouTube</b>"
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "<em>Now it's time! Just click the 'Save' button!</em>"
+msgstr "<em>Ara sí! Prem el botó 'Desa'!</em>"
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid ""
+"<em>There are some fields you need to check before save file!</em>\n"
+"                                                        <br/>\n"
+"                                                        This app needs to have a valid path to add the song into the\n"
+"                                                        library folder and we both actually know that condition is not\n"
+"                                                        true. Check <b>artist name</b>, <b>album name</b>,\n"
+"                                                        <b>track number</b> and <b>track title</b>. All are necessary!"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid ""
+"<em>This is your personal music manager!</em>\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    Here you can start building your collection by either uploading an\n"
+"                                                    <b>MP3 file</b> from your computer or adding a <b>YouTube link</b>\n"
+"                                                    to download and convert it automatically.\n"
+"                                                    <br/>\n"
+"                                                    Once your song is uploaded, you’ll be able to review and edit its\n"
+"                                                    metadata to keep everything tidy and organized.\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    <em>Let’s get started and bring some music to life!</em>"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
+msgid "<i class=\"fa fa-calendar me-2\" title=\"Calendar icon\"/>"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
+msgid "<i class=\"fa fa-dot-circle-o me-2\" title=\"Disk icon\"/>"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
+msgid "<i class=\"fa fa-music me-2\" title=\"Music icon\"/>"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
+msgid "<i class=\"fa fa-user me-2\" title=\"User icon\"/>"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Actual file metadata"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Add the file to Navidrome! 💿"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields.selection,name:music_manager.selection__music_manager_track__state__added
+#, python-format
+msgid "Added"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
+msgid "Added by"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.actions.act_window,name:music_manager.music_manager_album_view_action
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__tmp_album
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+#, python-format
+msgid "Album"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__album_amount
+#, python-format
+msgid "Album amount"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__album_artist_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_artist_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__tmp_album_artist
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+#, python-format
+msgid "Album artist"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_name
+msgid "Album name"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__name
+#, python-format
+msgid "Album title"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__album_ids
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__album_ids
+#, python-format
+msgid "Album(s)"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.ui.menu,name:music_manager.music_manager_music_menu_album_action
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+msgid "Albums"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "All metadata are been updated!"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#, python-format
+msgid "All metadata tracks are been updated!"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.actions.act_window,name:music_manager.music_manager_artist_view_action
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+msgid "Artist"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#, python-format
+msgid "Artist - %s"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+msgid "Artist(s)"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.ui.menu,name:music_manager.music_manager_music_menu_artist_action
+msgid "Artists"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Back"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__birthdate
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+#, python-format
+msgid "Birthdate"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "C'mon dude! 🙄"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Checking! 👀"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Confirm! ✅"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__cover
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__cover
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+#, python-format
+msgid "Cover"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__create_uid
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__create_uid
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__create_uid
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__create_date
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__create_date
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__create_date
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Disk"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__disk_amount
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__disk_amount
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
+#, python-format
+msgid "Disk amount"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__disk_no
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+#, python-format
+msgid "Disk no"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__display_name
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__display_name
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__display_name
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__display_artist_names
+#, python-format
+msgid "Display artist name"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__display_title
+#, python-format
+msgid "Display title"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields.selection,name:music_manager.selection__music_manager_track__state__done
+#, python-format
+msgid "Done"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+msgid "Duration"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__duration
+#, python-format
+msgid "Duration (min)"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#, python-format
+msgid "Edit artist"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Editing! 📝"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__is_favorite
+#, python-format
+msgid "Favorite"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__file
+#, python-format
+msgid "File"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__file_path
+#, python-format
+msgid "File path"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+msgid "Founded"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.actions.act_window,name:music_manager.music_manager_genre_view_action
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__genre_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__genre_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__tmp_genre
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+#, python-format
+msgid "Genre"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.ui.menu,name:music_manager.music_manager_music_menu_genre_action
+msgid "Genres"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+msgid "Group by"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+msgid "Group or artist name"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Here is the metadata founded! 🏷"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__id
+msgid "ID"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__is_deleted
+#, python-format
+msgid "Is deleted"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__is_saved
+#, python-format
+msgid "Is saved"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__write_uid
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__write_uid
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__write_uid
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__write_date
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__write_date
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__write_date
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Last checking"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "MP3 file"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+msgid "Members"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields.selection,name:music_manager.selection__music_manager_track__state__metadata
+#, python-format
+msgid "Metadata Editing"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.module.category,name:music_manager.module_category_music_manager
+#: model:ir.ui.menu,name:music_manager.music_manager_menu_root
+msgid "Music Manager"
+msgstr ""
+
+#. module: music_manager
+#: model:res.groups,name:music_manager.group_music_manager_user_admin
+msgid "Music Manager Admin"
+msgstr ""
+
+#. module: music_manager
+#: model:res.groups,name:music_manager.group_music_manager_user_general
+msgid "Music Manager User"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Music Manager says:"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "My gosh! 🙄"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.ui.menu,name:music_manager.music_manager_music_menu
+msgid "My music"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__name
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__name
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
+#, python-format
+msgid "Name"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "New metadata"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Next"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Nice! Your song is ready to be added onto your library! 😍"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+msgid "Not saved"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Not today! ❌"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__old_path
+#, python-format
+msgid "Old path"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__original_artist_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__tmp_original_artist
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#, python-format
+msgid "Original artist"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__user_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__user_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__user_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__user_id
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+#, python-format
+msgid "Owner"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__collection
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#, python-format
+msgid "Part of a collection"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+msgid "Path"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+msgid "Picture"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Polishing your track details! ✨"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__picture
+#, python-format
+msgid "Profile"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Ready to upload your next hit? 🎧"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__real_name
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+#, python-format
+msgid "Real name"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Save"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+msgid "Search"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+msgid "Set favorite"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Some metadata has not been changed!"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__track_ids
+#, python-format
+msgid "Song(s)"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.ui.menu,name:music_manager.music_manager_music_menu_song_action
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+msgid "Songs"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields.selection,name:music_manager.selection__music_manager_track__state__start
+#, python-format
+msgid "Start"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__state
+#, python-format
+msgid "State"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.constraint,message:music_manager.constraint_music_manager_genre_check_genre_name
+#, python-format
+msgid "The genre name must be unique."
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#, python-format
+msgid "There are not any tracks to update!"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__name
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+#, python-format
+msgid "Title"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+msgid "Total albums"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Total disk"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__total_disk
+#, python-format
+msgid "Total disk no"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Total track"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__total_track
+#, python-format
+msgid "Total track no"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+msgid "Total tracks"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.actions.act_window,name:music_manager.music_manager_track_view_action
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Track"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__track_amount
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__track_amount
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__track_amount
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
+#, python-format
+msgid "Track amount"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__tmp_artists
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__track_artist_ids
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#, python-format
+msgid "Track artist(s)"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__track_no
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+#, python-format
+msgid "Track no"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__track_ids
+#, python-format
+msgid "Track(s)"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__track_ids
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#, python-format
+msgid "Tracks"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__file_type
+#, python-format
+msgid "Type"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Update"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+msgid "Update metadata"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields.selection,name:music_manager.selection__music_manager_track__state__uploaded
+#, python-format
+msgid "Uploaded"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__has_valid_path
+#, python-format
+msgid "Valid path"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Wait a minute! 👮"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "Welcome! 🚀"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid ""
+"When you click on 'Save', the file will be moved to your main\n"
+"                                                    music folder used by <b>Navidrome</b>, and the updated metadata\n"
+"                                                    will be saved directly inside the audio file.\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    This way, your new track will immediately appear in your\n"
+"                                                    <b>Navidrome</b> library, ready to be streamed on your PC or\n"
+"                                                    mobile app. Once saved, you can still update metadata later from\n"
+"                                                    the main form if needed.\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    <em>Enjoy it!</em>"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__year
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__year
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
+#, python-format
+msgid "Year"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid ""
+"You can update or correct the metadata before saving your track\n"
+"                                                    on your <b>library</b>. This includes fixing typos, updating the\n"
+"                                                    artist name, adding the correct album, or choosing a better genre.\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    Keeping your metadata clean ensures that your music collection\n"
+"                                                    stays neat and easy to browse across all your devices,\n"
+"                                                    including <b>Substreamer</b> and <b>Navidrome</b>.\n"
+"                                                    <br/>\n"
+"                                                    <br/>\n"
+"                                                    <em>Let's do it!</em>"
+msgstr ""
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__url
+#, python-format
+msgid "Youtube URL"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model,name:music_manager.model_music_manager_album
+msgid "album_table"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model,name:music_manager.model_music_manager_artist
+msgid "artist_table"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+msgid "by album artist"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+msgid "by album title"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+msgid "by artist name"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
+msgid "by track title"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model,name:music_manager.model_music_manager_genre
+msgid "genre_table"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "https://"
+msgstr ""
+
+#. module: music_manager
+#: model:ir.model,name:music_manager.model_music_manager_track
+msgid "track_table"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "🎯 Edit song metadata"
+msgstr ""
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
+msgid "😱 MY GOSH! It is impossible to find this song. Add it again!"
+msgstr ""

@@ -8,7 +8,7 @@
 ### Modelos
 
  - [ ] **Añadir campo que almacene la extensión del archivo.**
- - [ ] **Evitar la eliminación de los campos género o artista si el usuario no es Admin u ocultar el mismo si se elimina.**
+ - [x] **Evitar la eliminación de los campos género o artista si el usuario no es Admin.**
 
 ### Servicios
 
@@ -24,20 +24,22 @@
 ### Módulo
 
  - [x] Preparar bien los diferentes pasos del formulario principal.
- - [x] Método al pulsar 'save' que devuelva las etiquetas añadidas al archivo y actualice los campos.
- - [x] Arreglar botón 'Save'. Constrains detecta que no hay URL ni archivo y da error.
+ - [x] Método al pulsar *'save'* que devuelva las etiquetas añadidas al archivo y actualice los campos.
+ - [x] Arreglar botón *'save'*. *'Constrains'* detecta que no hay URL ni archivo y da error.
  - [ ] **Crear test para revisar todos los servicios creados.**
  - [ ] **Por ahora no hay problemas de sobreescritura (comprobar al haber dos usuarios modificando el mismo archivo).**
- - [x] Qué ocurre si la canción se elimina y el registro se mantiene: Comprobación del 'path' una vez se abre el formulario.
- - [x] Implementar lógica que controle 'collection': Si se marca, various artists, si no que calcule según artista original.
+ - [x] Qué ocurre si la canción se elimina y el registro se mantiene: Comprobación del *'path'* una vez se abre el formulario.
+ - [x] Implementar lógica que controle *'collection'*: Si se marca, *'various artists'*, si no que calcule según artista original.
  - [ ] **Cuando se agrega un archivo desde un USB no se calcula su duración. Tener en cuenta al momento de desplegar el proyecto.**
  - [x] Añadir documentación y tipado de los modelos.
  - [x] Añadir textos informativos al actualizar los metadatos de las canciones.
  - [ ] **Implementar soporte multilenguaje.**
-   - [x] Inglés.
-   - [ ] **Francés.**
-   - [ ] **Español.**
-   - [ ] **Catalán.**
- - [ ] **Cuando se elimine un registro (user general), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.**
- - [ ] **Error al eliminar Genero y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.**
+   - [x] Inglés 100%.
+   - [ ] **Francés 0%.**
+   - [x] Español 100%.
+   - [ ] **Catalán 12%.**
+ - [ ] **Cuando se elimine un registro (*'user general'*), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.**
+ - [x] Error al eliminar Genero y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.
  - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
+ - [ ] **Crear menús y vistas de *'Albums'* y *'Artists'* según el tipo de usuario (*'General'*, *'Admin'*).**
+ - [ ] **Los artistas son globales y, por tanto, configurar si es favorito o no también. Eliminar dicho atributo y añadirlo a álbum.**
