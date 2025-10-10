@@ -9,7 +9,7 @@ import magic
 from odoo import _, api
 from odoo.exceptions import ValidationError
 from odoo.models import Model
-from odoo.fields import Binary, Boolean, Char, Date, Integer, Many2many, Many2one, One2many, Text
+from odoo.fields import Binary, Char, Date, Integer, Many2many, Many2one, One2many, Text
 
 from ..services.image_service import ImageToPNG
 from ..utils.custom_types import CustomWarningMessage, ArtistVals
@@ -23,14 +23,13 @@ class Artist(Model):
 
     _name = 'music_manager.artist'
     _description = 'artist_table'
-    _order = 'is_favorite desc, name'
+    _order = 'name'
 
     # Basic fields
     birthdate = Date(string=_("Birthdate"))
     name = Char(string=_("Name"), required=True)
     picture = Binary(string=_("Profile"))
     real_name = Text(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
-    is_favorite = Boolean(string=_("Favorite"), default=False)
 
     # Relational fields
     album_ids = One2many(comodel_name='music_manager.album', inverse_name='album_artist_id', string=_("Album(s)"))
@@ -101,10 +100,6 @@ class Artist(Model):
                 }
 
         return None
-
-    def set_favorite(self) -> None:
-        for artist in self:
-            artist.is_favorite = not artist.is_favorite
 
     def update_songs(self):
         if not self.track_ids:

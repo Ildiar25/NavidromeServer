@@ -14,12 +14,20 @@
             <field name="arch" type="xml">
                 <kanban>
                     <field name="name"/>
+                    <field name="is_favorite"/>
                     <template>
                         <t t-name="kanban-box">
-                            <div class="oe_kanban_global_click d-flex flex-column h-100" t-att-title="record.name.value">
-                                <div class="oe_kanban_image d-flex align-items-center justify-content-center" style="width: 100%; overflow: hidden; background: #f8f9fa;">
-                                    <field name="cover" string="" widget="image" style="max-height: 100%; max-width: 100%;" options="{'preview_image': 'cover'}"/>
+                            <div class="oe_kanban_global_click d-flex flex-column h-100" t-att-title="record.name.value" style="overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                                <div class="position-relative" style="width: 100%; overflow: hidden; background: #f8f9fa;">
+                                    <field name="cover" string="" widget="image" class="oe_kanban_image" options="{'preview_image': 'cover'}"/>
+                                    <button name="set_favorite" type="object" class="oe_stat_button btn-light position-absolute top-0 end-0 m-1 p-1 shadow-sm" style="z-index: 10;" help="Set favorite">
+                                        <i t-if="record.is_favorite.raw_value" class="fa fa-heart text-danger heartbeat"/>
+                                        <i t-else="" class="fa fa-heart-o"/>
+                                    </button>
                                 </div>
+<!--                                <div class="oe_kanban_image d-flex align-items-center justify-content-center" style="width: 100%; overflow: hidden; background: #f8f9fa;">-->
+<!--                                    <field name="cover" string="" widget="image" style="max-height: 100%; max-width: 100%;" options="{'preview_image': 'cover'}"/>-->
+<!--                                </div>-->
                             </div>
                         </t>
                     </template>

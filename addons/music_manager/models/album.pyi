@@ -22,6 +22,7 @@ class Album:
     id: int
 
     name: str
+    is_favorite: bool
     album_artist_id: Optional[Artist]
     genre_id: Optional[Genre]
     track_ids: Sequence[Track]
@@ -87,6 +88,11 @@ class Album:
     def _validate_cover_image(self: Iterable[Self]) -> CustomWarningMessage | None:
         """Checks cover image format. If image is WEBP format, clears the field `cover` and returns a warning message.
         :return: Warning Message (dict) | None
+        """
+
+    def set_favorite(self: Iterable[Self]) -> None:
+        """Toggles the 'is_favorite' field for each album.
+        :return: None
         """
 
     def update_songs(self) -> DisplayNotification | None:

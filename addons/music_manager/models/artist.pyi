@@ -25,7 +25,6 @@ class Artist:
     name: str
     picture: bytes | None
     real_name: str | None
-    is_favorite: bool
     album_ids: Sequence[Album]
     track_ids: Sequence[Track]
     album_amount: int
@@ -73,11 +72,6 @@ class Artist:
         """Checks profile image format. If image is WEBP format, clears the field `picture`
         and returns a warning message.
         :return: Warning Message (dict) | None
-        """
-
-    def set_favorite(self: Iterable[Self]) -> None:
-        """Toggles the 'is_favorite' field for each artist.
-        :return: None
         """
 
     def update_songs(self) -> DisplayNotification | None:

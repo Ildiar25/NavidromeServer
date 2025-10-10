@@ -9,7 +9,7 @@ import magic
 from odoo import _, api
 from odoo.exceptions import ValidationError
 from odoo.models import Model
-from odoo.fields import Binary, Char, Integer, Many2one, One2many
+from odoo.fields import Binary, Boolean, Char, Integer, Many2one, One2many
 
 from ..services.image_service import ImageToPNG
 from ..utils.custom_types import CustomWarningMessage, AlbumVals
@@ -23,10 +23,11 @@ class Album(Model):
 
     _name = 'music_manager.album'
     _description = 'album_table'
-    _order = 'name'
+    _order = 'is_favorite desc, name'
 
     # Basic fields
     name = Char(string=_("Album title"), required=True)
+    is_favorite = Boolean(string=_("Favorite"), default=False)
 
     # Relational fields
     album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
@@ -158,6 +159,10 @@ class Album(Model):
                 }
 
         return None
+
+    def set_favorite(self) -> None:
+        for album in self:
+            album.is_favorite = not album.is_favorite
 
     def update_songs(self):
         if not self.track_ids:

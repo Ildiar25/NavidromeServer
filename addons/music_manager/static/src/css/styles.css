@@ -12,3 +12,20 @@
 .big-title {
     font-size: 48px;
 }
+
+@keyframes heartbeat {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(1.2); }
+    40%  { transform: scale(0.9); }
+    60%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.heartbeat {
+    animation: heartbeat 1s 3;
+    transform-origin: center;
+}
+
+.heartbeat:hover {
+    animation-play-state: paused;
+}

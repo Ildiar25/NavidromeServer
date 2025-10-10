@@ -13,18 +13,11 @@
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
                 <kanban>
-                    <field name="is_favorite"/>
                     <template>
                         <t t-name="kanban-box">
-                            <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_global_click" style="box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                                 <div class="o_kanban_record_title d-flex flex-row justify-content-between">
                                     <field name="name"/>
-                                    <button name="set_favorite" type="object" class="oe_stat_button" help="Set favorite">
-                                        <div>
-                                            <i t-if="record.is_favorite.raw_value" class="fa fa-heart text-danger"/>
-                                            <i t-else="" class="fa fa-heart-o"/>
-                                        </div>
-                                    </button>
                                 </div>
                                 <hr class="mb-2"/>
                                 <div class="o_kanban_content d-flex flex-row">
@@ -59,9 +52,6 @@
                     <field name="birthdate" string="Birthdate" optional="hide"/>
                     <field name="track_amount" string="Total tracks"/>
                     <field name="album_amount" string="Total albums"/>
-                    <field name="is_favorite" column_invisible="True"/>
-                    <button name="set_favorite" type="object" class="oe_stat_button" help="Set favorite" icon="fa-heart text-danger" invisible="is_favorite == False"/>
-                    <button name="set_favorite" type="object" class="oe_stat_button" help="Set favorite" icon="fa-heart-o" invisible="is_favorite == True"/>
                     <field name="user_id" string="Added by"/>
                 </tree>
             </field>
