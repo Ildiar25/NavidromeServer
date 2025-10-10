@@ -37,7 +37,7 @@
    - [x] Inglés 100%.
    - [ ] **Francés 0%.**
    - [x] Español 100%.
-   - [ ] **Catalán 12%.**
+   - [x] Catalán 100%.
  - [ ] **Cuando se elimine un registro (*'user general'*), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.**
  - [x] Error al eliminar Genero y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.
  - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
