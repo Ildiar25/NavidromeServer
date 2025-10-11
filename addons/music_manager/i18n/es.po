@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 17.0-20250710\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-08 08:55+0000\n"
-"PO-Revision-Date: 2025-10-08 12:08+0200\n"
+"PO-Revision-Date: 2025-10-11 11:57+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -37,7 +37,7 @@ msgid ""
 "DownloadService Error: Sorry, something went wrong while validating URL."
 msgstr ""
 "\n"
-"DownloadService Error: Vaya, algo fue mal al validar la URL."
+"DownloadService Error: Lo siento, ocurrió un error al validar la URL."
 
 #. module: music_manager
 #. odoo-python
@@ -49,7 +49,7 @@ msgid ""
 "I'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷"
 msgstr ""
 "\n"
-"Lo siento muuucho pero, actualmente el formato WEBP no se admite: %s. 🤷"
+"Lo siento muuucho pero, actualmente el formato de imagen WEBP no se admite: %s. 🤷"
 
 #. module: music_manager
 #. odoo-python
@@ -60,7 +60,7 @@ msgid ""
 "I'm sooo sorry but, actually WEBP image format is not allowed: %s. 🤷"
 msgstr ""
 "\n"
-"Lo siento muuucho pero, actualmente el formato WEBP no está permitido: %s. 🤷"
+"Lo siento muuucho pero, actualmente el formato de imagen WEBP no está permitido: %s. 🤷"
 
 #. module: music_manager
 #. odoo-python
@@ -73,7 +73,7 @@ msgid ""
 "ImageServiceError: Sorry, something went wrong while processing cover image"
 msgstr ""
 "\n"
-"ImageServiceError: Vaya, algo fue mal al procesar la imagen de portada"
+"ImageServiceError: Lo siento, ocurrió un error al procesar la imagen de portada"
 
 #. module: music_manager
 #. odoo-python
@@ -84,7 +84,7 @@ msgid ""
 "Invalid YouTube URL or video is not accessible."
 msgstr ""
 "\n"
-"URL de YouTube inválida o el vídeo no es accesible."
+"Enlace de YouTube no válido o el vídeo no es accesible."
 
 #. module: music_manager
 #. odoo-python
@@ -95,7 +95,7 @@ msgid ""
 "Invalid metadata founded on file."
 msgstr ""
 "\n"
-"Se han encontrado metadatos inválidos en el archivo."
+"Se encontraron metadatos no válidos en el archivo."
 
 #. module: music_manager
 #. odoo-python
@@ -106,7 +106,7 @@ msgid ""
 "MetadataServiceError: Sorry, something went wrong while updating metadata fields."
 msgstr ""
 "\n"
-"MetadataServiceError: Vaya, algo fue mal al actualizar los campos de metadatos."
+"MetadataServiceError: Lo siento, ocurrió un error al actualizar los campos de metadatos."
 
 #. module: music_manager
 #. odoo-python
@@ -117,7 +117,7 @@ msgid ""
 "MetadataServiceError: Sorry, something went wrong while updating metadata."
 msgstr ""
 "\n"
-"MetadataServiceError: Vaya, algo fue mal al actualizar los metadatos."
+"MetadataServiceError: Lo siento, ocurrió un error al actualizar los metadatos."
 
 #. module: music_manager
 #. odoo-python
@@ -152,7 +152,7 @@ msgid ""
 "Something went wrong while processing cover image: %s"
 msgstr ""
 "\n"
-"Algo fue mal al procesar la imagen de portada: %s"
+"Ocurrió un error al procesar la imagen de portada: %s"
 
 #. module: music_manager
 #. odoo-python
@@ -163,7 +163,7 @@ msgid ""
 "The track '%s' already exists with the same artist(s)."
 msgstr ""
 "\n"
-"La canción '%s' ya existe con el / los mismo(s) artista(s)."
+"La canción '%s' ya existe con el/los mismo(s) artista(s)."
 
 #. module: music_manager
 #. odoo-python
@@ -185,7 +185,7 @@ msgid ""
 "This artist picture has an invalid format: %s"
 msgstr ""
 "\n"
-"Esta foto del artista tiene un formato inválido: %s"
+"La imagen del artista tiene un formato inválido: %s"
 
 #. module: music_manager
 #. odoo-python
@@ -197,7 +197,7 @@ msgid ""
 "This track cover has an invalid format: %s"
 msgstr ""
 "\n"
-"Esta portada para la canción tiene un formato inválido: %s"
+"La imagen de portada para la canción tiene un formato no válido: %s"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -218,16 +218,16 @@ msgid ""
 "                                                    <br/>\n"
 "                                                    <em>Review it carefully before moving forward!</em>"
 msgstr ""
-"Los <b>metadatos</b> son la información añadida dentro de tus\n"
-"                                                    archivos musicales, como son el título, el artista, el álbum, el año, el género, e\n"
-"                                                    incluso las imágenes de portada. Estos datos ayudan a los reproductores de música y a las librerías\n"
-"                                                    como <b>Navidrome</b> a mostrar y organizar tus canciones de forma correcta.\n"
+"Los <b>metadatos</b> son la información oculta incrustada en sus\n"
+"                                                    archivos de música, como son el título, el artista, el álbum, el año, el género, e\n"
+"                                                    incluso la imagen de portada. Estos detalles ayudan a reproductores y librerías\n"
+"                                                    (como <b>Navidrome</b>) a mostrar y organizar tus canciones correctamente.\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
 "                                                    ¡Aquí está la información encontrada en tu archivo!\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
-"                                                    <em>Revísala cuidadosamente antes de continuar!</em>"
+"                                                    <em>¡Revísala cuidadosamente antes de continuar!</em>"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -249,12 +249,12 @@ msgid ""
 "                                                        true. Check <b>artist name</b>, <b>album name</b>,\n"
 "                                                        <b>track number</b> and <b>track title</b>. All are necessary!"
 msgstr ""
-"<em>¡Hay algunos campos que necesitas revisar antes de guardar el archivo!</em>\n"
+"<em>¡Hay algunos campos que debes revisar antes de guardar el archivo!</em>\n"
 "                                                        <br/>\n"
-"                                                        Esta aplicación necesita tener una dirección válida para guardar la canción en el\n"
+"                                                        Esta aplicación necesita tener una ruta válida para añadir la canción al\n"
 "                                                        directorio de la librería y ambos sabemos que esa condición no se cumple.\n"
 "                                                        Revisa el <b>nombre del artista</b>, el <b>título del álbum</b>,\n"
-"                                                        el <b>número de pista</b> y el <b>título de la canción</b>. ¡Todos son necesarios!"
+"                                                        el <b>número de pista</b> y el <b>título de la canción</b>. ¡Todos son obligatorios!"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -275,12 +275,12 @@ msgstr ""
 "<em>¡Este es tu gestor de música personal!</em>\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
-"                                                    Aquí puedes empezar tu colección de música subiendo un\n"
-"                                                    <b>archivo MP3</b> desde tu ordenador o añadiendo un <b>enlace de YouTube</b>\n"
-"                                                    para descargar y convertir la canción automáticamente.\n"
+"                                                    Aquí puedes comenzar a construir tu colección musical subiendo un\n"
+"                                                    <b>archivo MP3</b> desde tu equipo o añadiendo un <b>enlace de YouTube</b>\n"
+"                                                    para descargarlo y convertirlo automáticamente.\n"
 "                                                    <br/>\n"
-"                                                    Una vez tu canción esté subida, podrás revisar y editar sus\n"
-"                                                    metadatos para mantener tu biblioteca limpia y organizada.\n"
+"                                                    Una vez subida la canción, podrás revisar y editar sus\n"
+"                                                    metadatos para mantener todo ordenado y organizado.\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
 "                                                    <em>¡Empecemos añadiendo un par de canciones!</em>"
@@ -313,7 +313,7 @@ msgstr "Metadatos del archivo actual"
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Add the file to Navidrome! 💿"
-msgstr "¡Añade tu archivo a Navidrome! 💿"
+msgstr "¡Añade el archivo a Navidrome! 💿"
 
 #. module: music_manager
 #. odoo-python
@@ -372,7 +372,7 @@ msgstr "Artista del álbum"
 #. module: music_manager
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_name
 msgid "Album name"
-msgstr "Título del álbum"
+msgstr "Nombre del álbum"
 
 #. module: music_manager
 #. odoo-python
@@ -450,7 +450,7 @@ msgstr "Atrás"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
 #, python-format
 msgid "Birthdate"
-msgstr "Cumpleaños"
+msgstr "Fecha de nacimiento"
 
 #. module: music_manager
 #. odoo-python
@@ -462,7 +462,7 @@ msgstr "Vamos tío! 🙄"
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Checking! 👀"
-msgstr "¡Revisión! 👀"
+msgstr "¡Revisando! 👀"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -496,7 +496,7 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__create_date
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__create_date
 msgid "Created on"
-msgstr "Creado el día"
+msgstr "Fecha de creación"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -531,7 +531,7 @@ msgstr "Número de disco"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__display_name
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__display_name
 msgid "Display Name"
-msgstr "Mostrar nombre"
+msgstr "Nombre a mostrar"
 
 #. module: music_manager
 #. odoo-python
@@ -539,7 +539,7 @@ msgstr "Mostrar nombre"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__display_artist_names
 #, python-format
 msgid "Display artist name"
-msgstr "Mostrar nombre de artista"
+msgstr "Nombre de artista a mostrar"
 
 #. module: music_manager
 #. odoo-python
@@ -547,7 +547,7 @@ msgstr "Mostrar nombre de artista"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__display_title
 #, python-format
 msgid "Display title"
-msgstr "Mostrar título"
+msgstr "Título a mostrar"
 
 #. module: music_manager
 #. odoo-python
@@ -555,7 +555,7 @@ msgstr "Mostrar título"
 #: model:ir.model.fields.selection,name:music_manager.selection__music_manager_track__state__done
 #, python-format
 msgid "Done"
-msgstr "Listo"
+msgstr "Completado"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
@@ -584,7 +584,7 @@ msgstr "Editar artista"
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Editing! 📝"
-msgstr "¡Editando! 📝"
+msgstr "¡Edición! 📝"
 
 #. module: music_manager
 #. odoo-python
@@ -608,12 +608,12 @@ msgstr "Archivo"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__file_path
 #, python-format
 msgid "File path"
-msgstr "Directorio del archivo"
+msgstr "Ruta de archivo"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
 msgid "Founded"
-msgstr "Fundado"
+msgstr "Fecha de fundación"
 
 #. module: music_manager
 #. odoo-python
@@ -642,12 +642,12 @@ msgstr "Géneros"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 msgid "Group by"
-msgstr "Agrupado por"
+msgstr "Agrupar por"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
 msgid "Group or artist name"
-msgstr "Nombre del grupo o del artista"
+msgstr "Nombre del grupo o artista"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -668,7 +668,7 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__is_deleted
 #, python-format
 msgid "Is deleted"
-msgstr "Está borrado"
+msgstr "Eliminado"
 
 #. module: music_manager
 #. odoo-python
@@ -676,7 +676,7 @@ msgstr "Está borrado"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__is_saved
 #, python-format
 msgid "Is saved"
-msgstr "Está guardado"
+msgstr "Guardado"
 
 #. module: music_manager
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_album__write_uid
@@ -684,7 +684,7 @@ msgstr "Está guardado"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__write_uid
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__write_uid
 msgid "Last Updated by"
-msgstr "Última actualización por"
+msgstr "Actualizado por"
 
 #. module: music_manager
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_album__write_date
@@ -692,7 +692,7 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__write_date
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__write_date
 msgid "Last Updated on"
-msgstr "Última actualización el día"
+msgstr "Fecha de la última actualización"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -726,12 +726,12 @@ msgstr "Music Manager"
 #. module: music_manager
 #: model:res.groups,name:music_manager.group_music_manager_user_admin
 msgid "Music Manager Admin"
-msgstr "Music Manager Admin"
+msgstr "Administrador de Music Manager"
 
 #. module: music_manager
 #: model:res.groups,name:music_manager.group_music_manager_user_general
 msgid "Music Manager User"
-msgstr "Music Manager User"
+msgstr "Usuario de Music Manager"
 
 #. module: music_manager
 #. odoo-python
@@ -778,12 +778,12 @@ msgstr "Siguiente"
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Nice! Your song is ready to be added onto your library! 😍"
-msgstr "¡Genial! ¡Tu canción está lista para agregarla a la biblioteca! 😍"
+msgstr "¡Genial! ¡Tu canción está lista para añadirla a tu biblioteca! 😍"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 msgid "Not saved"
-msgstr "Sin guardar"
+msgstr "No guardado"
 
 #. module: music_manager
 #. odoo-python
@@ -800,7 +800,7 @@ msgstr "¡Va a ser que no! ❌"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__old_path
 #, python-format
 msgid "Old path"
-msgstr "Directorio anterior"
+msgstr "Ruta anterior"
 
 #. module: music_manager
 #. odoo-python
@@ -840,17 +840,17 @@ msgstr "Parte de una colección"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
 msgid "Path"
-msgstr "Directorio"
+msgstr "Ruta"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
 msgid "Picture"
-msgstr "Foto"
+msgstr "Imagen"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Polishing your track details! ✨"
-msgstr "¡Puliendo los detalles de la canción! ✨"
+msgstr "¡Ajustando los detalles de tu canción! ✨"
 
 #. module: music_manager
 #. odoo-python
@@ -889,14 +889,14 @@ msgstr "Buscar"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
 msgid "Set favorite"
-msgstr "A favoritos"
+msgstr "Marcar como favorito"
 
 #. module: music_manager
 #. odoo-python
 #: code:addons/music_manager/models/track.py:0
 #, python-format
 msgid "Some metadata has not been changed!"
-msgstr "¡Algunos metadatos no se han actualizado!"
+msgstr "¡Algunos metadatos no han sido modificados!"
 
 #. module: music_manager
 #. odoo-python
@@ -975,7 +975,7 @@ msgstr "Discos totales"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__total_disk
 #, python-format
 msgid "Total disk no"
-msgstr "Número de discos totales"
+msgstr "Número total de discos"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -988,7 +988,7 @@ msgstr "Canciones totales"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__total_track
 #, python-format
 msgid "Total track no"
-msgstr "Número de canciones totales"
+msgstr "Número total de canciones"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
@@ -1082,7 +1082,7 @@ msgstr "Actualizar metadatos"
 #: model:ir.model.fields.selection,name:music_manager.selection__music_manager_track__state__uploaded
 #, python-format
 msgid "Uploaded"
-msgstr "Subida"
+msgstr "Subido"
 
 #. module: music_manager
 #. odoo-python
@@ -1090,7 +1090,7 @@ msgstr "Subida"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__has_valid_path
 #, python-format
 msgid "Valid path"
-msgstr "Directorio válido"
+msgstr "Ruta válida"
 
 #. module: music_manager
 #. odoo-python
@@ -1102,7 +1102,7 @@ msgstr "¡Un momento! 👮"
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Welcome! 🚀"
-msgstr "Bienvenido! 🚀"
+msgstr "Bienvenido/a! 🚀"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -1120,15 +1120,15 @@ msgid ""
 "                                                    <br/>\n"
 "                                                    <em>Enjoy it!</em>"
 msgstr ""
-"Cuando pulses en 'Guardar', el archivo se almacenará en el directorio\n"
-"                                                    'music' principal que usa <b>Navidrome</b>, y sus metadatos\n"
-"                                                    serán actualizados.\n"
+"Al hacer clic en 'Guardar', el archivo se moverá a la carpeta principal\n"
+"                                                    'music' utilizada por <b>Navidrome</b>, y los metadatos actualizados\n"
+"                                                    se guardarán directamente dentro del archivo de audio.\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
-"                                                    De este modo, tu nueva canción aparecerá en la librería de\n"
-"                                                    <b>Navidrome</b>, lista para ser retransmitida en tu PC o\n"
-"                                                    en tu aplicación móvil. Una vez guardada, puedes seguir actualizando sus metadatos desde\n"
-"                                                    el formulario principal.\n"
+"                                                    De esta manera, tu nueva canción aparecerá en la librería de\n"
+"                                                    <b>Navidrome</b>, lista para ser reproducida en tu equipo o\n"
+"                                                    tu aplicación móvil. Una vez guardada, todavía podrás actualizar los metadatos\n"
+"                                                    desde el formulario principal.\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
 "                                                    <em>¡A disfrutar!</em>"
@@ -1165,13 +1165,13 @@ msgid ""
 "                                                    <br/>\n"
 "                                                    <em>Let's do it!</em>"
 msgstr ""
-"Puedes actualizar o corregir los metadatos después de guardar la canción\n"
-"                                                    en tu <b>librería</b>. Esto incluye la corrección de errores tipográficos, actualizar\n"
-"                                                    el nombre del artista, añadir un álbum correcto, o elegir un género mejor.\n"
+"Puedes actualizar o corregir los metadatos antes de guardar el archivo\n"
+"                                                    en la <b>biblioteca</b>. Esto incluye la corrección de errores tipográficos, actualizar\n"
+"                                                    el nombre del artista, añadir el álbum correcto, o elegir un mejor género.\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
-"                                                    Al mantener los metadatos limpios aseguramos que tu colección musical\n"
-"                                                    se mantenga organizada y facilita su búsqueda en los diferentes clientes,\n"
+"                                                    Mantener sus metadatos limpios asegura que tu colección de música\n"
+"                                                    se mantenga organizada y fácil de explorar en todos sus dispositivos,\n"
 "                                                    incluyendo <b>Substreamer</b> y <b>Navidrome</b>.\n"
 "                                                    <br/>\n"
 "                                                    <br/>\n"
@@ -1204,17 +1204,17 @@ msgstr "por artista del álbum"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 msgid "by album title"
-msgstr "por el título del álbum"
+msgstr "por título del álbum"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 msgid "by artist name"
-msgstr "por el nombre de artista"
+msgstr "por nombre de artista"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 msgid "by track title"
-msgstr "por el título de la canción"
+msgstr "por título de canción"
 
 #. module: music_manager
 #: model:ir.model,name:music_manager.model_music_manager_genre
@@ -1234,9 +1234,9 @@ msgstr "track_table"
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "🎯 Edit song metadata"
-msgstr "🎯 Editar los metadatos de la canción"
+msgstr "🎯 Edición de metadatos por canción"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "😱 MY GOSH! It is impossible to find this song. Add it again!"
-msgstr "😱 ¡VENGA YA! Es imposible encontrar esta canción. ¡Añádela de nuevo!"
+msgstr "😱 ¡VENGA YA! Es imposible encontrar este archivo. ¡Añádelo de nuevo!"
