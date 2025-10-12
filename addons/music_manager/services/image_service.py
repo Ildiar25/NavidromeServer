@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 from PIL import Image, UnidentifiedImageError
 
-from ..utils.exceptions import ImageServiceError, MusicManagerError
+from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
 
 
 _logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class ImageToPNG(ImageFile):
             return buffer.read()
 
         if not output_path.lower().endswith('.png'):
-            raise ImageServiceError("Image must have PNG extension")
+            raise InvalidImageFormatError("Image must have PNG extension")
 
         try:
             self.__img.save(output_path)
@@ -65,7 +65,7 @@ class ImageToPNG(ImageFile):
 
         except (PermissionError, FileExistsError) as not_allowed:
             _logger.error(f"File already exists or no permission to write file: {not_allowed}")
-            raise ImageServiceError(not_allowed)
+            raise ImagePersistenceError(not_allowed)
 
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while saving image: {unknown_error}")
@@ -78,7 +78,7 @@ class ImageToPNG(ImageFile):
 
         except UnidentifiedImageError as corrupt_file:
             _logger.error(f"Failed to open image (invalid format or corrupted): {corrupt_file}")
-            raise ImageServiceError(corrupt_file)
+            raise InvalidImageFormatError(corrupt_file)
 
         except OSError as system_error:
             _logger.error(f"An OS error ocurred while reading image: {system_error}")

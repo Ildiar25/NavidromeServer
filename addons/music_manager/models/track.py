@@ -18,7 +18,13 @@ from ..services.file_service import FolderManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
 from ..utils.custom_types import CustomWarningMessage, ReplaceItemCommand, TrackVals
-from ..utils.exceptions import DownloadServiceError, ImageServiceError, MetadataServiceError, MusicManagerError
+from ..utils.exceptions import (
+    DownloadServiceError,
+    ImagePersistenceError,
+    InvalidImageFormatError,
+    MetadataServiceError,
+    MusicManagerError
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -581,12 +587,18 @@ class Track(Model):
                     cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=350, height=350).build()
                     value['cover'] = base64.b64encode(cover)
 
-            except ImageServiceError as service_error:
-                _logger.error(f"Failed to process cover image: {service_error}")
-                raise ValidationError(_("\nSomething went wrong while processing cover image: %s", service_error))
+            except InvalidImageFormatError as format_error:
+                _logger.error(f"Image has an invalid format or file is corrupt: {format_error}.")
+                raise ValidationError(_("\nThe uploaded file has an invalid format or is corrupt."))
+
+            except ImagePersistenceError as service_error:
+                _logger.error(f"Failed to process cover image: {service_error}.")
+                raise ValidationError(
+                    _("\nAn internal issue ocurred while processing the image. Please, try a different file.")
+                )
 
             except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing image: {unknown_error}")
+                _logger.error(f"Unexpected error while processing image: {unknown_error}.")
                 raise ValidationError(
-                    _("\nImageServiceError: Sorry, something went wrong while processing cover image")
+                    _("\nImageServiceError: Sorry, something went wrong while processing cover image.")
                 )

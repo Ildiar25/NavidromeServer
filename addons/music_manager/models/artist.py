@@ -9,12 +9,11 @@ import magic
 from odoo import _, api
 from odoo.exceptions import ValidationError
 from odoo.models import Model
-from odoo.fields import Binary, Char, Date, Integer, Many2many, Many2one, One2many, Text
+from odoo.fields import Binary, Boolean, Char, Date, Integer, Many2many, Many2one, One2many, Text
 
 from ..services.image_service import ImageToPNG
 from ..utils.custom_types import CustomWarningMessage, ArtistVals
-from ..utils.exceptions import ImageServiceError, MusicManagerError
-
+from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
 
 _logger = logging.getLogger(__name__)
 
@@ -23,7 +22,7 @@ class Artist(Model):
 
     _name = 'music_manager.artist'
     _description = 'artist_table'
-    _order = 'name'
+    _order = 'to_delete, name'
 
     # Basic fields
     birthdate = Date(string=_("Birthdate"))
@@ -146,12 +145,18 @@ class Artist(Model):
                     picture = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=250, height=250).build()
                     value['picture'] = base64.b64encode(picture)
 
-            except ImageServiceError as service_error:
-                _logger.error(f"Failed to process cover image: {service_error}")
-                raise ValidationError(_("\nSomething went wrong while processing cover image: %s", service_error))
+            except InvalidImageFormatError as format_error:
+                _logger.error(f"Image has an invalid format or file is corrupt: {format_error}.")
+                raise ValidationError(_("\nThe uploaded file has an invalid format or is corrupt."))
+
+            except ImagePersistenceError as service_error:
+                _logger.error(f"Failed to process cover image: {service_error}.")
+                raise ValidationError(
+                    _("\nAn internal issue ocurred while processing the image. Please, try a different file.")
+                )
 
             except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing image: {unknown_error}")
+                _logger.error(f"Unexpected error while processing image: {unknown_error}.")
                 raise ValidationError(
-                    _("\nImageServiceError: Sorry, something went wrong while processing cover image")
+                    _("\nImageServiceError: Sorry, something went wrong while processing cover image.")
                 )
