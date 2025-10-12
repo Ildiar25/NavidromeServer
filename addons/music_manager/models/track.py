@@ -19,11 +19,12 @@ from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
 from ..utils.custom_types import CustomWarningMessage, ReplaceItemCommand, TrackVals
 from ..utils.exceptions import (
-    DownloadServiceError,
+    ClientPlatformError,
     ImagePersistenceError,
     InvalidImageFormatError,
     MetadataServiceError,
-    MusicManagerError
+    MusicManagerError,
+    VideoProcessingError
 )
 
 
@@ -400,14 +401,20 @@ class Track(Model):
                     }
                 )
 
-            except DownloadServiceError as video_error:
-                _logger.error(f"Failed to process YouTube URL {track.url}: {video_error}")
+            except ClientPlatformError as download_error:
+                _logger.error(f"Failed to process YouTube URL '{track.url}': {download_error}")
                 raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
 
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while validating URL {track.url}: {unknown_error}")
+            except VideoProcessingError as video_error:
+                _logger.error(f"Filed to process downloaded video: {video_error}")
                 raise ValidationError(
-                    _("\nDownloadService Error: Sorry, something went wrong while validating URL.")
+                    _("\nAn internal issue ocurred while processing the video. Please, try a different URL.")
+                )
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unexpected error while processing video URL '{track.url}': {unknown_error}")
+                raise ValidationError(
+                    _("\nSorry, something went wrong while validating URL.\nPlease, contact with your Admin.")
                 )
 
     def _find_or_create_album(self, album_name: str) -> int | bool:
@@ -600,5 +607,5 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing image: {unknown_error}.")
                 raise ValidationError(
-                    _("\nImageServiceError: Sorry, something went wrong while processing cover image.")
+                    _("\nSorry, something went wrong while processing cover image.\nPlease, contact with your Admin.")
                 )

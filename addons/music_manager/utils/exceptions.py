@@ -24,6 +24,13 @@ class MetadataServiceError(MusicManagerError):
 
 
 # ---- Specific DOWNLOAD SERVICE exceptions ---- #
+class VideoProcessingError(DownloadServiceError):
+    """Raised when video is unreadable or cannot be processed."""
+    ...
+
+class ClientPlatformError(DownloadServiceError):
+    """Raised when client denies connection or download is unavailable."""
+    ...
 
 
 # ---- Specific FILE SERVICE exceptions ---- #

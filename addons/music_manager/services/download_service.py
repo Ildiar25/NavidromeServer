@@ -13,7 +13,7 @@ from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked,
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError, MaxDownloadsReached, RegexNotFoundError, UnavailableVideoError, YoutubeDLError
 
-from ..utils.exceptions import DownloadServiceError, MusicManagerError
+from ..utils.exceptions import ClientPlatformError, VideoProcessingError, MusicManagerError
 
 
 _logger = logging.getLogger(__name__)
@@ -44,11 +44,11 @@ class PyTubeAdapter(StreamProtocol):  # ❌ Library no updated -> It does not wo
             download_path = stream.download(output_path=tmp_path, filename=filename)
 
         except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
-            _logger.warning(f"Failed to process YouTube URL {self.__url}: {video_error}")
-            raise DownloadServiceError(video_error)
+            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {video_error}")
+            raise ClientPlatformError(video_error)
 
         except Exception as unknown_error:
-            _logger.error(f"Unexpected error while validating URL {self.__url}: {unknown_error}")
+            _logger.error(f"Unexpected error while processing the download: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
         result = subprocess.run(
@@ -58,18 +58,18 @@ class PyTubeAdapter(StreamProtocol):  # ❌ Library no updated -> It does not wo
 
         if result.returncode != 0:
             _logger.error(f"FFmpeg failed: {result.stderr.decode()}")
-            raise DownloadServiceError(result.stderr.decode())
+            raise VideoProcessingError(result.stderr.decode())
 
         try:
             os.remove(f'{download_path}')
 
-        except PermissionError as permission_error:
-            _logger.info(f"Can not delete file '{download_path}.mp3': {permission_error}")
-            raise DownloadServiceError(permission_error)
+        except (PermissionError, FileNotFoundError) as system_error:
+            _logger.error(f"File not found or no permission to delete: {system_error}")
+            raise VideoProcessingError(system_error)
 
-        except FileNotFoundError as not_found:
-            _logger.info(f"Failed to delete file '{download_path}.mp3': {not_found}")
-            raise DownloadServiceError(not_found)
+        except Exception as unknown_error:
+            _logger.error(f"Something went wrong while deleting path '{download_path}': {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
     def stream_to_buffer(self, buffer: io.BytesIO) -> None:
 
@@ -82,11 +82,11 @@ class PyTubeAdapter(StreamProtocol):  # ❌ Library no updated -> It does not wo
             download_path = stream.download(output_path=tmp_path, filename=filename)
 
         except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
-            _logger.warning(f"Failed to process YouTube URL {self.__url}: {video_error}")
-            raise DownloadServiceError(video_error)
+            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {video_error}")
+            raise ClientPlatformError(video_error)
 
         except Exception as unknown_error:
-            _logger.error(f"Unexpected error while validating URL {self.__url}: {unknown_error}")
+            _logger.error(f"Unexpected error while processing the download: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
         result = subprocess.run(
@@ -97,7 +97,7 @@ class PyTubeAdapter(StreamProtocol):  # ❌ Library no updated -> It does not wo
 
         if result.returncode != 0:
             _logger.error(f"FFmpeg failed: {result.stderr.decode()}")
-            raise DownloadServiceError(result.stderr.decode())
+            raise ClientPlatformError(result.stderr.decode())
 
         try:
             with open(f'{tmp_path.joinpath(filename)}.mp3', 'rb') as new_song:
@@ -106,18 +106,18 @@ class PyTubeAdapter(StreamProtocol):  # ❌ Library no updated -> It does not wo
 
         except FileNotFoundError as not_found:
             _logger.info(f"Failed to open file '{tmp_path}.mp3': {not_found}")
-            raise DownloadServiceError(not_found)
+            raise VideoProcessingError(not_found)
 
         try:
             os.remove(f'{download_path}')
 
-        except PermissionError as permission_error:
-            _logger.info(f"Can not delete file '{download_path}.mp3': {permission_error}")
-            raise DownloadServiceError(permission_error)
+        except (PermissionError, FileNotFoundError) as system_error:
+            _logger.info(f"File not found or no permission to delete: {system_error}")
+            raise VideoProcessingError(system_error)
 
-        except FileNotFoundError as not_found:
-            _logger.info(f"Failed to delete file '{download_path}.mp3': {not_found}")
-            raise DownloadServiceError(not_found)
+        except Exception as unknown_error:
+            _logger.error(f"Something went wrong while deleting path '{download_path}': {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
 
 class YTDLPAdapter(StreamProtocol):
@@ -145,16 +145,21 @@ class YTDLPAdapter(StreamProtocol):
                 yotube_dl.download(
                     [self.__url]
                 )
-        except (DownloadError, MaxDownloadsReached, UnavailableVideoError, YoutubeDLError) as video_error:
-            _logger.warning(f"Failed to process YouTube download {self.__url}: {video_error}")
-            raise DownloadServiceError(video_error)
 
         except RegexNotFoundError as invalid_url:
-            _logger.warning(f"Failed to process YouTube URL {self.__url}: {invalid_url}")
-            raise DownloadServiceError(invalid_url)
+            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {invalid_url}")
+            raise ClientPlatformError(invalid_url)
+
+        except (DownloadError, MaxDownloadsReached, UnavailableVideoError) as download_error:
+            _logger.warning(f"Failed to download '{self.__url}': {download_error}")
+            raise ClientPlatformError(download_error)
+
+        except YoutubeDLError as service_error:
+            _logger.error(f"Something went wrong while processing the video: {service_error}")
+            raise VideoProcessingError(service_error)
 
         except Exception as unknown_error:
-            _logger.error(f"Unexpected error while validating URL {self.__url}: {unknown_error}")
+            _logger.error(f"Unexpected error while processing the download: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
     def stream_to_buffer(self, buffer: io.BytesIO) -> None:
@@ -186,16 +191,20 @@ class YTDLPAdapter(StreamProtocol):
                     [self.__url]
                 )
 
-        except (DownloadError, MaxDownloadsReached, UnavailableVideoError, YoutubeDLError) as video_error:
-            _logger.warning(f"Failed to process YouTube download {self.__url}: {video_error}")
-            raise DownloadServiceError(video_error)
-
         except RegexNotFoundError as invalid_url:
-            _logger.warning(f"Failed to process YouTube URL {self.__url}: {invalid_url}")
-            raise DownloadServiceError(invalid_url)
+            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {invalid_url}")
+            raise ClientPlatformError(invalid_url)
+
+        except (DownloadError, MaxDownloadsReached, UnavailableVideoError) as download_error:
+            _logger.warning(f"Failed to download '{self.__url}': {download_error}")
+            raise ClientPlatformError(download_error)
+
+        except YoutubeDLError as service_error:
+            _logger.error(f"Something went wrong while processing the video: {service_error}")
+            raise VideoProcessingError(service_error)
 
         except Exception as unknown_error:
-            _logger.error(f"Unexpected error while validating URL {self.__url}: {unknown_error}")
+            _logger.error(f"Unexpected error while processing the download: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
         try:
@@ -205,18 +214,18 @@ class YTDLPAdapter(StreamProtocol):
 
         except FileNotFoundError as not_found:
             _logger.info(f"Failed to open file '{tmp_path}.mp3': {not_found}")
-            raise DownloadServiceError(not_found)
+            raise VideoProcessingError(not_found)
 
         try:
             os.remove(f'{tmp_path}.mp3')
 
-        except PermissionError as permission_error:
-            _logger.info(f"Can not delete file '{tmp_path}.mp3': {permission_error}")
-            raise DownloadServiceError(permission_error)
+        except (PermissionError, FileNotFoundError) as system_error:
+            _logger.info(f"File not found or no permission to delete: {system_error}")
+            raise VideoProcessingError(system_error)
 
-        except FileNotFoundError as not_found:
-            _logger.info(f"Failed to delete file '{tmp_path}.mp3': {not_found}")
-            raise DownloadServiceError(not_found)
+        except Exception as unknown_error:
+            _logger.error(f"Something went wrong while deleting path '{tmp_path}': {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
 
 # ---- Download service ---- #
