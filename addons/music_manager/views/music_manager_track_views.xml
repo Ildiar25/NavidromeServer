@@ -213,7 +213,7 @@
                                         <h1>Confirm! ✅ </h1>
                                     </header>
                                     <separator/>
-                                    <div style="height: 640px">
+                                    <div style="height: 670px">
                                         <div class="d-flex flex-row justify-content-around">
                                             <div class="w-50 mb-3">
                                                 <h3 class="text-muted">Add the file to Navidrome! 💿</h3>
