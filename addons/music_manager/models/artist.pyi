@@ -25,6 +25,7 @@ class Artist:
     name: str
     picture: bytes | None
     real_name: str | None
+    to_delete: bool
     album_ids: Sequence[Album]
     track_ids: Sequence[Track]
     album_amount: int

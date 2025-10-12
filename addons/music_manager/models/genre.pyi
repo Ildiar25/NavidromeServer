@@ -15,6 +15,7 @@ class Genre:
     id: int
 
     name: str
+    to_delete: bool
     track_ids: Sequence[Track]
     album_ids: Sequence[Album]
     track_amount: int

@@ -29,6 +29,7 @@ class Artist(Model):
     name = Char(string=_("Name"), required=True)
     picture = Binary(string=_("Profile"))
     real_name = Text(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
+    to_delete = Boolean(string=_("To delete"), default=False)
 
     # Relational fields
     album_ids = One2many(comodel_name='music_manager.album', inverse_name='album_artist_id', string=_("Album(s)"))

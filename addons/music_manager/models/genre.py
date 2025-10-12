@@ -2,20 +2,21 @@
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.models import Model
-from odoo.fields import Char, Integer, One2many, Many2one
+from odoo.fields import Boolean, Char, Integer, One2many, Many2one
 
 
 class Genre(Model):
 
     _name = 'music_manager.genre'
     _description = 'genre_table'
-    _order = 'name'
+    _order = 'to_delete, name'
     _sql_constraints = [
         ('check_genre_name', 'UNIQUE(name)', _("The genre name must be unique.")),
     ]
 
     # Default fields
     name = Char(string=_("Name"), required=True)
+    to_delete = Boolean(string=_("To delete"), default=False)
 
     # Relationships
     track_ids = One2many(comodel_name='music_manager.track', inverse_name='genre_id', string=_("Song(s)"))
