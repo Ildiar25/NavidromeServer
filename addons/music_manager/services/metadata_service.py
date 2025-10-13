@@ -78,7 +78,7 @@ class MP3File(FileMetadata):
             track_data.MIME = mime_type
 
         except Exception as unknown_error:
-            _logger.warning(f"There was an error while trying to read MIME type and track duration: {unknown_error}")
+            _logger.warning(f"There was an issue while trying to read MIME type or track duration: {unknown_error}")
 
         return track_data
 
