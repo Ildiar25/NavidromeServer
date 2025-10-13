@@ -144,7 +144,7 @@ class Artist(Model):
             'tag': 'display_notification',
             'params': {
                 'title': _("Music Manager says:"),
-                'message': "\n".join(final_message),
+                'message': " • ".join(final_message),
                 'type': 'warning' if total_failure_messages else 'success',
                 'sticky': False,
             }
