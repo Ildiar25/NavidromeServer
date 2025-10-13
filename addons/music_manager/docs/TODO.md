@@ -8,7 +8,9 @@
 ### Modelos
 
  - [ ] **Añadir campo que almacene la extensión del archivo.**
- - [x] **Evitar la eliminación de los campos género o artista si el usuario no es Admin.**
+ - [x] Evitar la eliminación de los campos género o artista si el usuario no es Admin.
+ - [ ] **Que el usuario pueda marcar género o artista para eliminar. El Admin puede eliminar dichos registros.**
+ - [x] Informar correctamente al usuario mediante notificaciones.
 
 ### Servicios
 
@@ -16,7 +18,7 @@
  - [x] Añadir método que se encargue de mover los archivos.
  - [x] Añadir método que se encargue de actualizar nombre de archivo.
  - [x] Añadir método que se encargue de devolver los ID3 tipo Dict.
- - [ ] **Añadir excepciones específicas en los servicios.**
+ - [x] Añadir excepciones específicas en los servicios.
  - [x] Arreglar el guardado de metadatos: Actualmente da problemas.
  - [x] Comprobar que el archivo se elimine al eliminar el registro.
  - [x] Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.
@@ -43,3 +45,5 @@
  - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
  - [ ] **Crear menús y vistas de *'Albums'* y *'Artists'* según el tipo de usuario (*'General'*, *'Admin'*).**
  - [x] Los artistas son globales y, por tanto, configurar si es favorito o no también. Eliminar dicho atributo y añadirlo a álbum.
+ - [ ] **Revisar textos en inglés.**
+ - [x] **Revisar excepciones dadas.**
