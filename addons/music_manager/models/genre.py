@@ -40,32 +40,50 @@ class Genre(Model):
             genre.disk_amount = len(genre.album_ids) if genre.album_ids else 0
 
     def update_songs(self):
+        self.ensure_one()
+
         if not self.track_ids:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': _("Music Manager says:"),
-                    'message': _("There are not any tracks to update!"),
+                    'message': _("This genre has not any tracks to update!"),
                     'type': 'info',
                     'sticky': False,
                 }
             }
 
-        for genre in self:  # type:ignore
-            if genre.track_ids:
-                for track in genre.track_ids:
-                    track.save_changes()
+        total_success_count = 0
+        total_failure_messages = []
 
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _("Music Manager says:"),
-                    'message': _("All metadata tracks are been updated!"),
-                    'type': 'success',
-                    'sticky': False,
-                }
+        for track in self.track_ids:
+            results = track._perform_save_changes()
+            total_success_count += results['success']
+
+            if results['messages']:
+                total_failure_messages.extend(results['messages'])
+
+        final_message = []
+
+        if total_success_count == len(self.track_ids):
+            final_message.append(
+                _("All tracks from this genre have been updated!")
+            )
+
+        if total_failure_messages:
+            final_message.append(
+                _("Some tracks has been ignored:")
+            )
+            final_message.extend(total_failure_messages)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Music Manager says:"),
+                'message': "\n".join(final_message),
+                'type': 'warning' if total_failure_messages else 'success',
+                'sticky': False,
             }
-
-        return None
+        }

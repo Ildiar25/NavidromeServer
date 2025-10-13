@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections.abc import Callable
 from typing import Final, Iterable, Optional, Self, Sequence, Literal
 
 from odoo.addons.base.models.res_users import Users
@@ -20,6 +21,7 @@ class Album:
     _order: str | None
     _sql_constraints: list[tuple[str, str, str]] | None
     id: int
+    ensure_one: Callable[[], Self]
 
     name: str
     is_favorite: bool

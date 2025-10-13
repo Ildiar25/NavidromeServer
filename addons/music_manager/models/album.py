@@ -165,35 +165,53 @@ class Album(Model):
             album.is_favorite = not album.is_favorite
 
     def update_songs(self):
+        self.ensure_one()
+
         if not self.track_ids:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': _("Music Manager says:"),
-                    'message': _("There are not any tracks to update!"),
+                    'message': _("This album has not any tracks to update!"),
                     'type': 'info',
                     'sticky': False,
                 }
             }
 
-        for album in self:  # type:ignore
-            if album.track_ids:
-                for track in album.track_ids:
-                    track.save_changes()
+        total_success_count = 0
+        total_failure_messages = []
 
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _("Music Manager says:"),
-                    'message': _("All metadata tracks are been updated!"),
-                    'type': 'success',
-                    'sticky': False,
-                }
+        for track in self.track_ids:
+            results = track._perform_save_changes()
+            total_success_count += results['success']
+
+            if results['messages']:
+                total_failure_messages.extend(results['messages'])
+
+        final_message = []
+
+        if total_success_count == len(self.track_ids):
+            final_message.append(
+                _("All tracks from this album have been updated!")
+            )
+
+        if total_failure_messages:
+            final_message.append(
+                _("Some tracks has been ignored:")
+            )
+            final_message.extend(total_failure_messages)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Music Manager says:"),
+                'message': "\n".join(final_message),
+                'type': 'warning' if total_failure_messages else 'success',
+                'sticky': False,
             }
-
-        return None
+        }
 
     @staticmethod
     def _process_cover_image(value: AlbumVals) -> None:

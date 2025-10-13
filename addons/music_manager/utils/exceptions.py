@@ -34,7 +34,13 @@ class VideoProcessingError(DownloadServiceError):
 
 
 # ---- Specific FILE SERVICE exceptions ---- #
+class FilePersistenceError(FileServiceError):
+    """Raised when file cannot be saved."""
+    ...
 
+class PathNotFoundError(FileServiceError):
+    """Raised when file has an invalid path or is not found."""
+    ...
 
 
 # ---- Specific IMAGE SERVICE exceptions ---- #

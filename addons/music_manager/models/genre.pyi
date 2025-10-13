@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections.abc import Callable
 from typing import Final, Iterable, Self, Sequence
 
 from .album import Album
@@ -13,6 +14,7 @@ class Genre:
     _order: str | None
     _sql_constraints: list[tuple[str, str, str]] | None
     id: int
+    ensure_one: Callable[[], Self]
 
     name: str
     to_delete: bool

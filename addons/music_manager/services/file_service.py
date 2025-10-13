@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from unidecode import unidecode
 
+from ..utils.exceptions import FilePersistenceError, PathNotFoundError, MusicManagerError
+
 
 _logger = logging.getLogger(__name__)
 
@@ -20,28 +22,26 @@ class FolderManager:
             self.file_path = file_path
 
     def create_folders(self) -> 'FolderManager':
-        if isinstance(self.file_path, Path):
-            if not self.file_path.parent.exists():
-                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+        if isinstance(self.file_path, Path) and not self.file_path.parent.exists():
+            self.file_path.parent.mkdir(parents=True, exist_ok=True)
 
         return self
 
     def save(self, data: bytes) -> None:
+        if not self.file_path or not isinstance(self.file_path, Path):
+            _logger.error(f"Cannot save the file. The path is not valid: {self.file_path}")
+            raise PathNotFoundError("File path does not exist. Must be set before saving.")
+
         try:
-            if isinstance(self.file_path, Path):
-                if not self.file_path:
-                    raise ValueError("Path does not exist")
+            self.file_path.write_bytes(data)
 
-                self.file_path.write_bytes(data)
-
-        except ValueError as no_path:
-            _logger.error(f"Cannot save the file: {no_path}")
-
-        except PermissionError as no_permission:
-            _logger.error(f"Do not have permissions to write file: {no_permission}")
+        except PermissionError as not_allowed:
+            _logger.error(f"Is not allowed to write file: {not_allowed}")
+            raise FilePersistenceError(not_allowed)
 
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while saving the file: {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
     def set_path(self, artist: str, album: str, track: str, title: str) -> str:
         clean_artist = self.__clean_path_name(artist)
@@ -55,46 +55,41 @@ class FolderManager:
 
         return str(self.__root_folder / clean_artist / clean_album / f"{clean_track}_{clean_title}.{self.__extension}")
 
-    def update_file_path(self, path: str) -> 'FolderManager':
+    def update_file_path(self, path: str) -> None:
+        old_path = Path(path)
+
+        if not old_path.exists():
+            raise PathNotFoundError(f"Source file not found at: '{path}'.")
+
         try:
-            old_path = Path(path)
             old_path.replace(self.file_path)
 
-        except FileNotFoundError as not_found:
-            _logger.error(f"Try to update file but not found: {not_found}")
-            return self
-
-        except PermissionError as no_permission:
-            _logger.error(f"Do not have permissions to delete files: {no_permission}")
-            return self
+        except PermissionError as not_allowed:
+            _logger.error(f"Do not have permissions to delete files: {not_allowed}")
+            raise FilePersistenceError(not_allowed)
 
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while deleting file: {unknown_error}")
-            return self
+            raise MusicManagerError(unknown_error)
 
         self._clean_empty_dirs(old_path.parent)
-        return self
 
     def delete_file(self, path: str) -> None:
+        file_path = Path(path)
+
+        if not file_path.is_file():
+            raise PathNotFoundError(f"File not found or it is not a file: '{path}'.")
+
         try:
-            file_path = Path(path)
-
-            if not file_path.is_file():
-                return
-
             file_path.unlink()
 
-        except FileNotFoundError as not_found:
-            _logger.error(f"Try to delete file but not found: {not_found}")
-            return
-
-        except PermissionError as no_permission:
-            _logger.error(f"Do not have permissions to delete files: {no_permission}")
-            return
+        except PermissionError as not_allowed:
+            _logger.error(f"Do not have permissions to delete files: {not_allowed}")
+            raise FilePersistenceError(not_allowed)
 
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while deleting file: {unknown_error}")
-            return
+            raise MusicManagerError(unknown_error)
 
         self._clean_empty_dirs(file_path.parent)
 

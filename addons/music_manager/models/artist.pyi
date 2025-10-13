@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections.abc import Callable
 from datetime import date
 from typing import Final, Iterable, Self, Sequence, Literal
 
@@ -20,6 +21,7 @@ class Artist:
     _order: str | None
     _sql_constraints: list[tuple[str, str, str]] | None
     id: int
+    ensure_one: Callable[[], Self]
 
     birthdate: date | None
     name: str

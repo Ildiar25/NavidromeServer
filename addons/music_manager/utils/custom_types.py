@@ -72,6 +72,7 @@ class TrackVals(TypedDict, total=False):
 
 
 # Custom types
+MessageCounter: TypeAlias = Dict[str, int | List[str]]
 CustomWarningMessage: TypeAlias = Dict[str, Dict[str, str]]
 DisplayNotification: TypeAlias = Dict[str, str | Dict[str, str | bool]]
 ReplaceItemCommand: TypeAlias = Tuple[int, int, List[int]]

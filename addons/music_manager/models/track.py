@@ -17,15 +17,17 @@ from ..services.download_service import YTDLPAdapter, YoutubeDownload
 from ..services.file_service import FolderManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
-from ..utils.custom_types import CustomWarningMessage, ReplaceItemCommand, TrackVals
+from ..utils.custom_types import CustomWarningMessage, MessageCounter, ReplaceItemCommand, TrackVals
 from ..utils.exceptions import (
     ClientPlatformError,
+    FilePersistenceError,
     ImagePersistenceError,
     InvalidFileFormatError,
     InvalidImageFormatError,
     MetadataPersistenceError,
     MetadataServiceError,
     MusicManagerError,
+    PathNotFoundError,
     ReadingFileError,
     VideoProcessingError
 )
@@ -141,14 +143,28 @@ class Track(Model):
 
         for path, is_deleted in file_paths:
             if not is_deleted:
-                if is_admin:
-                    FolderManager().delete_file(path)
+                still_used = self.env['music_manager.track'].sudo().search_count([('file_path', '=', path)])
 
-                else:
-                    still_used = self.env['music_manager.track'].sudo().search_count([('file_path', '=', path)])
-
-                    if still_used == 0:
+                if is_admin or still_used == 0:
+                    try:
                         FolderManager().delete_file(path)
+
+                    except PathNotFoundError as not_found:
+                        _logger.warning(f"File to delete not found, continuing: {not_found}")
+                        continue
+
+                    except FilePersistenceError as not_allowed:
+                        _logger.error(f"Cannot delete the file: {not_allowed}")
+                        raise ValidationError(
+                            _("\nAn internal issue ocurred while trying to delete the file."
+                              "\nPlease, try it again with a different record.")
+                        )
+
+                    except MusicManagerError as unknown_error:
+                        _logger.error(f"Unespected error while trying to delete the file: {unknown_error}")
+                        raise ValidationError(
+                            _("\nSorry, something went wrong while deleting the file.\nPlease, contact with your Admin.")
+                        )
 
         return res
 
@@ -336,31 +352,32 @@ class Track(Model):
                     track.state = 'done'
 
     def save_changes(self):
-        for track in self:  # type:ignore
-            if not (isinstance(track.file_path, str) and track.has_valid_path):
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': _("Music Manager says:"),
-                        'message': _("Some metadata has not been changed!"),
-                        'type': 'warning',
-                        'sticky': False,
-                    }
-                }
+        track = self.ensure_one()
+        results = track._perform_save_changes()
+        final_message = []
 
-            path = FolderManager(track.file_path).create_folders()
-            path.update_file_path(track.old_path)
-            self._update_metadata(track.file_path)
-            track.old_path = track.file_path
+        if results['success'] > 0:
+            final_message.append(
+                _("Metadata from '%s' has been updated!", track.name)
+            )
+
+        if results['messages']:
+            final_message.append(
+                _("Failed to update metadata for '%s' track!", track.name)
+            )
+
+        if not final_message:  # This message has never been shown.
+            final_message.append(
+                _("No changes applied to '%s' track!", track.name)
+            )
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _("Music Manager says:"),
-                'message': _("All metadata are been updated!"),
-                'type': 'success',
+                'message': "\n".join(final_message),
+                'type': 'warning' if results['messages'] else 'success',
                 'sticky': False,
             }
         }
@@ -371,7 +388,27 @@ class Track(Model):
                 continue
 
             song = base64.b64decode(track.file)
-            FolderManager(track.file_path).create_folders().save(song)
+
+            try:
+                FolderManager(track.file_path).create_folders().save(song)
+
+            except PathNotFoundError as not_found:
+                _logger.error(f"There was an issue with file path: {not_found}")
+                raise ValidationError(_("\nActually, the file path of this record is not valid."))
+
+            except FilePersistenceError as not_allowed:
+                _logger.error(f"Cannot write the file: {not_allowed}")
+                raise ValidationError(
+                    _("\nAn internal issue ocurred while trying to save the file."
+                      "\nPlease, try it again with a different one.")
+                )
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unespected error while trying to save the file: {unknown_error}")
+                raise ValidationError(
+                    _("\nSorry, something went wrong while saving the file.\nPlease, contact with your Admin.")
+                )
+
             self._update_metadata(track.file_path)
 
             track.old_path = track.file_path
@@ -409,7 +446,7 @@ class Track(Model):
                 raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
 
             except VideoProcessingError as video_error:
-                _logger.error(f"Filed to process downloaded video: {video_error}")
+                _logger.error(f"Failed to process downloaded video: {video_error}")
                 raise ValidationError(
                     _("\nAn internal issue ocurred while processing the video. Please, try a different URL.")
                 )
@@ -488,6 +525,54 @@ class Track(Model):
             return fallback_ids[0]
 
         return False
+
+    def _perform_save_changes(self) -> MessageCounter:
+        failure_messages = []
+        success_counter = 0
+
+        for track in self:  # type:ignore
+            if not isinstance(track.old_path, str):
+                failure_messages.append(
+                    _("Track '%s' was skipped because it is not saved into your library.", track.name)
+                )
+                continue
+
+            if not (isinstance(track.file_path, str) and track.has_valid_path):
+                failure_messages.append(
+                    _("Track '%s' was skipped because it has an invalid path.", track.name)
+                )
+                continue
+
+            try:
+                path = FolderManager(track.file_path).create_folders()
+                path.update_file_path(track.old_path)
+                success_counter += 1
+
+            except PathNotFoundError as not_found:
+                _logger.error(f"There was an issue with file path: {not_found}")
+                raise ValidationError(_("\nActually, the file path of this record is not valid."))
+
+            except FilePersistenceError as not_allowed:
+                _logger.error(f"Cannot update the file: {not_allowed}")
+                raise ValidationError(
+                    _("\nAn internal issue ocurred while trying to update the file."
+                      "\nPlease, try it again with a different record.")
+                )
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unespected error while trying to update the file: {unknown_error}")
+                raise ValidationError(
+                    _("\nSorry, something went wrong while updating the file.\nPlease, contact with your Admin.")
+                )
+
+            if success_counter > 0:
+                self._update_metadata(track.file_path)  #type:ignore
+                track.old_path = track.file_path
+
+        return {
+            'success': success_counter,
+            'messages': failure_messages
+        }
 
     def _sync_album_with_artist(self) -> None:
         self.ensure_one()

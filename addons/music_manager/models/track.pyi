@@ -8,7 +8,13 @@ from odoo.addons.base.models.res_users import Users
 from .album import Album
 from .artist import Artist
 from .genre import Genre
-from ..utils.custom_types import CustomWarningMessage, DisplayNotification, ReplaceItemCommand, TrackVals
+from ..utils.custom_types import (
+    CustomWarningMessage,
+    DisplayNotification,
+    MessageCounter,
+    ReplaceItemCommand,
+    TrackVals
+)
 
 
 class Track:
@@ -151,7 +157,7 @@ class Track:
 
     def save_changes(self) -> DisplayNotification:
         """Updates track metadata & path file.
-        :return: None
+        :return: Dictionary with notification data
         """
 
     def save_file(self) -> None:
@@ -187,6 +193,11 @@ class Track:
         :param artist_name: Artist name
         :param fallback_ids: A list with various artist IDs
         :return: Artist ID (created or finded) | False if there is not any name
+        """
+
+    def _perform_save_changes(self: Iterable[Self]) -> MessageCounter:
+        """Create a custom dictionary to count failures while tracks are updating.
+        :return: Custom dictonary
         """
 
     def _sync_album_with_artist(self) -> None:
