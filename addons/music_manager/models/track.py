@@ -21,9 +21,12 @@ from ..utils.custom_types import CustomWarningMessage, ReplaceItemCommand, Track
 from ..utils.exceptions import (
     ClientPlatformError,
     ImagePersistenceError,
+    InvalidFileFormatError,
     InvalidImageFormatError,
+    MetadataPersistenceError,
     MetadataServiceError,
     MusicManagerError,
+    ReadingFileError,
     VideoProcessingError
 )
 
@@ -538,14 +541,22 @@ class Track(Model):
                 track.album_artist_id = self._find_or_create_single_artist(metadata.TPE2, track.track_artist_ids.ids)
                 track.original_artist_id = self._find_or_create_single_artist(metadata.TOPE, track.track_artist_ids.ids)
 
-            except MetadataServiceError as invalid_metadata:
+            except InvalidFileFormatError as corrupt_file:
+                _logger.error(f"There was a problem reading the file: {corrupt_file}")
+                raise ValidationError(
+                    _("\nThe uploaded file has an invalid format or is corrupt.")
+                )
+
+            except ReadingFileError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
-                raise ValidationError(_("\nInvalid metadata founded on file."))
+                raise ValidationError(
+                    _("\nAn internal issue ocurred while processing metadata. Please, try a different file.")
+                )
 
             except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
+                _logger.error(f"Unexpected error while processing the file: {unknown_error}")
                 raise ValidationError(
-                    _("\nMetadataServiceError: Sorry, something went wrong while updating metadata fields.")
+                    _("\nSorry, something went wrong while processing metadata file.\nPlease, contact with your Admin.")
                 )
 
     def _update_metadata(self, path: str) -> None:
@@ -566,13 +577,22 @@ class Track(Model):
             try:
                 MP3File().set_metadata(path, metadata)
 
-            except MetadataServiceError as invalid_metadata:
+            except ReadingFileError as invalid_metadata:
                 _logger.error(f"Failed to process file metadata: {invalid_metadata}")
+                raise ValidationError(
+                    _("\nAn internal issue ocurred while processing metadata. Please, try a different file.")
+                )
+
+            except MetadataPersistenceError as not_allowed:
+                _logger.error(f"Failed to save metadata into file: {not_allowed}")
+                raise ValidationError(
+                    _("\nThere was a problem when writing metadata: There is no permission or disk is full.")
+                )
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
                 raise ValidationError(
-                    _("\nMetadataServiceError: Sorry, something went wrong while updating metadata.")
+                    _("\nSorry, something went wrong while processing metadata file.\nPlease, contact with your Admin.")
                 )
 
     @staticmethod

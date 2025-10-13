@@ -24,26 +24,38 @@ class MetadataServiceError(MusicManagerError):
 
 
 # ---- Specific DOWNLOAD SERVICE exceptions ---- #
-class VideoProcessingError(DownloadServiceError):
-    """Raised when video is unreadable or cannot be processed."""
-    ...
-
 class ClientPlatformError(DownloadServiceError):
     """Raised when client denies connection or download is unavailable."""
+    ...
+
+class VideoProcessingError(DownloadServiceError):
+    """Raised when video is unreadable or cannot be processed."""
     ...
 
 
 # ---- Specific FILE SERVICE exceptions ---- #
 
 
-# ---- Specific IMAGE SERVICE exceptions ---- #
-class InvalidImageFormatError(ImageServiceError):
-    """Raised when an image is unreadable or has an invalid format."""
-    ...
 
+# ---- Specific IMAGE SERVICE exceptions ---- #
 class ImagePersistenceError(ImageServiceError):
     """Raised when an image cannot be saved."""
     ...
 
+class InvalidImageFormatError(ImageServiceError):
+    """Raised when an image is unreadable or has an invalid format."""
+    ...
+
 
 # ---- Specific METADATA SERVICE exceptions ---- #
+class InvalidFileFormatError(MetadataServiceError):
+    """Raised when file has no header or is a corrupt file."""
+    ...
+
+class MetadataPersistenceError(MetadataServiceError):
+    """Raised when metadata cannot be saved."""
+    ...
+
+class ReadingFileError(MetadataServiceError):
+    """Raised when file is unreadable or has not any tag."""
+    ...

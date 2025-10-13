@@ -11,7 +11,7 @@ import mutagen.mp3 as exception
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
 
-from ..utils.exceptions import MetadataServiceError, MusicManagerError
+from ..utils.exceptions import InvalidFileFormatError, MetadataPersistenceError, MusicManagerError, ReadingFileError
 from ..utils.metadata_schema import TrackMetadata
 
 
@@ -33,7 +33,7 @@ class MP3File(FileMetadata):
 
     def get_metadata(self, filething: str | io.BytesIO) -> TrackMetadata:
 
-        track = self.__load_track(filething)
+        track = self.__load_metadata_tags(filething)
 
         if not track.tags:
             return TrackMetadata()
@@ -97,7 +97,7 @@ class MP3File(FileMetadata):
             'APIC': tag_type.APIC,
         }
 
-        track = self.__load_track(filething)
+        track = self.__load_metadata_tags(filething)
         self.__reset_metadata(track)
 
         new_data = TrackMetadata(**new_data)
@@ -121,7 +121,16 @@ class MP3File(FileMetadata):
             elif isinstance(value, str):
                 track.tags.add(tag(encoding=3, text=value))
 
-        track.save()
+        try:
+            track.save()
+
+        except (PermissionError, OSError) as not_allowed:
+            _logger.error(f"Cannot save metadata to file: {not_allowed}")
+            raise MetadataPersistenceError(not_allowed)
+
+        except Exception as unknown_error:
+            _logger.error(f"Unexpected error during metadata writing: {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
     @staticmethod
     def __reset_metadata(track: MP3) -> None:
@@ -131,20 +140,29 @@ class MP3File(FileMetadata):
         else:
             track.add_tags()
 
-        track.save()
+        try:
+            track.save()
+
+        except (PermissionError, OSError) as not_allowed:
+            _logger.error(f"Cannot save metadata to file: {not_allowed}")
+            raise MetadataPersistenceError(not_allowed)
+
+        except Exception as unknown_error:
+            _logger.error(f"Unexpected error during metadata writing: {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __load_track(file: str | io.BytesIO) -> MP3:
+    def __load_metadata_tags(file: str | io.BytesIO) -> MP3:
         try:
             return MP3(file, ID3=ID3)
 
         except tag_type.ID3NoHeaderError as no_tags:
             _logger.warning(f"No tags founded in this file: {no_tags}")
-            raise MetadataServiceError(no_tags)
+            raise ReadingFileError(no_tags)
 
         except exception.HeaderNotFoundError as corrupt_file:
             _logger.error(f"There was a problem with the file: {corrupt_file}")
-            raise MetadataServiceError(corrupt_file)
+            raise InvalidFileFormatError(corrupt_file)
 
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while analyzing file metadata: {unknown_error}")
