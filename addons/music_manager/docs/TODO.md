@@ -22,6 +22,7 @@
  - [x] Arreglar el guardado de metadatos: Actualmente da problemas.
  - [x] Comprobar que el archivo se elimine al eliminar el registro.
  - [x] Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.
+ - [ ] **Añadir la etiqueta *'TCMP'* para marcar las canciones como compilatorias.**
 
 ### Módulo
 
