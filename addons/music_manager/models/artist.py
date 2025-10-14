@@ -15,6 +15,7 @@ from ..services.image_service import ImageToPNG
 from ..utils.custom_types import CustomWarningMessage, ArtistVals
 from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
 
+
 _logger = logging.getLogger(__name__)
 
 
@@ -25,7 +26,7 @@ class Artist(Model):
     _order = 'to_delete, name'
 
     # Basic fields
-    birthdate = Date(string=_("Birthdate"))
+    founded_in = Date(string=_("Founded in"))
     name = Char(string=_("Name"), required=True)
     picture = Binary(string=_("Profile"))
     real_name = Text(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
@@ -44,13 +45,13 @@ class Artist(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.model_create_multi
-    def create(self, list_vals: list[ArtistVals]) -> 'Artist':
+    def create(self, list_vals: list[ArtistVals]):
         for vals in list_vals:
             self._process_picture_image(vals)
 
         return super().create(list_vals)
 
-    def write(self, vals: ArtistVals) -> bool:
+    def write(self, vals: ArtistVals):
         self._process_picture_image(vals)
         return super().write(vals)
 
@@ -63,7 +64,7 @@ class Artist(Model):
     def _compute_display_title_form(self) -> None:
         for artist in self:
             if not artist.id:
-                artist.display_title = _("Edit artist")
+                artist.display_title = _("New artist")
 
             else:
                 artist.display_title = _("Artist - %s", artist.name)
@@ -101,6 +102,10 @@ class Artist(Model):
 
         return None
 
+    def set_to_delete(self) -> None:
+        for artist in self:
+            artist.to_delete = not artist.to_delete
+
     def update_songs(self):
         self.ensure_one()
 
@@ -135,7 +140,7 @@ class Artist(Model):
 
         if total_failure_messages:
             final_message.append(
-                _("Some tracks has been ignored:")
+                _("Some tracks have been ignored:")
             )
             final_message.extend(total_failure_messages)
 

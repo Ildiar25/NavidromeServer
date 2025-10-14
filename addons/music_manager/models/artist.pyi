@@ -76,6 +76,10 @@ class Artist:
         and returns a warning message.
         :return: Warning Message (dict) | None
         """
+    def set_to_delete(self: Iterable[Self]) -> None:
+        """Toggles the 'to_delete' field for each artist.
+        :return: None
+        """
 
     def update_songs(self) -> DisplayNotification | None:
         """Update track metadata linked to this artist. It calls to the `save_changes()` method for each track.

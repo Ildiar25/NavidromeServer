@@ -17,6 +17,9 @@
                     <field name="track_amount" string="Track amount"/>
                     <field name="disk_amount" string="Disk amount"/>
                     <field name="user_id" string="Added by"/>
+                    <field name="to_delete" column_invisible="True"/>
+                    <button name="set_to_delete" type="object" class="oe_stat_button" help="Set to delete" icon="fa-trash text-danger" invisible="to_delete == False"/>
+                    <button name="set_to_delete" type="object" class="oe_stat_button" help="Set to delete" icon="fa-trash-o" invisible="to_delete == True"/>
                 </tree>
             </field>
         </record>

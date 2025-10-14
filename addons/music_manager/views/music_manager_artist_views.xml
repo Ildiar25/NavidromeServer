@@ -13,11 +13,18 @@
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
                 <kanban>
+                    <field name="to_delete"/>
                     <template>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click" style="box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                                 <div class="o_kanban_record_title d-flex flex-row justify-content-between">
                                     <field name="name"/>
+                                    <button name="set_to_delete" type="object" class="oe_stat_button" help="Set to delete">
+                                        <div>
+                                            <i t-if="record.to_delete.raw_value" class="fa fa-trash text-danger"/>
+                                            <i t-else="" class="fa fa-trash-o"/>
+                                        </div>
+                                    </button>
                                 </div>
                                 <hr class="mb-2"/>
                                 <div class="o_kanban_content d-flex flex-row">
@@ -27,7 +34,7 @@
                                     <div class="oe_kanban_details flex-grow-1">
                                         <ul>
                                             <li><i class="fa fa-user me-2" title="User icon"/><field name="real_name"/></li>
-                                            <li t-if="record.birthdate.raw_value"><i class="fa fa-calendar me-2" title="Calendar icon"/><field name="birthdate"/></li>
+                                            <li t-if="record.founded_in.raw_value"><i class="fa fa-calendar me-2" title="Calendar icon"/><field name="founded_in"/></li>
                                             <li><i class="fa fa-dot-circle-o me-2" title="Disk icon"/><field name="album_amount"/></li>
                                             <li><i class="fa fa-music me-2" title="Music icon"/><field name="track_amount"/></li>
                                         </ul>
@@ -49,10 +56,13 @@
                     <field name="picture" string="Picture" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Name"/>
                     <field name="real_name" string="Real name"/>
-                    <field name="birthdate" string="Birthdate" optional="hide"/>
+                    <field name="founded_in" string="Founded in" optional="hide"/>
                     <field name="track_amount" string="Total tracks"/>
                     <field name="album_amount" string="Total albums"/>
                     <field name="user_id" string="Added by"/>
+                    <field name="to_delete" column_invisible="True"/>
+                    <button name="set_to_delete" type="object" class="oe_stat_button" help="Set to delete" icon="fa-trash text-danger" invisible="to_delete == False"/>
+                    <button name="set_to_delete" type="object" class="oe_stat_button" help="Set to delete" icon="fa-trash-o" invisible="to_delete == True"/>
                 </tree>
             </field>
         </record>
@@ -76,7 +86,7 @@
                                 <group>
                                     <field name="name" string="Group or artist name"/>
                                     <field name="real_name" string="Members"/>
-                                    <field name="birthdate" string="Founded"/>
+                                    <field name="founded_in" string="Founded in"/>
                                 </group>
                                 <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
                             </div>

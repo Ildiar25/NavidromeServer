@@ -9,7 +9,7 @@
 
  - [ ] **Añadir campo que almacene la extensión del archivo.**
  - [x] Evitar la eliminación de los campos género o artista si el usuario no es Admin.
- - [ ] **Que el usuario pueda marcar género o artista para eliminar. El Admin puede eliminar dichos registros.**
+ - [x] Que el usuario pueda marcar género o artista para eliminar. El Admin puede eliminar dichos registros.
  - [x] Informar correctamente al usuario mediante notificaciones.
 
 ### Servicios
@@ -45,5 +45,5 @@
  - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
  - [ ] **Crear menús y vistas de *'Albums'* y *'Artists'* según el tipo de usuario (*'General'*, *'Admin'*).**
  - [x] Los artistas son globales y, por tanto, configurar si es favorito o no también. Eliminar dicho atributo y añadirlo a álbum.
- - [ ] **Revisar textos en inglés.**
- - [x] **Revisar excepciones dadas.**
+ - [x] Revisar textos en inglés.
+ - [x] Revisar excepciones dadas.

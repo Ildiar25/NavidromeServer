@@ -17,7 +17,7 @@ from ..services.download_service import YTDLPAdapter, YoutubeDownload
 from ..services.file_service import FolderManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
-from ..utils.custom_types import CustomWarningMessage, MessageCounter, ReplaceItemCommand, TrackVals
+from ..utils.custom_types import CustomWarningMessage, TrackVals
 from ..utils.exceptions import (
     ClientPlatformError,
     FilePersistenceError,
@@ -25,7 +25,6 @@ from ..utils.exceptions import (
     InvalidFileFormatError,
     InvalidImageFormatError,
     MetadataPersistenceError,
-    MetadataServiceError,
     MusicManagerError,
     PathNotFoundError,
     ReadingFileError,
@@ -101,7 +100,7 @@ class Track(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
-    def create(self, list_vals: list[TrackVals]) -> 'Track':
+    def create(self, list_vals: list[TrackVals]):
         for vals in list_vals:
             self._process_cover_image(vals)
 
@@ -116,7 +115,7 @@ class Track(Model):
 
         return tracks
 
-    def write(self, vals: TrackVals) -> bool:
+    def write(self, vals: TrackVals):
         self._process_cover_image(vals)
 
         res = super().write(vals)
@@ -129,7 +128,7 @@ class Track(Model):
 
         return res
 
-    def unlink(self) -> 'Track':
+    def unlink(self):
         file_paths = [(track.file_path, track.is_deleted) for track in self]  # type:ignore
         check_albums = self.mapped('album_id')
 
@@ -163,7 +162,8 @@ class Track(Model):
                     except MusicManagerError as unknown_error:
                         _logger.error(f"Unespected error while trying to delete the file: {unknown_error}")
                         raise ValidationError(
-                            _("\nSorry, something went wrong while deleting the file.\nPlease, contact with your Admin.")
+                            _("\nSorry, something went wrong while deleting the file."
+                              "\nPlease, contact with your Admin.")
                         )
 
         return res
@@ -366,7 +366,7 @@ class Track(Model):
                 _("Failed to update metadata for '%s' track!", track.name)
             )
 
-        if not final_message:  # This message has never been shown.
+        if not final_message:  # This message will never be shown.
             final_message.append(
                 _("No changes applied to '%s' track!", track.name)
             )
@@ -457,7 +457,7 @@ class Track(Model):
                     _("\nSorry, something went wrong while validating URL.\nPlease, contact with your Admin.")
                 )
 
-    def _find_or_create_album(self, album_name: str) -> int | bool:
+    def _find_or_create_album(self, album_name: str):
         albums = self.env['music_manager.album']
 
         if album_name and album_name.lower() != 'unknown':
@@ -472,7 +472,7 @@ class Track(Model):
 
         return False
 
-    def _find_or_create_artist(self, artist_names: str) -> list[ReplaceItemCommand]:
+    def _find_or_create_artist(self, artist_names: str):
         artists = self.env['music_manager.artist']
         artist_ids = []
 
@@ -493,7 +493,7 @@ class Track(Model):
 
         return [(6, 0, artist_ids)]
 
-    def _find_or_create_genre(self, genre_name: str) -> int | bool:
+    def _find_or_create_genre(self, genre_name: str):
         genres = self.env['music_manager.genre']
 
         if genre_name and genre_name.lower() != 'unknown':
@@ -508,7 +508,7 @@ class Track(Model):
 
         return False
 
-    def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]) -> int | bool:
+    def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]):
         artists = self.env['music_manager.artist']
 
         if artist_name and artist_name.lower() != 'unknown':
@@ -526,7 +526,7 @@ class Track(Model):
 
         return False
 
-    def _perform_save_changes(self) -> MessageCounter:
+    def _perform_save_changes(self):
         failure_messages = []
         success_counter = 0
 
@@ -550,19 +550,20 @@ class Track(Model):
 
             except PathNotFoundError as not_found:
                 _logger.error(f"There was an issue with file path: {not_found}")
-                raise ValidationError(_("\nActually, the file path of this record is not valid."))
+                raise ValidationError(_("\nActually, the file path of '%s' is not valid.", track.name))
 
             except FilePersistenceError as not_allowed:
                 _logger.error(f"Cannot update the file: {not_allowed}")
                 raise ValidationError(
-                    _("\nAn internal issue ocurred while trying to update the file."
-                      "\nPlease, try it again with a different record.")
+                    _("\nAn internal issue ocurred while trying to update the file '%s'."
+                      "\nPlease, try it again with a different record.", track.name)
                 )
 
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unespected error while trying to update the file: {unknown_error}")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while updating the file.\nPlease, contact with your Admin.")
+                    _("\nSorry, something went wrong while updating the file '%s'."
+                      "\nPlease, contact with your Admin.", track.name)
                 )
 
             if success_counter > 0:
@@ -671,7 +672,7 @@ class Track(Model):
             except MetadataPersistenceError as not_allowed:
                 _logger.error(f"Failed to save metadata into file: {not_allowed}")
                 raise ValidationError(
-                    _("\nThere was a problem when writing metadata: There is no permission or disk is full.")
+                    _("\nUnable to write metadata. Please check your permissions or ensure there is enough disk space.")
                 )
 
             except MusicManagerError as unknown_error:
@@ -681,7 +682,7 @@ class Track(Model):
                 )
 
     @staticmethod
-    def _format_track_duration(duration: int) -> str:
+    def _format_track_duration(duration: int):
         minutes, seconds = divmod(duration, 60)
         return f"{minutes:02}:{seconds:02}"
 

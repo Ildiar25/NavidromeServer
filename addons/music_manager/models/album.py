@@ -49,7 +49,7 @@ class Album(Model):
     user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
 
     @api.model_create_multi
-    def create(self, list_vals: list[AlbumVals]) -> 'Album':
+    def create(self, list_vals: list[AlbumVals]):
         for vals in list_vals:
             self._process_cover_image(vals)
 
@@ -71,7 +71,7 @@ class Album(Model):
 
         return albums
 
-    def write(self, vals: AlbumVals) -> bool:
+    def write(self, vals: AlbumVals):
         self._process_cover_image(vals)
 
         res = super().write(vals)
@@ -90,7 +90,7 @@ class Album(Model):
 
         return res
 
-    def unlink(self) -> 'Album':
+    def unlink(self):
 
         for album in self:
             album.track_ids.unlink()
@@ -198,7 +198,7 @@ class Album(Model):
 
         if total_failure_messages:
             final_message.append(
-                _("Some tracks has been ignored:")
+                _("Some tracks have been ignored:")
             )
             final_message.extend(total_failure_messages)
 

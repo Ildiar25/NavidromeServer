@@ -35,6 +35,10 @@ class Genre:
         :return: None
         """
 
+    def set_to_delete(self: Iterable[Self]) -> None:
+        """Toggles the 'to_delete' field for each genre.
+        :return: None"""
+
     def update_songs(self) -> DisplayNotification | None:
         """Update track metadata linked to this genre. It calls to the `save_changes()` method for each track.
         :return: None | Dictionary with UI information
