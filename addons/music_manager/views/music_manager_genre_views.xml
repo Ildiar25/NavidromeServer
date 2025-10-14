@@ -70,5 +70,17 @@
                 </form>
             </field>
         </record>
+
+        <!-- Searchbar -->
+        <record id="music_manager_genre_view_searchbar" model="ir.ui.view">
+            <field name="name">music_manager.genre.view.searchbar</field>
+            <field name="model">music_manager.genre</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <!-- Custom filters -->
+                    <filter name="by_deleted" string="To delete" domain="[('to_delete', '=', True)]"/>
+                </search>
+            </field>
+        </record>
     </data>
 </odoo>
