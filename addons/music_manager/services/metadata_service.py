@@ -61,6 +61,9 @@ class MP3File(FileMetadata):
                     else:
                         metadata['TPOS'] = int(value.text[0]) if value.text[0].isdigit() else 1, 1
 
+                elif key == 'TCMP':
+                    metadata['TCMP'] = value.text[0] == '1'
+
                 else:
                     metadata[key] = value.text[0]
 
@@ -90,6 +93,7 @@ class MP3File(FileMetadata):
             'TPE2': tag_type.TPE2,
             'TOPE': tag_type.TOPE,
             'TALB': tag_type.TALB,
+            'TCMP': tag_type.TCMP,
             'TRCK': tag_type.TRCK,
             'TPOS': tag_type.TPOS,
             'TDRC': tag_type.TDRC,
@@ -107,6 +111,12 @@ class MP3File(FileMetadata):
 
             if name == 'TRCK' or name == 'TPOS':
                 track.tags.add(tag(encoding=3, text=self.__format_track_tuple(value)))
+
+            if name == 'TCMP':
+                if value is True:
+                    track.tags.add(tag(encoding=3, text='1'))
+                else:
+                    track.tags.add(tag(encoding=3, text='0'))
 
             elif name == 'APIC' and value is not None:
                 track.tags.add(

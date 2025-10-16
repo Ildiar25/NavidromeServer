@@ -8,6 +8,7 @@ class TrackMetadata:
     TPE2: str = "Unknown"               # Album artist
     TOPE: str = "Unknown"               # Original artist
     TALB: str = "Unknown"               # Album
+    TCMP: bool = False                  # Compilation
     TRCK: tuple[int, int] = (1, 1)      # Track no / Total tracks
     TPOS: tuple[int, int] = (1, 1)      # Disk no / Total disks
     TDRC: str = "Unknown"               # Year

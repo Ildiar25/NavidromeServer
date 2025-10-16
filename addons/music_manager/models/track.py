@@ -615,7 +615,7 @@ class Track(Model):
                 for attr_name, value in mapping_fields.items():
                     setattr(track, attr_name, value)
 
-                if metadata.TPE2 and metadata.TPE2.lower() == 'various artists':
+                if metadata.TPE2 and (metadata.TPE2.lower() == 'various artists' or metadata.TCMP):
                     track.collection = True
 
                 if metadata.APIC:
@@ -653,6 +653,7 @@ class Track(Model):
                 'TPE2': "Various Artists" if track.collection else track.album_artist_id.name,
                 'TOPE': track.original_artist_id.name,
                 'TALB': track.album_id.name,
+                'TCMP': track.collection,
                 'TRCK': (track.track_no, track.total_track),
                 'TPOS': (track.disk_no, track.total_disk),
                 'TDRC': track.year,
