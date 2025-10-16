@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0-20250710\n"
+"Project-Id-Version: Odoo Server 17.0-20251008\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 08:55+0000\n"
-"PO-Revision-Date: 2025-10-10 17:32+0200\n"
+"POT-Creation-Date: 2025-10-16 15:30+0000\n"
+"PO-Revision-Date: 2025-10-16 18:41+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca_ES\n"
@@ -34,10 +34,175 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"DownloadService Error: Sorry, something went wrong while validating URL."
+"Actually, the file path of '%s' is not valid."
 msgstr ""
 "\n"
-"DownloadService Error: Vaja, ha sorgit un problema en validar l'URL."
+"Actualment la ruta del fitxer per a '%s' no és vàlida."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Actually, the file path of this record is not valid."
+msgstr ""
+"\n"
+"Actualment, la ruta del fitxer d'aquest registre no és vàlida."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"An internal issue ocurred while processing metadata. Please, try a different file."
+msgstr ""
+"\n"
+"S'ha produït un error intern en processar les metadades. Si us plau, prova un fitxer diferent."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"An internal issue ocurred while processing the image. Please, try a different file."
+msgstr ""
+"\n"
+"S'ha produït un error intern en processar la imatge. Si us plau, prova un fitxer diferent."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"An internal issue ocurred while processing the video. Please, try a different URL."
+msgstr ""
+"\n"
+"S'ha produït un error intern en processar el video. Si us plau, prova una URL diferent."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"An internal issue ocurred while trying to delete the file.\n"
+"Please, try it again with a different record."
+msgstr ""
+"\n"
+"S'ha produït un error intern en suprimir el fitxer.\n"
+"Si us plau, prova un registre diferent."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"An internal issue ocurred while trying to save the file.\n"
+"Please, try it again with a different one."
+msgstr ""
+"\n"
+"S'ha produït un error intern en desar el fitxer.\n"
+"Si us plau, prova amb un altre."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"An internal issue ocurred while trying to update the file '%s'.\n"
+"Please, try it again with a different record."
+msgstr ""
+"\n"
+"S'ha produït un error intern en actualitzar el fitxer de '%s'.\n"
+"Si us plau, prova un registre diferent."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Damn! Something went wrong while deleting the file.\n"
+"Please, contact with your Admin."
+msgstr ""
+"\n"
+"Vaja! Hi ha hagut un problema mentre se suprimia el fitxer.\n"
+"Si us plau, contacta l'administrador/a."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Damn! Something went wrong while processing cover image.\n"
+"Please, contact with your Admin."
+msgstr ""
+"\n"
+"Vaja! Hi ha hagut un problema mentre se processava la imatge de coberta.\n"
+"Si us plau, contacta l'administrador/a."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Damn! Something went wrong while processing metadata file.\n"
+"Please, contact with your Admin."
+msgstr ""
+"\n"
+"Vaja! Hi ha hagut un problema mentre se processaven les metadades del fitxer.\n"
+"Si us plau, contacta l'administrador/a."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Damn! Something went wrong while saving the file.\n"
+"Please, contact with your Admin."
+msgstr ""
+"\n"
+"Vaja! Hi ha hagut un problema mentre se desava el fitxer.\n"
+"Si us plau, contacta l'administrador/a."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Damn! Something went wrong while updating the file '%s'.\n"
+"Please, contact with your Admin."
+msgstr ""
+"\n"
+"Vaja! Hi ha hagut un problema mentre s'actualitzava el fitxer de '%s'.\n"
+"Si us plau, contacta l'administrador/a."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Damn! Something went wrong while validating URL.\n"
+"Please, contact with your Admin."
+msgstr ""
+"\n"
+"Vaja! Hi ha hagut un problema mentre se validava l'URL.\n"
+"Si us plau, contacta l'administrador/a."
 
 #. module: music_manager
 #. odoo-python
@@ -64,19 +229,6 @@ msgstr ""
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/album.py:0
-#: code:addons/music_manager/models/artist.py:0
-#: code:addons/music_manager/models/track.py:0
-#, python-format
-msgid ""
-"\n"
-"ImageServiceError: Sorry, something went wrong while processing cover image"
-msgstr ""
-"\n"
-"ImageServiceError: Vaja, ha sorgit un problema en processar la imatge de portada"
-
-#. module: music_manager
-#. odoo-python
 #: code:addons/music_manager/models/track.py:0
 #, python-format
 msgid ""
@@ -85,39 +237,6 @@ msgid ""
 msgstr ""
 "\n"
 "L'URL de YouTube és invàlida o no es pot accedir al video."
-
-#. module: music_manager
-#. odoo-python
-#: code:addons/music_manager/models/track.py:0
-#, python-format
-msgid ""
-"\n"
-"Invalid metadata founded on file."
-msgstr ""
-"\n"
-"S'han trobat metadades no vàlides al fitxer."
-
-#. module: music_manager
-#. odoo-python
-#: code:addons/music_manager/models/track.py:0
-#, python-format
-msgid ""
-"\n"
-"MetadataServiceError: Sorry, something went wrong while updating metadata fields."
-msgstr ""
-"\n"
-"MetadataServiceError: Vaja, ha sorgit un problema en actualitzar els camps de les metadades."
-
-#. module: music_manager
-#. odoo-python
-#: code:addons/music_manager/models/track.py:0
-#, python-format
-msgid ""
-"\n"
-"MetadataServiceError: Sorry, something went wrong while updating metadata."
-msgstr ""
-"\n"
-"MetadataServiceError: Vaja, ha sorgit un problema en actualitzar les metadades."
 
 #. module: music_manager
 #. odoo-python
@@ -143,19 +262,6 @@ msgstr ""
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/album.py:0
-#: code:addons/music_manager/models/artist.py:0
-#: code:addons/music_manager/models/track.py:0
-#, python-format
-msgid ""
-"\n"
-"Something went wrong while processing cover image: %s"
-msgstr ""
-"\n"
-"Ha sorgit un problema en processar la imatge de portada: %s"
-
-#. module: music_manager
-#. odoo-python
 #: code:addons/music_manager/models/track.py:0
 #, python-format
 msgid ""
@@ -164,6 +270,19 @@ msgid ""
 msgstr ""
 "\n"
 "La cançó '%s' ja existeix amb el/s mateix/os artista/es."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"The uploaded file has an invalid format or is corrupt."
+msgstr ""
+"\n"
+"El fitxer carregat té un format invàlid o està corrupte."
 
 #. module: music_manager
 #. odoo-python
@@ -198,6 +317,17 @@ msgid ""
 msgstr ""
 "\n"
 "Aquesta coberta de la cançó té un format invàlid: %s"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Unable to write metadata. Please check your permissions or ensure there is enough disk space."
+msgstr ""
+"\n"
+"No es poden escriure les metadades. Si us plau, comprova els permisos o assegura't que hi ha prou espai al disc."
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -401,19 +531,24 @@ msgstr "Àlbums"
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/track.py:0
+#: code:addons/music_manager/models/album.py:0
 #, python-format
-msgid "All metadata are been updated!"
-msgstr "S'han actualitzat totes les metadades!"
+msgid "All tracks from this album have been updated!"
+msgstr "Totes les cançons d'aquest àlbum s'han actualitzat!"
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/album.py:0
 #: code:addons/music_manager/models/artist.py:0
+#, python-format
+msgid "All tracks from this artist have been updated!"
+msgstr "Totes les cançons d'aquest artista s'han actualitzat!"
+
+#. module: music_manager
+#. odoo-python
 #: code:addons/music_manager/models/genre.py:0
 #, python-format
-msgid "All metadata tracks are been updated!"
-msgstr "S'han actualitzat totes les metadades de les cançons!"
+msgid "All tracks from this genre have been updated!"
+msgstr "Totes les cançons d'aquest gènere s'han actualitzat!"
 
 #. module: music_manager
 #: model:ir.actions.act_window,name:music_manager.music_manager_artist_view_action
@@ -442,15 +577,6 @@ msgstr "Artistes"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Back"
 msgstr "Enrere"
-
-#. module: music_manager
-#. odoo-python
-#: code:addons/music_manager/models/artist.py:0
-#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__birthdate
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
-#, python-format
-msgid "Birthdate"
-msgstr "Data de naixement"
 
 #. module: music_manager
 #. odoo-python
@@ -575,21 +701,21 @@ msgid "Duration (min)"
 msgstr "Durada (min)"
 
 #. module: music_manager
-#. odoo-python
-#: code:addons/music_manager/models/artist.py:0
-#, python-format
-msgid "Edit artist"
-msgstr "Edita l'artista"
-
-#. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Editing! 📝"
 msgstr "Editant! 📝"
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/artist.py:0
-#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__is_favorite
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Failed to update metadata for '%s' track!"
+msgstr "No s'han pogut actualitzar les metadades de la cançó '%s'!"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_album__is_favorite
 #, python-format
 msgid "Favorite"
 msgstr "Preferit"
@@ -611,9 +737,14 @@ msgid "File path"
 msgstr "Ruta del fitxer"
 
 #. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__founded_in
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-msgid "Founded"
-msgstr "Fundat/da"
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
+#, python-format
+msgid "Founded in"
+msgstr "Fundat el"
 
 #. module: music_manager
 #. odoo-python
@@ -632,6 +763,14 @@ msgstr "Fundat/da"
 #, python-format
 msgid "Genre"
 msgstr "Gènere"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.constraint,message:music_manager.constraint_music_manager_genre_check_genre_name
+#, python-format
+msgid "Genre name must be unique."
+msgstr "El nom del gènere ha de ser únic."
 
 #. module: music_manager
 #: model:ir.ui.menu,name:music_manager.music_manager_music_menu_genre_action
@@ -718,6 +857,13 @@ msgid "Metadata Editing"
 msgstr "Edició de Metadades"
 
 #. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Metadata from '%s' has been updated!"
+msgstr "Les metadades de '%s' s'han actualitzat!"
+
+#. module: music_manager
 #: model:ir.module.category,name:music_manager.module_category_music_manager
 #: model:ir.ui.menu,name:music_manager.music_manager_menu_root
 msgid "Music Manager"
@@ -766,6 +912,13 @@ msgid "Name"
 msgstr "Nom"
 
 #. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#, python-format
+msgid "New artist"
+msgstr "Nou artista"
+
+#. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "New metadata"
 msgstr "Metadades noves"
@@ -779,6 +932,13 @@ msgstr "Següent"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 msgid "Nice! Your song is ready to be added onto your library! 😍"
 msgstr "Genial! La teva cançó està a punt per afegir-la a la biblioteca 😍"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "No changes applied to '%s' track!"
+msgstr "Cap canvi s'ha aplicat a la cançó '%s'!"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
@@ -881,30 +1041,32 @@ msgstr "Desa"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 msgid "Search"
 msgstr "Cerca"
 
 #. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_kanban
+msgid "Set favorite"
+msgstr "Marcar com a preferit"
+
+#. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
-msgid "Set favorite"
-msgstr "Afegir a preferits"
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
+msgid "Set to delete"
+msgstr "Marcar per suprimir"
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/track.py:0
-#, python-format
-msgid "Some metadata has not been changed!"
-msgstr "Algunes metadades no s'han modificat!"
-
-#. module: music_manager
-#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#: code:addons/music_manager/models/artist.py:0
 #: code:addons/music_manager/models/genre.py:0
-#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__track_ids
 #, python-format
-msgid "Song(s)"
-msgstr "Cançó/ns"
+msgid "Some tracks have been ignored:"
+msgstr "Algunes cançons s'han ignorat:"
 
 #. module: music_manager
 #: model:ir.ui.menu,name:music_manager.music_manager_music_menu_song_action
@@ -931,20 +1093,24 @@ msgstr "Estat"
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/genre.py:0
-#: model:ir.model.constraint,message:music_manager.constraint_music_manager_genre_check_genre_name
+#: code:addons/music_manager/models/album.py:0
 #, python-format
-msgid "The genre name must be unique."
-msgstr "El nom del gènere ha de ser únic."
+msgid "This album has not any tracks to update!"
+msgstr "Aquest àlbum no té cap cançó per actualitzar!"
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/album.py:0
 #: code:addons/music_manager/models/artist.py:0
+#, python-format
+msgid "This artist has not any tracks to update!"
+msgstr "Aquest artista no té cap cançó per actualitzar!"
+
+#. module: music_manager
+#. odoo-python
 #: code:addons/music_manager/models/genre.py:0
 #, python-format
-msgid "There are not any tracks to update!"
-msgstr "No hi ha cap cançó per actualitzar!"
+msgid "This genre has not any tracks to update!"
+msgstr "Aquest gènere no té cap cançó per actualitzar!"
 
 #. module: music_manager
 #. odoo-python
@@ -958,6 +1124,18 @@ msgstr "No hi ha cap cançó per actualitzar!"
 #, python-format
 msgid "Title"
 msgstr "Títol"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__to_delete
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__to_delete
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_searchbar
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_searchbar
+#, python-format
+msgid "To delete"
+msgstr "Per suprimir"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
@@ -1003,6 +1181,20 @@ msgstr "Pista"
 
 #. module: music_manager
 #. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Track '%s' was skipped because it has an invalid path."
+msgstr "S'ha omès la cançó '%s' perquè té una ruta invàlida."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid "Track '%s' was skipped because it is not saved into your library."
+msgstr "S'ha omès la cançó '%s' perquè no és a la teva biblioteca."
+
+#. module: music_manager
+#. odoo-python
 #: code:addons/music_manager/models/album.py:0
 #: code:addons/music_manager/models/artist.py:0
 #: code:addons/music_manager/models/genre.py:0
@@ -1041,7 +1233,9 @@ msgstr "Número de pista"
 #. module: music_manager
 #. odoo-python
 #: code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__track_ids
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__track_ids
 #, python-format
 msgid "Track(s)"
 msgstr "Cançó/ns"
@@ -1188,12 +1382,12 @@ msgstr "URL de YouTube"
 #. module: music_manager
 #: model:ir.model,name:music_manager.model_music_manager_album
 msgid "album_table"
-msgstr "album_table"
+msgstr "taula_d'àlbums"
 
 #. module: music_manager
 #: model:ir.model,name:music_manager.model_music_manager_artist
 msgid "artist_table"
-msgstr "artist_table"
+msgstr "taula_d'artistes"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
@@ -1219,7 +1413,7 @@ msgstr "per títol de pista"
 #. module: music_manager
 #: model:ir.model,name:music_manager.model_music_manager_genre
 msgid "genre_table"
-msgstr "genre_table"
+msgstr "taula_de_gèneres"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -1229,7 +1423,7 @@ msgstr "https://"
 #. module: music_manager
 #: model:ir.model,name:music_manager.model_music_manager_track
 msgid "track_table"
-msgstr "track_table"
+msgstr "taula_de_cançons"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form

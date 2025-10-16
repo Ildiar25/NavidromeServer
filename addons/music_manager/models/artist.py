@@ -182,5 +182,5 @@ class Artist(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing image: {unknown_error}.")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while processing cover image.\nPlease, contact with your Admin.")
+                    _("\nDamn! Something went wrong while processing cover image.\nPlease, contact with your Admin.")
                 )

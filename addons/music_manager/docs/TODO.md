@@ -22,7 +22,7 @@
  - [x] Arreglar el guardado de metadatos: Actualmente da problemas.
  - [x] Comprobar que el archivo se elimine al eliminar el registro.
  - [x] Por ahora no hay lógica que elimine carpetas vacías. Implementar de forma recursiva.
- - [ ] **Añadir la etiqueta *'TCMP'* para marcar las canciones como compilatorias.**
+ - [x] Añadir la etiqueta *'TCMP'* para marcar las canciones como compilatorias.
 
 ### Módulo
 
@@ -41,7 +41,7 @@
    - [ ] **Francés 0%.**
    - [x] Español 100%.
    - [x] Catalán 100%.
- - [ ] **Cuando se elimine un registro (*'user general'*), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.**
+ - [ ] ~~Cuando se elimine un registro (*'user general'*), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.~~
  - [x] Error al eliminar Genero y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.
  - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
  - [ ] **Crear menús y vistas de *'Albums'* y *'Artists'* según el tipo de usuario (*'General'*, *'Admin'*).**

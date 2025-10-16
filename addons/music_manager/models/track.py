@@ -162,7 +162,7 @@ class Track(Model):
                     except MusicManagerError as unknown_error:
                         _logger.error(f"Unespected error while trying to delete the file: {unknown_error}")
                         raise ValidationError(
-                            _("\nSorry, something went wrong while deleting the file."
+                            _("\nDamn! Something went wrong while deleting the file."
                               "\nPlease, contact with your Admin.")
                         )
 
@@ -406,7 +406,7 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unespected error while trying to save the file: {unknown_error}")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while saving the file.\nPlease, contact with your Admin.")
+                    _("\nDamn! Something went wrong while saving the file.\nPlease, contact with your Admin.")
                 )
 
             self._update_metadata(track.file_path)
@@ -454,7 +454,7 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing video URL '{track.url}': {unknown_error}")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while validating URL.\nPlease, contact with your Admin.")
+                    _("\nDamn! Something went wrong while validating URL.\nPlease, contact with your Admin.")
                 )
 
     def _find_or_create_album(self, album_name: str):
@@ -562,7 +562,7 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unespected error while trying to update the file: {unknown_error}")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while updating the file '%s'."
+                    _("\nDamn! Something went wrong while updating the file '%s'."
                       "\nPlease, contact with your Admin.", track.name)
                 )
 
@@ -642,7 +642,7 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing the file: {unknown_error}")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while processing metadata file.\nPlease, contact with your Admin.")
+                    _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
                 )
 
     def _update_metadata(self, path: str) -> None:
@@ -679,7 +679,7 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while processing metadata file.\nPlease, contact with your Admin.")
+                    _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
                 )
 
     @staticmethod
@@ -714,5 +714,5 @@ class Track(Model):
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing image: {unknown_error}.")
                 raise ValidationError(
-                    _("\nSorry, something went wrong while processing cover image.\nPlease, contact with your Admin.")
+                    _("\nDamn! Something went wrong while processing cover image.\nPlease, contact with your Admin.")
                 )
