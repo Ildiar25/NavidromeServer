@@ -44,7 +44,7 @@
  - [ ] ~~Cuando se elimine un registro (*'user general'*), se elimine su propietario pero que Admin pueda ver qué registros no tienen propietario.~~
  - [x] Error al eliminar Genero y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.
  - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
- - [ ] **Crear menús y vistas de *'Albums'* y *'Artists'* según el tipo de usuario (*'General'*, *'Admin'*).**
+ - [x] Crear menús y vistas de *'Albums'* y *'Artists'* según el tipo de usuario (*'General'*, *'Admin'*).
  - [x] Los artistas son globales y, por tanto, configurar si es favorito o no también. Eliminar dicho atributo y añadirlo a álbum.
  - [x] Revisar textos en inglés.
  - [x] Revisar excepciones dadas.
