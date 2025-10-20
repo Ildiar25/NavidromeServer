@@ -3,7 +3,6 @@ from collections.abc import Callable
 from typing import Final, Iterable, Literal, Optional, Self, Sequence
 
 from odoo.api import Environment
-from odoo.addons.base.models.res_users import Users
 
 from .album import Album
 from .artist import Artist
@@ -11,6 +10,7 @@ from .genre import Genre
 from ..utils.custom_types import (
     CustomWarningMessage,
     DisplayNotification,
+    DomainCustomFilter,
     MessageCounter,
     ReplaceItemCommand,
     TrackVals
@@ -62,7 +62,6 @@ class Track:
     has_valid_path: bool
     is_saved: bool
     state: Literal['start', 'uploaded', 'metadata', 'done', 'added']
-    user_id: Users
 
     def create(self, list_vals: list[TrackVals]) -> Self:
         """Overrides 'create' method to process cover track & syncronizes with album & artist ids.
@@ -106,6 +105,13 @@ class Track:
     def _inverse_collection_value(self: Iterable[Self]) -> None:
         """Sets artist name as 'various artists' if `collection` field is True.
         :return: None
+        """
+
+    def _search_is_deleted(self: Iterable[Self], operator: str, value: bool) -> DomainCustomFilter:
+        """This method returns a record list according to the given filter.
+        :param operator: Representative strinmg from different operators like '=' or '!='.
+        :param value: Boolean value
+        :return: List with diferent records according to filter.
         """
 
     def _check_fields(self: Iterable[Self]) -> None:

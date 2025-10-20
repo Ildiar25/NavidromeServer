@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-        <record id="music_manager_track_view_action" model="ir.actions.act_window">
+        <record id="music_manager_track_view_action_general" model="ir.actions.act_window">
             <field name="name">Track</field>
             <field name="res_model">music_manager.track</field>
             <field name="view_mode">tree,form</field>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
+        </record>
+
+        <record id="music_manager_track_view_action_admin" model="ir.actions.act_window">
+            <field name="name">Track</field>
+            <field name="res_model">music_manager.track</field>
+            <field name="view_mode">tree</field>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
+            <field name="context">{'group_by': 'create_uid'}</field>
         </record>
 
         <!-- Tree view -->
@@ -26,6 +35,9 @@
                     <field name="has_valid_path" column_invisible="True"/>
                     <field name="is_saved" column_invisible="True"/>
                     <field name="is_deleted" column_invisible="True"/>
+                    <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                 </tree>
             </field>
         </record>
@@ -369,10 +381,12 @@
 
                     <!-- Custom filters -->
                     <filter name="by_saved" string="Not saved" domain="[('is_saved', '=', False)]"/>
+                    <filter name="by_path_type" string="Invalid path" domain="[('has_valid_path', '=', False)]" groups="music_manager.group_music_manager_user_admin"/>
+                    <filter name="by_deleted_file" string="Deleted file" domain="[('is_deleted', '=', True)]" groups="music_manager.group_music_manager_user_admin"/>
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
-                        <filter name="user_id" string="Owner" context="{'group_by': 'user_id'}" groups="music_manager.group_music_manager_user_admin"/>
+                        <filter name="create_uid" string="Owner" context="{'group_by': 'create_uid'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                     </group>

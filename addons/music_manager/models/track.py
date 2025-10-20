@@ -9,7 +9,7 @@ import magic
 from urllib.parse import urlparse
 # noinspection PyProtectedMember
 from odoo import _, api
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
@@ -76,7 +76,9 @@ class Track(Model):
         default=False,
     )
     display_artist_names = Char(string=_("Display artist name"), compute='_compute_display_artist_name', store=False)
-    is_deleted = Boolean(string=_("Is deleted"), compute='_compute_file_is_deleted', store=False)
+    is_deleted = Boolean(
+        string=_("Is deleted"), compute='_compute_file_is_deleted', search='_search_is_deleted', store=False
+    )
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
     old_path = Char(string=_("Old path"), copy=False, store=True)
 
@@ -97,7 +99,6 @@ class Track(Model):
         string=_("State"),
         default='start'
     )
-    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
     def create(self, list_vals: list[TrackVals]):
@@ -121,6 +122,8 @@ class Track(Model):
         res = super().write(vals)
 
         for track in self:  # type:ignore
+            if track.is_deleted:
+                raise UserError(_("You cannot modify a deleted file."))
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
@@ -215,6 +218,16 @@ class Track(Model):
                     track.original_artist_id.name, track.track_artist_ids
                 )
 
+    def _search_is_deleted(self, operator, value):
+        matching_ids = []
+        for track in self.search([('is_saved', '=', True)]):
+            deleted = not os.path.isfile(track.old_path)
+
+            if (value and deleted) or (not value and not deleted):
+                matching_ids.append(track.id)
+
+        return [("id", "in", matching_ids)]
+
     @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
         for track in self:
@@ -231,7 +244,7 @@ class Track(Model):
                     _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
                 )
 
-    @api.constrains('name', 'track_artist_ids', 'user_id')
+    @api.constrains('name', 'track_artist_ids', 'create_uid')
     def _check_track_name(self) -> None:
         for current_track in self:  # type:ignore
             if not current_track.track_artist_ids:
@@ -240,7 +253,7 @@ class Track(Model):
             existing_tracks = self.search([
                 ('id', '!=', current_track.id),
                 ('name', '=', current_track.name),
-                ('user_id', '=', current_track.user_id.id)
+                ('create_uid', '=', current_track.create_uid.id)
             ])
 
             for track in existing_tracks:  # type:ignore
