@@ -6,9 +6,15 @@
     <!-- Submenus -->
     <menuitem id="music_manager_music_menu" name="My music" parent="music_manager_menu_root"/>
 
-    <!-- Actions -->
-    <menuitem id="music_manager_music_menu_song_action" name="Songs" parent="music_manager_music_menu" action="music_manager_track_view_action"/>
-    <menuitem id="music_manager_music_menu_artist_action" name="Artists" parent="music_manager_music_menu" action="music_manager_artist_view_action"/>
-    <menuitem id="music_manager_music_menu_album_action" name="Albums" parent="music_manager_music_menu" action="music_manager_album_view_action"/>
-    <menuitem id="music_manager_music_menu_genre_action" name="Genres" parent="music_manager_music_menu" action="music_manager_genre_view_action"/>
+    <!-- Actions User General -->
+    <menuitem id="music_manager_music_menu_song_action_general" name="Songs" parent="music_manager_music_menu" action="music_manager_track_view_action_general" groups="music_manager.group_music_manager_user_general"/>
+    <menuitem id="music_manager_music_menu_artist_action_general" name="Artists" parent="music_manager_music_menu" action="music_manager_artist_view_action_general" groups="music_manager.group_music_manager_user_general"/>
+    <menuitem id="music_manager_music_menu_album_action_general" name="Albums" parent="music_manager_music_menu" action="music_manager_album_view_action_general" groups="music_manager.group_music_manager_user_general"/>
+    <menuitem id="music_manager_music_menu_genre_action_general" name="Genres" parent="music_manager_music_menu" action="music_manager_genre_view_action_general" groups="music_manager.group_music_manager_user_general"/>
+
+    <!-- Actions User Admin -->
+    <menuitem id="music_manager_music_menu_song_action_admin" name="Songs" parent="music_manager_music_menu" action="music_manager_track_view_action_admin" groups="music_manager.group_music_manager_user_admin"/>
+    <menuitem id="music_manager_music_menu_artist_action_admin" name="Artists" parent="music_manager_music_menu" action="music_manager_artist_view_action_admin" groups="music_manager.group_music_manager_user_admin"/>
+    <menuitem id="music_manager_music_menu_album_action_admin" name="Albums" parent="music_manager_music_menu" action="music_manager_album_view_action_admin" groups="music_manager.group_music_manager_user_admin"/>
+    <menuitem id="music_manager_music_menu_genre_action_admin" name="Genres" parent="music_manager_music_menu" action="music_manager_genre_view_action_admin" groups="music_manager.group_music_manager_user_admin"/>
 </odoo>
