@@ -48,3 +48,5 @@
  - [x] Los artistas son globales y, por tanto, configurar si es favorito o no también. Eliminar dicho atributo y añadirlo a álbum.
  - [x] Revisar textos en inglés.
  - [x] Revisar excepciones dadas.
+ - [ ] **Conseguir que los formularios se muestren de modo *'solo lectura'* cuando el usuario no es propietario (*'artist'*, *'genre'*).**
+ - [ ] **El administrador no puede ver los resultados obtenidos agrupados por usuario en *'artist'* y *'genre'* en las pestañas álbum o canciones.**
