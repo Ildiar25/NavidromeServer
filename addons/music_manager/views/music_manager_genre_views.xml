@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-        <record id="music_manager_genre_view_action" model="ir.actions.act_window">
+        <record id="music_manager_genre_view_action_general" model="ir.actions.act_window">
             <field name="name">Genre</field>
             <field name="res_model">music_manager.genre</field>
             <field name="view_mode">tree,form</field>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
+        </record>
+
+        <record id="music_manager_genre_view_action_admin" model="ir.actions.act_window">
+            <field name="name">Genre</field>
+            <field name="res_model">music_manager.genre</field>
+            <field name="view_mode">tree,form</field>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
         </record>
 
         <!-- Tree View -->
@@ -16,10 +24,9 @@
                     <field name="name" string="Name"/>
                     <field name="track_amount" string="Track amount"/>
                     <field name="disk_amount" string="Disk amount"/>
-                    <field name="user_id" string="Added by"/>
-                    <field name="to_delete" column_invisible="True"/>
-                    <button name="set_to_delete" type="object" class="oe_stat_button" help="Set to delete" icon="fa-trash text-danger" invisible="to_delete == False"/>
-                    <button name="set_to_delete" type="object" class="oe_stat_button" help="Set to delete" icon="fa-trash-o" invisible="to_delete == True"/>
+                    <field name="create_uid" string="Added by"/>
+                    <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                 </tree>
             </field>
         </record>
@@ -47,6 +54,9 @@
                                         <field name="disk_amount" string="Disk amount" optional="hide"/>
                                         <field name="genre_id" string="Genre"/>
                                         <field name="year" string="Year"/>
+                                        <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
                                 </field>
                             </page>
@@ -62,6 +72,9 @@
                                         <field name="duration" string="Duration"/>
                                         <field name="is_saved" column_invisible="True"/>
                                         <field name="is_deleted" column_invisible="True"/>
+                                        <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
                                 </field>
                             </page>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections.abc import Callable
 from datetime import date
-from typing import Final, Iterable, Self, Sequence, Literal
+from typing import Final, Iterable, Literal, Self, Sequence
 
 from odoo.addons.base.models.res_users import Users
 from odoo.api import Environment
@@ -45,7 +45,7 @@ class Artist:
 
     def write(self, vals: ArtistVals) -> Literal[True]:
         """Overrides 'write' method to process the profile picture if it exists before
-        update an artist record.
+        update an artist record and ensures only owner can update records.
         :param vals: Dictionary with artist values to update.
         :return: Confirms updated artist record.
         """

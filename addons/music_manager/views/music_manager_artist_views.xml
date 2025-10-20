@@ -106,6 +106,9 @@
                                         <field name="disk_amount" string="Disk amount" optional="hide"/>
                                         <field name="genre_id" string="Genre"/>
                                         <field name="year" string="Year"/>
+                                        <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
                                 </field>
                             </page>
@@ -121,6 +124,9 @@
                                         <field name="duration" string="Duration"/>
                                         <field name="is_saved" column_invisible="True"/>
                                         <field name="is_deleted" column_invisible="True"/>
+                                        <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
                                 </field>
                             </page>

@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # noinspection PyProtectedMember
 from odoo import _, api
+from odoo.exceptions import UserError
 from odoo.models import Model
 from odoo.fields import Boolean, Char, Integer, One2many, Many2one
+
+from ..utils.custom_types import GenreVals
 
 
 class Genre(Model):
@@ -26,8 +29,31 @@ class Genre(Model):
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
 
-    # Technical fields
-    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
+    def write(self, vals: GenreVals):
+        for genre in self:  # type:ignore
+            if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+                if genre.create_uid != self.env.user:
+                    raise UserError(_("\nCannot update this genre because you are not the owner. 🤷"))
+
+        return super().write(vals)
+
+    def unlink(self):
+        for genre in self:  # type:ignore
+            if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+                if genre.create_uid != self.env.user:
+                    raise UserError(_("\nCannot delete this genre because you are not the owner. 🤷"))
+
+                related_tracks = self.env['music_manager.track'].sudo().search(
+                    [('genre_id', '=', genre.id)], limit=1
+                )
+                related_albums = self.env['music_manager.album'].sudo().search(
+                    [('genre_id', '=', genre.id)], limit=1
+                )
+
+                if related_tracks or related_albums:
+                    raise UserError(_("\nCannot delete this genre because it is in use by other users. 🤷"))
+
+        return super().unlink()
 
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:

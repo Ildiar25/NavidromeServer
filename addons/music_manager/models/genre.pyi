@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from collections.abc import Callable
-from typing import Final, Iterable, Self, Sequence
+from typing import Final, Iterable, Literal, Self, Sequence
+
+from odoo.api import Environment
 
 from .album import Album
 from .track import Track
-from ..utils.custom_types import DisplayNotification
+from ..utils.custom_types import GenreVals, DisplayNotification
 
 
 class Genre:
@@ -14,6 +16,7 @@ class Genre:
     _order: str | None
     _sql_constraints: list[tuple[str, str, str]] | None
     id: int
+    env: Environment
     ensure_one: Callable[[], Self]
 
     name: str
@@ -22,6 +25,17 @@ class Genre:
     album_ids: Sequence[Album]
     track_amount: int
     disk_amount: int
+
+    def write(self, vals: GenreVals) -> Literal[True]:
+        """Overrides 'write' method to ensure only owner can update records.
+        :param vals: Dictionary with artist values to update.
+        :return: Confirms updated artist record.
+        """
+
+    def unlink(self) -> Literal[True]:
+        """Overrides 'unlink' method to ensure only owner can delete records.
+        :return: Confirms deleted genre record.
+        """
 
     def _compute_track_amount(self: Iterable[Self]) -> None:
         """Calculates track amount linked to this genre record.
