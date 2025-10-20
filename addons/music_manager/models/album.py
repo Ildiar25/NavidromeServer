@@ -45,9 +45,6 @@ class Album(Model):
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
     year = Char(string=_("Year"), compute='_compute_album_year', inverse='_inverse_album_year', store=True)
 
-    # Technical fields
-    user_id = Many2one(comodel_name='res.users', string=_("Owner"), default=lambda self: self.env.user)
-
     @api.model_create_multi
     def create(self, list_vals: list[AlbumVals]):
         for vals in list_vals:

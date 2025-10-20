@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-        <record id="music_manager_album_view_action" model="ir.actions.act_window">
+        <record id="music_manager_album_view_action_general" model="ir.actions.act_window">
             <field name="name">Album</field>
             <field name="res_model">music_manager.album</field>
             <field name="view_mode">kanban,form</field>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
+        </record>
+
+        <record id="music_manager_album_view_action_admin" model="ir.actions.act_window">
+            <field name="name">Album</field>
+            <field name="res_model">music_manager.album</field>
+            <field name="view_mode">tree,form</field>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
+            <field name="context">{'group_by': 'create_uid'}</field>
         </record>
 
         <!-- Kanban view -->
@@ -29,6 +38,26 @@
                         </t>
                     </template>
                 </kanban>
+            </field>
+        </record>
+
+        <!-- Tree view -->
+        <record id="music_manager_album_view_tree" model="ir.ui.view">
+            <field name="name">music_manager.album.view.tree</field>
+            <field name="model">music_manager.album</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}"/>
+                    <field name="name" string="Album title"/>
+                    <field name="album_artist_id" string="Album artist"/>
+                    <field name="genre_id" string="Genre"/>
+                    <field name="track_amount" string="Track amount" optional="hide"/>
+                    <field name="disk_amount" string="Disk amount" optional="hide"/>
+                    <field name="year" string="Year" optional="hide"/>
+                    <field name="create_uid" string="Owner" optional="hide"/>
+                    <field name="create_date" string="Create date"/>
+                    <field name="write_date" string="Last update"/>
+                </tree>
             </field>
         </record>
 
@@ -87,6 +116,7 @@
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
+                        <filter name="create_uid" string="Owner" context="{'group_by': 'create_uid'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                         <filter name="genre_id" string="Genre" context="{'group_by': 'genre_id'}"/>

@@ -2,8 +2,6 @@
 from collections.abc import Callable
 from typing import Final, Iterable, Optional, Self, Sequence, Literal
 
-from odoo.addons.base.models.res_users import Users
-
 from .artist import Artist
 from .genre import Genre
 from .track import Track
@@ -32,7 +30,6 @@ class Album:
     disk_amount: int
     track_amount: int
     year: str | None
-    user_id: Users
 
     def create(self, list_vals: list[AlbumVals]) -> Self:
         """Overrides 'create' method to process cover album & propagate to linked tracks, genre or artist records.
