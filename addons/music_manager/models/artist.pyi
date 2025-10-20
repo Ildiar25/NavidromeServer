@@ -4,6 +4,7 @@ from datetime import date
 from typing import Final, Iterable, Self, Sequence, Literal
 
 from odoo.addons.base.models.res_users import Users
+from odoo.api import Environment
 
 from .album import Album
 from .track import Track
@@ -21,6 +22,7 @@ class Artist:
     _order: str | None
     _sql_constraints: list[tuple[str, str, str]] | None
     id: int
+    env: Environment
     ensure_one: Callable[[], Self]
 
     birthdate: date | None
@@ -46,6 +48,11 @@ class Artist:
         update an artist record.
         :param vals: Dictionary with artist values to update.
         :return: Confirms updated artist record.
+        """
+
+    def unlink(self) -> Literal[True]:
+        """Overrides 'unlink' method to ensure only owner can delete records.
+        :return: Confirms deleted artist record.
         """
 
     def _compute_album_amount(self: Iterable[Self]) -> None:
