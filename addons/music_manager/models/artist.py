@@ -23,14 +23,13 @@ class Artist(Model):
 
     _name = 'music_manager.artist'
     _description = 'artist_table'
-    _order = 'to_delete, name'
+    _order = 'name'
 
     # Basic fields
     founded_in = Date(string=_("Founded in"))
     name = Char(string=_("Name"), required=True)
     picture = Binary(string=_("Profile"))
     real_name = Text(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
-    to_delete = Boolean(string=_("To delete"), default=False)
 
     # Relational fields
     album_ids = One2many(comodel_name='music_manager.album', inverse_name='album_artist_id', string=_("Album(s)"))
@@ -122,10 +121,6 @@ class Artist(Model):
                 }
 
         return None
-
-    def set_to_delete(self) -> None:
-        for artist in self:
-            artist.to_delete = not artist.to_delete
 
     def update_songs(self):
         self.ensure_one()

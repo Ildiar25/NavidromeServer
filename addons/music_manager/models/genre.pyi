@@ -20,7 +20,6 @@ class Genre:
     ensure_one: Callable[[], Self]
 
     name: str
-    to_delete: bool
     track_ids: Sequence[Track]
     album_ids: Sequence[Album]
     track_amount: int
@@ -48,10 +47,6 @@ class Genre:
         Result is saved into `disk_amount` field.
         :return: None
         """
-
-    def set_to_delete(self: Iterable[Self]) -> None:
-        """Toggles the 'to_delete' field for each genre.
-        :return: None"""
 
     def update_songs(self) -> DisplayNotification | None:
         """Update track metadata linked to this genre. It calls to the `save_changes()` method for each track.

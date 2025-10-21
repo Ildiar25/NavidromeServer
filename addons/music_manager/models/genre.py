@@ -12,14 +12,13 @@ class Genre(Model):
 
     _name = 'music_manager.genre'
     _description = 'genre_table'
-    _order = 'to_delete, name'
+    _order = 'name'
     _sql_constraints = [
         ('check_genre_name', 'UNIQUE(name)', _("Genre name must be unique.")),
     ]
 
     # Default fields
     name = Char(string=_("Name"), required=True)
-    to_delete = Boolean(string=_("To delete"), default=False)
 
     # Relationships
     track_ids = One2many(comodel_name='music_manager.track', inverse_name='genre_id', string=_("Track(s)"))
@@ -64,10 +63,6 @@ class Genre(Model):
     def _compute_disk_amount(self) -> None:
         for genre in self:
             genre.disk_amount = len(genre.album_ids) if genre.album_ids else 0
-
-    def set_to_delete(self) -> None:
-        for genre in self:
-            genre.to_delete = not genre.to_delete
 
     def update_songs(self):
         self.ensure_one()
