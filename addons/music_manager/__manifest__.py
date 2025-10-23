@@ -6,7 +6,7 @@
 {
     'name': "Music Manager",
     'version': "1.0.0",
-    'category': "Manager",
+    'category': "Music Manager",
     'description': """
         This module allows the user to manage a music directory, doing CRUD operations with music files and
         update music metadata with ID3 labels.

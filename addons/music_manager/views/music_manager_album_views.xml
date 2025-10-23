@@ -2,14 +2,14 @@
 <odoo>
     <data>
         <record id="music_manager_album_view_action_general" model="ir.actions.act_window">
-            <field name="name">Album</field>
+            <field name="name">Albums</field>
             <field name="res_model">music_manager.album</field>
             <field name="view_mode">kanban,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
         </record>
 
         <record id="music_manager_album_view_action_admin" model="ir.actions.act_window">
-            <field name="name">Album</field>
+            <field name="name">Album management</field>
             <field name="res_model">music_manager.album</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>

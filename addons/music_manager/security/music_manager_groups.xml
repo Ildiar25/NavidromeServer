@@ -4,20 +4,27 @@
         <!-- Music manager category group security -->
         <record id="module_category_music_manager" model="ir.module.category">
             <field name="name">Music Manager</field>
-            <field name="sequence">1</field>
+        </record>
+
+        <record id="module_subcategory_music_manager" model="ir.module.category">
+            <field name="name">Music Manager Administration</field>
+            <field name="description">Allows music user management</field>
+            <field name="parent_id" ref="music_manager.module_category_music_manager"/>
+            <field name="sequence">20</field>
         </record>
 
         <!-- Music manager general user -->
         <record id="group_music_manager_user_general" model="res.groups">
             <field name="name">Music Manager User</field>
-            <field name="category_id" ref="music_manager.module_category_music_manager"/>
+            <field name="comment">General users of the Music Manager module (Only see own records)</field>
+            <field name="category_id" ref="music_manager.module_subcategory_music_manager"/>
         </record>
 
         <!-- Music manager admin user -->
         <record id="group_music_manager_user_admin" model="res.groups">
             <field name="name">Music Manager Admin</field>
-            <field name="category_id" ref="music_manager.module_category_music_manager"/>
-<!--            <field name="implied_ids" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>-->
+            <field name="comment">Admin users of the Music Manager module (Can see all records)</field>
+            <field name="category_id" ref="music_manager.module_subcategory_music_manager"/>
         </record>
 
         <!-- Music manager model rules: USER -->
