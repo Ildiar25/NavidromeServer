@@ -607,6 +607,9 @@ class Track(Model):
     def _update_fields(self) -> None:
         for track in self:  # type:ignore
             try:
+
+                # TODO: File service debería de encargarse de abrir el archivo y devolver un bytes stream
+
                 metadata = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
 
                 mapping_fields = {

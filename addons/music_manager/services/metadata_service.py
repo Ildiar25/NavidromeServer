@@ -164,6 +164,9 @@ class MP3File(FileMetadata):
     @staticmethod
     def __load_metadata_tags(file: str | io.BytesIO) -> MP3:
         try:
+
+            # TODO: Esta función debe recibir un bytes stream ya abierto
+
             return MP3(file, ID3=ID3)
 
         except tag_type.ID3NoHeaderError as no_tags:

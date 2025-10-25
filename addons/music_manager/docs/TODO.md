@@ -50,3 +50,4 @@
  - [x] Revisar excepciones dadas.
  - [ ] **Conseguir que los formularios se muestren de modo *'solo lectura'* cuando el usuario no es propietario (*'artist'*, *'genre'*).**
  - [ ] **El administrador no puede ver los resultados obtenidos agrupados por usuario en *'artist'* y *'genre'* en las pestañas álbum o canciones.**
+ - [ ] **Incluir en *'file_service'* la lectura de archivo (*'read_bytes'*) y pasar dichos datos a *'metadata_service'*.**

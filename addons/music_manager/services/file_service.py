@@ -11,6 +11,9 @@ _logger = logging.getLogger(__name__)
 
 
 class FolderManager:
+
+    # TODO: Agregar un método que se encargue de abrir un archivo y devolver un bytes stream
+
     def __init__(self, file_path: str | None = None, root_folder: str = '/music', file_extension: str = 'mp3') -> None:
         self.__root_folder = Path(root_folder)
         self.__extension = file_extension
