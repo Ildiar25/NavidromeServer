@@ -10,7 +10,7 @@ VENV_DIR:=.venv
 YELLOW:=\033[33m
 
 
-.PHONY: help venv install permissions gitinit gitcommit dkinit dkup dkdown dkrestart
+.PHONY: help venv install permissions gitinit gitcommit dkinit dkup dkdown dkrestart test
 
 
 # Set main functions
@@ -123,3 +123,8 @@ dkrestart: dkinit ## Restart docker services
 		echo "\n🐋  ...Starting docker services... 🐋"; \
 		docker compose -f compose.yaml up -d; \
 	fi
+
+
+test: ## Run module tests
+	@echo "\n🧪  Running Music Manager tests... \n"
+	@docker compose run --rm odoo --test-enable --test-tags /music_manager --stop-after-init

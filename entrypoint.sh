@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Entrypoint with extra commands
+if [ -n "$1" ]; then
+    echo "⚙️  Ejecutando comando personalizado: $*"
+    exec odoo -c /etc/odoo/odoo.conf "$@"
+    exit $?
+fi
+
+
 # Settings
 DB_NAME="odoo_db"
 DB_USER="odoo_user"
