@@ -2,7 +2,7 @@
 
 # Entrypoint with extra commands
 if [ -n "$1" ]; then
-    echo "⚙️  Ejecutando comando personalizado: $*"
+    echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
     exec odoo -c /etc/odoo/odoo.conf "$@"
     exit $?
 fi
