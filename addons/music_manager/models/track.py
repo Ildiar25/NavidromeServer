@@ -13,8 +13,8 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
+from ..services.adapters.file_service_adapter import FileServiceAdapter
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
-from ..services.file_service import FolderManager
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
 from ..utils.custom_types import CustomWarningMessage, TrackVals
@@ -149,7 +149,7 @@ class Track(Model):
 
                 if is_admin or still_used == 0:
                     try:
-                        FolderManager().delete_file(path)
+                        FileServiceAdapter().delete_file(path)
 
                     except PathNotFoundError as not_found:
                         _logger.warning(f"File to delete not found, continuing: {not_found}")
@@ -190,7 +190,7 @@ class Track(Model):
     def _compute_file_path(self) -> None:
         for track in self:
 
-            track.file_path = FolderManager().set_path(
+            track.file_path = FileServiceAdapter().set_new_path(
                 artist=track.album_artist_id.name or '',
                 album=track.album_id.name or '',
                 track=str(track.track_no) or '',
@@ -268,7 +268,7 @@ class Track(Model):
             if not (track.file_path and isinstance(track.file_path, str)):
                 continue
 
-            track.has_valid_path = FolderManager().is_valid_path(track.file_path)
+            track.has_valid_path = FileServiceAdapter().is_valid_path(track.file_path)
 
     @api.onchange('file')
     def _validate_file_type(self) -> CustomWarningMessage | None:
@@ -403,7 +403,7 @@ class Track(Model):
             song = base64.b64decode(track.file)
 
             try:
-                FolderManager(track.file_path).create_folders().save(song)
+                FileServiceAdapter().save_file(track.file_path, song)
 
             except PathNotFoundError as not_found:
                 _logger.error(f"There was an issue with file path: {not_found}")
@@ -557,8 +557,7 @@ class Track(Model):
                 continue
 
             try:
-                path = FolderManager(track.file_path).create_folders()
-                path.update_file_path(track.old_path)
+                FileServiceAdapter().update_file_path(track.old_path, track.file_path)
                 success_counter += 1
 
             except PathNotFoundError as not_found:
