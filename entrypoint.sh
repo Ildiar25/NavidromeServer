@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# Settings
+DB_NAME="odoo_db"
+DB_USER="odoo_user"
+DB_HOST="database"
+DB_PASSWORD="odoo_password"
+
+echo -e "\n⏳ Waiting for PostgreSQL to start on host '$DB_HOST'..."
+
+RETRIES=10
+until PGPASSWORD="$DB_PASSWORD" psql -U "$DB_USER" -h "$DB_HOST" -d postgres -c '\q' 2>/dev/null; do
+    RETRIES=$((RETRIES-1))
+    if [ $RETRIES -le 0 ]; then
+        echo "❌ PostgreSQL not reachable after multiple attempts. Exiting..."
+        exit 1
+    fi
+    echo "🔄 Still waiting for PostgreSQL... ($RETRIES retries left)"
+    sleep 5
+done
+
+echo "✅ PostgreSQL is ready!"
+
 # Entrypoint with extra commands
 if [ -n "$1" ]; then
     echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
@@ -7,12 +28,7 @@ if [ -n "$1" ]; then
     exit $?
 fi
 
-
-# Settings
-DB_NAME="odoo_db"
-DB_USER="odoo_user"
-DB_HOST="database"
-DB_PASSWORD="odoo_password"
+# Odoo database checking
 
 echo -e "\n🔍  Checking if Odoo database '$DB_NAME' exists..."
 

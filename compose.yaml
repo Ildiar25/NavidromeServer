@@ -40,7 +40,6 @@ services:
       - "./data/odoo_files:/var/lib/odoo"
       - "./addons:/mnt/extra-addons"
       - "./music:/music"
-    command: ["bash", "/entrypoint.sh"]
     restart: always
 
   navidrome:

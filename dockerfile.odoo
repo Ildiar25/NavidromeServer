@@ -29,3 +29,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Back to standard user
 USER odoo
+
+# Define entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Default command (empty — handled by entrypoint)
+CMD []
