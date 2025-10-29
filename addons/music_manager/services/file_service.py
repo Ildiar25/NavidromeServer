@@ -2,7 +2,7 @@
 import logging
 from pathlib import Path
 
-from ..utils.exceptions import FilePersistenceError, MusicManagerError
+from ..utils.exceptions import FilePersistenceError, PathNotFoundError, MusicManagerError
 
 
 _logger = logging.getLogger(__name__)
@@ -31,7 +31,6 @@ class FolderManager:
     def set_path(self, artist: str, album: str, track: str, title: str) -> Path:
         return self.__root_dir / artist / album / f"{track}_{title}.{self.__file_extension}"
 
-
     def _clean_empty_dirs(self, path: Path) -> None:
         if path == self.__root_dir:
             return
@@ -41,7 +40,7 @@ class FolderManager:
                 return
 
             path.rmdir()
-            _logger.info(f"Removed empty directory: {path}")
+            _logger.debug(f"Removed empty directory: {path}")
 
         except PermissionError as no_permission:
             _logger.error(f"Do not have permissions to delete folders: {no_permission}")
@@ -71,6 +70,10 @@ class FolderManager:
         try:
             return file_path.read_bytes()
 
+        except FileNotFoundError as not_found:
+            _logger.error(f"File not found. Impossible to read: {not_found}")
+            raise PathNotFoundError(not_found)
+
         except PermissionError as not_allowed:
             _logger.error(f"Is not allowed to read file: {not_allowed}")
             raise FilePersistenceError(not_allowed)
@@ -79,11 +82,15 @@ class FolderManager:
             _logger.error(f"Something went wrong while reading the file: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
-
     def update_file_path(self, old_path: Path, new_path: Path) -> None:
         try:
             self.create_folders(new_path)
             old_path.replace(new_path)
+            self._clean_empty_dirs(old_path.parent)
+
+        except FileNotFoundError as not_found:
+            _logger.error(f"File not found. Impossible to update: {not_found}")
+            raise PathNotFoundError(not_found)
 
         except PermissionError as not_allowed:
             _logger.error(f"Do not have permissions to move files: {not_allowed}")
@@ -93,11 +100,14 @@ class FolderManager:
             _logger.error(f"Something went wrong while moving file: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
-        self._clean_empty_dirs(old_path.parent)
-
     def delete_file(self, file_path: Path) -> None:
         try:
             file_path.unlink()
+            self._clean_empty_dirs(file_path.parent)
+
+        except FileNotFoundError as not_found:
+            _logger.error(f"File not found. Impossible to delete: {not_found}")
+            raise PathNotFoundError(not_found)
 
         except PermissionError as not_allowed:
             _logger.error(f"Do not have permissions to delete files: {not_allowed}")
@@ -106,5 +116,3 @@ class FolderManager:
         except Exception as unknown_error:
             _logger.error(f"Something went wrong while deleting file: {unknown_error}")
             raise MusicManagerError(unknown_error)
-
-        self._clean_empty_dirs(file_path.parent)

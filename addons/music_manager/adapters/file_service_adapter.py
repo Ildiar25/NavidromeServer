@@ -4,8 +4,9 @@ import re
 from pathlib import Path
 from unidecode import unidecode
 
-from ..file_service import FolderManager
-from ...utils.exceptions import PathNotFoundError
+from ..services.file_service import FolderManager
+from ..utils.exceptions import PathNotFoundError
+
 
 _logger = logging.getLogger(__name__)
 

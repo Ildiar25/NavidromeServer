@@ -13,7 +13,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
-from ..services.adapters.file_service_adapter import FileServiceAdapter
+from ..adapters.file_service_adapter import FileServiceAdapter
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
 from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
