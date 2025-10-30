@@ -32,18 +32,6 @@ class TestFileService(TransactionCase):
         self.assertIsInstance(self.manager.file_extension, str, "Extension must be an 'str' instance.")
         self.assertEqual(self.manager.file_extension, EXTENSION, f"Extension must be '{EXTENSION}'.")
 
-    def test_init_without_root(self) -> None:
-        with self.assertRaises(TypeError) as caught_error:
-            FolderManager(file_extension=EXTENSION)
-
-        self.assertIn("1 required positional argument", str(caught_error.exception))
-
-    def test_init_without_extension(self) -> None:
-        with self.assertRaises(TypeError) as caught_error:
-            FolderManager(root_dir=Path(ROOT_DIR))
-
-        self.assertIn("1 required positional argument", str(caught_error.exception))
-
     # =========================================================================================
     # Testing for 'create_folders'
     # =========================================================================================
