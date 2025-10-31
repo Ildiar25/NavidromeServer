@@ -109,7 +109,7 @@ class Track:
 
     def _search_is_deleted(self: Iterable[Self], operator: str, value: bool) -> DomainCustomFilter:
         """This method returns a record list according to the given filter.
-        :param operator: Representative strinmg from different operators like '=' or '!='.
+        :param operator: Representative string from different operators like '=' or '!='.
         :param value: Boolean value
         :return: List with diferent records according to filter.
         """

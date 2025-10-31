@@ -2,7 +2,6 @@ from datetime import date
 from typing import Dict, List, Literal, Sequence, Tuple, TypeAlias, TypedDict
 
 
-
 class AlbumVals(TypedDict, total=False):
     name: str
     album_artist_id: int | None

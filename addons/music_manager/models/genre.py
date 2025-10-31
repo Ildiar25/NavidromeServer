@@ -3,7 +3,7 @@
 from odoo import _, api
 from odoo.exceptions import UserError
 from odoo.models import Model
-from odoo.fields import Boolean, Char, Integer, One2many, Many2one
+from odoo.fields import Char, Integer, One2many
 
 from ..utils.custom_types import GenreVals
 

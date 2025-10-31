@@ -220,7 +220,7 @@ class Track(Model):
 
     def _search_is_deleted(self, operator, value):
         matching_ids = []
-        for track in self.search([('is_saved', '=', True)]):
+        for track in self.search([('is_saved', operator, True)]):
             deleted = not os.path.isfile(track.old_path)
 
             if (value and deleted) or (not value and not deleted):
@@ -579,7 +579,7 @@ class Track(Model):
                 )
 
             if success_counter > 0:
-                self._update_metadata(track.file_path)  #type:ignore
+                self._update_metadata(track.file_path)  # type:ignore
                 track.old_path = track.file_path
 
         return {

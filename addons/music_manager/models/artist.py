@@ -9,7 +9,7 @@ import magic
 from odoo import _, api
 from odoo.exceptions import UserError, ValidationError
 from odoo.models import Model
-from odoo.fields import Binary, Boolean, Char, Date, Integer, Many2many, One2many, Text
+from odoo.fields import Binary, Char, Date, Integer, Many2many, One2many, Text
 
 from ..services.image_service import ImageToPNG
 from ..utils.custom_types import CustomWarningMessage, ArtistVals
