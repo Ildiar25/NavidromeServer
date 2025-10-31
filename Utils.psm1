@@ -1,25 +1,26 @@
 # Set global variables
 $Global:VenvDir = ".venv"
 $EmojiDict = @{
-    "warning" = "26A0";
-    "check_mark_button" = "2705";
-    "hammer_and_wrench" = "1F6E0";
-    "cross_mark" = "274C";
     "backhand_index_pointing_right" = "1F449";
-    "thinking_face" = "1F914";
-    "link" = "1F517";
+    "check_mark_button" = "2705";
+    "checkered_flag" = "1F3C1";
+    "cross_mark" = "274C";
+    "cyclone" = "1F300";
+    "eyes" = "1F440";
+    "face_screaming_in_fear" = "1F631";
+    "hammer_and_wrench" = "1F6E0";
     "information" = "2139";
+    "link" = "1F517";
     "outbox_tray" = "1F4E4";
     "party_popper" = "1F389";
-    "checkered_flag" = "1F3C1";
-    "eyes" = "1F440";
-    "top_hat" = "1F3A9";
-    "face_screaming_in_fear" = "1F631";
-    "cyclone" = "1F300";
     "rocket" = "1F680";
-    "sunglasses" = "1F60E";
-    "whale" = "1F40B";
     "smiling_face_with_smiling_eyes" = "1F60A";
+    "sunglasses" = "1F60E";
+    "test_tube" = "1F9EA";
+    "thinking_face" = "1F914";
+    "top_hat" = "1F3A9";
+    "warning" = "26A0";
+    "whale" = "1F40B";
     "winking_face" = "1F609";
 }
 
@@ -275,6 +276,31 @@ function DkRestart {
 }
 
 
+function Test{
+    <# .SYNOPSIS
+    Start Odoo module testing #>
+
+    if (Get-Process 'com.docker.build' -ErrorAction SilentlyContinue) {
+        Write-Host "`n$(_SetEmoji $EmojiDict['test_tube'])  Running Music Manager tests...`n"
+
+        docker compose run --rm odoo --test-enable --test-tags /music_manager --stop-after-init
+
+        Write-Host ""
+    }
+    else {
+        Write-Host "`n$(_SetEmoji $EmojiDict['face_screaming_in_fear'])  Ops! It seems docker is not running..."
+        $Answer = Read-Host "Do you want to initiate docker? $(_SetEmoji $EmojiDict['thinking_face']) [Y/N]"
+
+        if ($Answer -eq "Y" -or $Answer -eq "y") {
+            DkInit
+        }
+        else {
+            Write-Host "`n$(_SetEmoji $EmojiDict['winking_face'])  I understand, have a nice day! $(_SetEmoji $EmojiDict['top_hat'])`n"
+        }
+    }
+}
+
+
 # Show Help on import
 if ($Host.Name -ne "ServerHost") {
     Help
@@ -282,7 +308,7 @@ if ($Host.Name -ne "ServerHost") {
 
 
 
-Export-ModuleMember -Function Help, Venv, GitInit, GitCommit, DkInit, DkUp, DkDown, DkRestart
+Export-ModuleMember -Function Help, Venv, GitInit, GitCommit, DkInit, DkUp, DkDown, DkRestart, Test
 
 # .SYNOPSIS: A brief description of the function's purpose.
 # .DESCRIPTION: A detailed description of the function.
