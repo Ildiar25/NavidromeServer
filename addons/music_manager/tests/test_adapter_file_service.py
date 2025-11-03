@@ -3,14 +3,13 @@ from unittest.mock import MagicMock, patch
 
 from odoo.tests.common import TransactionCase
 
-from .mocks.base_mock_helper import BaseMock
 from ..adapters.file_service_adapter import FileServiceAdapter
-from ..services.file_service import FolderManager
-from ..utils.exceptions import PathNotFoundError
+from ..utils.exceptions import InvalidPathError
 
 
 ROOT_DIR = "/music"
 EXTENSION = "mp3"
+PATH_PATTERN = r'^\/music\/\w+\/\w+\/[0-9]{2}_\w+\.[a-zA-Z0-9]{3,4}$'
 
 
 class TestAdapterFileService(TransactionCase):
@@ -61,66 +60,258 @@ class TestAdapterFileService(TransactionCase):
     # =========================================================================================
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_save_file_success(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_save_file_success(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = "/testing/fake/dir.mp3"
+        fake_data = b"Fake data"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+        fake_save_method = fake_folder_manager.create_folders.return_value
+
+        adapter = FileServiceAdapter()
+
+        adapter.save_file(fake_path, fake_data)
+
+        fake_folder_manager.create_folders.assert_called_once_with(Path(fake_path))
+        fake_save_method.save_file.assert_called_once_with(Path(fake_path), fake_data)
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_save_file_with_path_not_found_error(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_save_file_without_path(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = None
+        fake_data = b"Fake data"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+        fake_save_method = fake_folder_manager.create_folders.return_value
+
+        adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidPathError) as caught_error:
+            adapter.save_file(fake_path, fake_data)
+
+        self.assertIn("File path does not exist.", str(caught_error.exception))
+        fake_folder_manager.create_folders.assert_not_called()
+        fake_save_method.save_file.assert_not_called()
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_save_file_with_no_data(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = "/testing/fake/dir.mp3"
+        fake_data = None
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+        fake_save_method = fake_folder_manager.create_folders.return_value
+
+        adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidPathError) as caught_error:
+            adapter.save_file(fake_path, fake_data)
+
+        self.assertIn("Data to save is not valid.", str(caught_error.exception))
+        fake_folder_manager.create_folders.assert_not_called()
+        fake_save_method.save_file.assert_not_called()
 
     # =========================================================================================
     # Testing for 'read_file'
     # =========================================================================================
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_read_file_success(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_read_file_success(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = "/testing/fake/dir.mp3"
+        fake_data = b"Fake data"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+        fake_folder_manager.read_file.return_value = fake_data
+
+        adapter = FileServiceAdapter()
+
+        data_read = adapter.read_file(fake_path)
+
+        fake_folder_manager.read_file.assert_called_once_with(Path(fake_path))
+        self.assertEqual(data_read, fake_data)
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_read_file_with_path_not_found_error(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_read_file_with_invalid_path_error(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = None
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidPathError) as caught_error:
+            adapter.read_file(fake_path)
+
+        self.assertIn("File path does not exist.", str(caught_error.exception))
+        fake_folder_manager.read_file.assert_not_called()
 
     # =========================================================================================
     # Testing for 'update_file_path'
     # =========================================================================================
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_update_file_path_success(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_update_file_path_success(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_old_path = "/fake/old/path.mp3"
+        fake_new_path = "/fake/new/path.mp3"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with patch.object(Path, 'exists', side_effect=[True, False]):
+            adapter.update_file_path(fake_old_path, fake_new_path)
+
+        fake_folder_manager.update_file_path.assert_called_once_with(Path(fake_old_path), Path(fake_new_path))
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_update_file_path_with_path_not_found_error(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_update_file_path_with_old_path_instance_error(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_old_path = None
+        fake_new_path = "/fake/new/path.mp3"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidPathError) as caught_error:
+            adapter.update_file_path(fake_old_path, fake_new_path)
+
+        self.assertIn("File path does not exist.", str(caught_error.exception))
+        fake_folder_manager.update_file_path.assert_not_called()
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_update_file_path_with_new_path_instance_error(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_old_path = "/fake/old/path.mp3"
+        fake_new_path = None
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidPathError) as caught_error:
+            adapter.update_file_path(fake_old_path, fake_new_path)
+
+        self.assertIn("File path does not exist.", str(caught_error.exception))
+        fake_folder_manager.update_file_path.assert_not_called()
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_update_file_path_equal_paths(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_old_path = "/fake/equal/path.mp3"
+        fake_new_path = "/fake/equal/path.mp3"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+        adapter.update_file_path(fake_old_path, fake_new_path)
+
+        fake_folder_manager.update_file_path.assert_not_called()
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_update_file_path_old_path_with_invalid_path_error(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_old_path = "/fake/old/path.mp3"
+        fake_new_path = "/fake/new/path.mp3"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with patch.object(Path, 'exists', side_effect=[False, False]):
+            with self.assertRaises(InvalidPathError) as caught_error:
+                adapter.update_file_path(fake_old_path, fake_new_path)
+
+        self.assertIn("Old path does not exist.", str(caught_error.exception))
+        fake_folder_manager.update_file_path.assert_not_called()
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_update_file_path_new_path_with_invalid_path_error(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_old_path = "/fake/old/path.mp3"
+        fake_new_path = "/fake/new/path.mp3"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with patch.object(Path, 'exists', side_effect=[True, True]):
+            with self.assertRaises(InvalidPathError) as caught_error:
+                adapter.update_file_path(fake_old_path, fake_new_path)
+
+        self.assertIn("New path already exists.", str(caught_error.exception))
+        fake_folder_manager.update_file_path.assert_not_called()
 
     # =========================================================================================
     # Testing for 'delete_path'
     # =========================================================================================
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_delete_file_success(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_delete_file_success(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = "/testing/fake/dir.mp3"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with patch.object(Path, 'is_file', return_value=True):
+            adapter.delete_file(fake_path)
+
+        fake_folder_manager.delete_file.assert_called_once_with(Path(fake_path))
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
-    def test_delete_file_with_file_not_found_error(self, fake_folder_manager: MagicMock) -> None:
-        pass
+    def test_delete_file_with_instance_error(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = None
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidPathError) as caught_error:
+            adapter.delete_file(fake_path)
+
+        self.assertIn("File path does not exist.", str(caught_error.exception))
+        fake_folder_manager.delete_file.assert_not_called()
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_delete_file_with_is_file_error(self, fake_folder_manager_class: MagicMock) -> None:
+        fake_path = "this is not a path or file"
+
+        fake_folder_manager = fake_folder_manager_class.return_value
+
+        adapter = FileServiceAdapter()
+
+        with patch.object(Path, 'is_file', return_value=False):
+            with self.assertRaises(InvalidPathError) as caught_error:
+                adapter.delete_file(fake_path)
+
+        self.assertIn("File not found or it is not a file.", str(caught_error.exception))
+        fake_folder_manager.delete_file.assert_not_called()
 
     # =========================================================================================
     # Testing for 'set_new_path'
     # =========================================================================================
 
     def test_set_new_path_with_normal_characters(self) -> None:
-        pass
+        artist = "Shakira"
+        album = "Laundry Service"
+        track = "2"
+        title = "Underneath Your Clothes"
+
+        expected_path = f"{ROOT_DIR}/shakira/laundry_service/02_underneath_your_clothes.{EXTENSION}"
+
+        result_path = self.adapter.set_new_path(artist, album, track, title)
+
+        self.assertEqual(expected_path, result_path, f"Paths must be equals: '{expected_path}' & '{result_path}'.")
 
     def test_set_new_path_with_special_characters(self) -> None:
-        pass
+        artist = "K(no)w Name ft. Ke$ha"
+        album = "A + B"
+        track = "1"
+        title = "R&B - !!!"
+
+        expected_path = f"{ROOT_DIR}/k_no_w_name_ft_kesha/a_plus_b/01_r_and_b_three_exclamation_marks.{EXTENSION}"
+
+        result_path = self.adapter.set_new_path(artist, album, track, title)
+
+        self.assertEqual(expected_path, result_path, f"Paths must be equals: '{expected_path}' & '{result_path}'.")
 
     # =========================================================================================
     # Testing for 'is_valid_path'
     # =========================================================================================
 
     def test_is_valid_path_success(self) -> None:
-        pattern = r'^\/music\/\w+\/\w+\/[0-9]{2}_\w+\.[a-zA-Z0-9]{3,4}$'
-
         artist = "Test Band"
         album = "Epic Album Vol.II (Mega Mix Edition)"
         track = "18"
@@ -128,11 +319,9 @@ class TestAdapterFileService(TransactionCase):
 
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
-        self.assertTrue(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {pattern}")
+        self.assertTrue(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}")
 
     def test_is_valid_path_fail_with_track_number(self) -> None:
-        pattern = r'^\/music\/\w+\/\w+\/[0-9]{2}_\w+\.[a-zA-Z0-9]{3,4}$'
-
         artist = "Test Band"
         album = "Epic Album Vol.II (Mega Mix Edition)"
         track = "253"
@@ -140,11 +329,9 @@ class TestAdapterFileService(TransactionCase):
 
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
-        self.assertFalse(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {pattern}")
+        self.assertFalse(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}")
 
     def test_is_valid_path_fail_with_extension(self) -> None:
-        pattern = r'^\/music\/\w+\/\w+\/[0-9]{2}_\w+\.[a-zA-Z0-9]{3,4}$'
-
         artist = "Test Band"
         album = "Epic Album Vol.II (Mega Mix Edition)"
         track = "3"
@@ -154,7 +341,7 @@ class TestAdapterFileService(TransactionCase):
         result_path = manager_with_bad_extension.set_new_path(artist, album, track, title)
 
         self.assertFalse(
-            manager_with_bad_extension.is_valid_path(result_path), f"Path must have next pattern: {pattern}"
+            manager_with_bad_extension.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}"
         )
 
     # =========================================================================================

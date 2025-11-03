@@ -4,7 +4,7 @@ from odoo.tests.common import TransactionCase
 
 from .mocks.file_mock import FileMock
 from ..services.file_service import FolderManager
-from ..utils.exceptions import PathNotFoundError, FilePersistenceError, MusicManagerError
+from ..utils.exceptions import FilePersistenceError, InvalidPathError, MusicManagerError
 
 
 ROOT_DIR = "/music"
@@ -210,7 +210,7 @@ class TestFileService(TransactionCase):
         pathlib_mock = FileMock.open_bytes_file_pathlib_with_file_not_found_error()
         fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=EXTENSION)
 
-        with self.assertRaises(PathNotFoundError) as caught_error:
+        with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.read_file(pathlib_mock)
 
         self.assertIn("FileNotFound", str(caught_error.exception))
@@ -268,13 +268,13 @@ class TestFileService(TransactionCase):
         old_path_mock.replace.assert_called_once()
         parent_mock.rmdir.assert_called_once()
 
-    def test_update_file_with_path_not_found_error(self) -> None:
+    def test_update_file_with_invalid_path_error(self) -> None:
         old_path_mock = FileMock.replace_file_pathlib_with_file_not_found_error()
         new_path_mock = FileMock.create_mock(Path)
 
         fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=EXTENSION)
 
-        with self.assertRaises(PathNotFoundError) as caught_error:
+        with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
 
         self.assertIn("FileNotFound", str(caught_error.exception))
@@ -341,7 +341,7 @@ class TestFileService(TransactionCase):
         pathlib_mock = FileMock.remove_file_pathlib_with_file_not_found_error()
         fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=EXTENSION)
 
-        with self.assertRaises(PathNotFoundError) as caught_error:
+        with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
 
         self.assertIn("FileNotFound", str(caught_error.exception))

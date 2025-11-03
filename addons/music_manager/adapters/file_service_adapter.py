@@ -11,6 +11,9 @@ from ..utils.exceptions import InvalidPathError
 _logger = logging.getLogger(__name__)
 
 
+SYMBOL_MAP = {"$": "s", "&": "_and_", "+": "_plus_", "@": "_at_", "!!!": "three_exclamation_marks"}
+
+
 class FileServiceAdapter:
 
     def __init__(self, str_root_dir: str = "/music", str_file_extension: str = "mp3") -> None:
@@ -93,8 +96,17 @@ class FileServiceAdapter:
 
         return bool(re.fullmatch(pattern, path))
 
+    def __clean_path_name(self, name: str) -> str:
+        normalized_name = self.__normalize_characters(name)
+        mapped_characters = self.__map_special_characters(normalized_name)
+        new_name = re.sub(pattern=r'[^a-z0-9]', repl='_', string=mapped_characters)
+        return re.sub(pattern=r'_+', repl='_', string=new_name).strip('_')
+
     @staticmethod
-    def __clean_path_name(name: str) -> str:
-        name = unidecode(name).lower()
-        name = re.sub(pattern=r'[^a-z0-9]', repl='_', string=name)
-        return re.sub(pattern=r'_+', repl='_', string=name).strip('_')
+    def __normalize_characters(string: str) -> str:
+        return unidecode(string).lower()
+
+    @staticmethod
+    def __map_special_characters(string: str) -> str:
+        pattern = re.compile("|".join(re.escape(symbol_key) for symbol_key in SYMBOL_MAP.keys()))
+        return pattern.sub(lambda match_pattern: SYMBOL_MAP[match_pattern.group(0)], string)
