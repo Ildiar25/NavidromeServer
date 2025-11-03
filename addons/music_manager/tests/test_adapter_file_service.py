@@ -72,17 +72,47 @@ class TestAdapterFileService(TransactionCase):
     # Testing for 'read_file'
     # =========================================================================================
 
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_read_file_success(self, fake_folder_manager: MagicMock) -> None:
+        pass
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_read_file_with_path_not_found_error(self, fake_folder_manager: MagicMock) -> None:
+        pass
+
     # =========================================================================================
     # Testing for 'update_file_path'
     # =========================================================================================
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_update_file_path_success(self, fake_folder_manager: MagicMock) -> None:
+        pass
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_update_file_path_with_path_not_found_error(self, fake_folder_manager: MagicMock) -> None:
+        pass
 
     # =========================================================================================
     # Testing for 'delete_path'
     # =========================================================================================
 
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_delete_file_success(self, fake_folder_manager: MagicMock) -> None:
+        pass
+
+    @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
+    def test_delete_file_with_file_not_found_error(self, fake_folder_manager: MagicMock) -> None:
+        pass
+
     # =========================================================================================
     # Testing for 'set_new_path'
     # =========================================================================================
+
+    def test_set_new_path_with_normal_characters(self) -> None:
+        pass
+
+    def test_set_new_path_with_special_characters(self) -> None:
+        pass
 
     # =========================================================================================
     # Testing for 'is_valid_path'
