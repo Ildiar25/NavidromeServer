@@ -47,7 +47,7 @@ class FilePersistenceError(FileServiceError):
     ...
 
 
-class PathNotFoundError(FileServiceError):
+class InvalidPathError(FileServiceError):
     """Raised when file has an invalid path or is not found."""
     ...
 

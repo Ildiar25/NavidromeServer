@@ -2,7 +2,7 @@
 import logging
 from pathlib import Path
 
-from ..utils.exceptions import FilePersistenceError, PathNotFoundError, MusicManagerError
+from ..utils.exceptions import FilePersistenceError, InvalidPathError, MusicManagerError
 
 
 _logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ class FolderManager:
 
         except FileNotFoundError as not_found:
             _logger.error(f"File not found. Impossible to read: {not_found}")
-            raise PathNotFoundError(not_found)
+            raise InvalidPathError(not_found)
 
         except PermissionError as not_allowed:
             _logger.error(f"Is not allowed to read file: {not_allowed}")
@@ -90,7 +90,7 @@ class FolderManager:
 
         except FileNotFoundError as not_found:
             _logger.error(f"File not found. Impossible to update: {not_found}")
-            raise PathNotFoundError(not_found)
+            raise InvalidPathError(not_found)
 
         except PermissionError as not_allowed:
             _logger.error(f"Do not have permissions to move files: {not_allowed}")
@@ -107,7 +107,7 @@ class FolderManager:
 
         except FileNotFoundError as not_found:
             _logger.error(f"File not found. Impossible to delete: {not_found}")
-            raise PathNotFoundError(not_found)
+            raise InvalidPathError(not_found)
 
         except PermissionError as not_allowed:
             _logger.error(f"Do not have permissions to delete files: {not_allowed}")

@@ -26,7 +26,7 @@ from ..utils.exceptions import (
     InvalidImageFormatError,
     MetadataPersistenceError,
     MusicManagerError,
-    PathNotFoundError,
+    InvalidPathError,
     ReadingFileError,
     VideoProcessingError
 )
@@ -151,8 +151,8 @@ class Track(Model):
                     try:
                         FileServiceAdapter().delete_file(path)
 
-                    except PathNotFoundError as not_found:
-                        _logger.warning(f"File to delete not found, continuing: {not_found}")
+                    except InvalidPathError as invalid_path:
+                        _logger.warning(f"File to delete not found, continuing: {invalid_path}")
                         continue
 
                     except FilePersistenceError as not_allowed:
@@ -405,8 +405,8 @@ class Track(Model):
             try:
                 FileServiceAdapter().save_file(track.file_path, song)
 
-            except PathNotFoundError as not_found:
-                _logger.error(f"There was an issue with file path: {not_found}")
+            except InvalidPathError as invalid_path:
+                _logger.error(f"There was an issue with file path: {invalid_path}")
                 raise ValidationError(_("\nActually, the file path of this record is not valid."))
 
             except FilePersistenceError as not_allowed:
@@ -560,8 +560,8 @@ class Track(Model):
                 FileServiceAdapter().update_file_path(track.old_path, track.file_path)
                 success_counter += 1
 
-            except PathNotFoundError as not_found:
-                _logger.error(f"There was an issue with file path: {not_found}")
+            except InvalidPathError as invalid_path:
+                _logger.error(f"There was an issue with file path: {invalid_path}")
                 raise ValidationError(_("\nActually, the file path of '%s' is not valid.", track.name))
 
             except FilePersistenceError as not_allowed:

@@ -5,7 +5,7 @@ from pathlib import Path
 from unidecode import unidecode
 
 from ..services.file_service import FolderManager
-from ..utils.exceptions import PathNotFoundError
+from ..utils.exceptions import InvalidPathError
 
 
 _logger = logging.getLogger(__name__)
@@ -19,8 +19,12 @@ class FileServiceAdapter:
 
     def save_file(self, str_file_path: str, data: bytes) -> None:
         if not isinstance(str_file_path, str):
-            _logger.error(f"Cannot save the file. The path is not valid: {str_file_path}")
-            raise PathNotFoundError("File path does not exist. Must be set before saving.")
+            _logger.error(f"Cannot save the file. The path is not valid: '{str_file_path}'.")
+            raise InvalidPathError("File path does not exist. Must be set before saving.")
+
+        if not isinstance(data, bytes):
+            _logger.error(f"Cannot save the file. The data is not valid: '{type(data).__name__}'.")
+            raise InvalidPathError("Data to save is not valid. Must be 'bytes' instead.")
 
         file_path = Path(str_file_path)
 
@@ -28,8 +32,8 @@ class FileServiceAdapter:
 
     def read_file(self, str_file_path) -> bytes:
         if not isinstance(str_file_path, str):
-            _logger.error(f"Cannot read the file. The path is not valid: {str_file_path}")
-            raise PathNotFoundError("File path does not exist. Must be set before reading.")
+            _logger.error(f"Cannot read the file. The path is not valid: '{str_file_path}'.")
+            raise InvalidPathError("File path does not exist. Must be set before reading.")
 
         file_path = Path(str_file_path)
 
@@ -37,26 +41,36 @@ class FileServiceAdapter:
 
     def update_file_path(self, old_str_path: str, new_str_path: str) -> None:
         if not isinstance(old_str_path, str) or not isinstance(new_str_path, str):
-            _logger.error(f"Cannot move the file. One of the paths is not valid: {old_str_path} & {new_str_path}")
-            raise PathNotFoundError("File path does not exist. Must be set before saving.")
+            _logger.error(f"Cannot move the file. One of the paths is not valid: '{old_str_path}' & '{new_str_path}'.")
+            raise InvalidPathError("File path does not exist. Must be set before saving.")
 
         old_path = Path(old_str_path)
         new_path = Path(new_str_path)
 
-        if not old_path.exists() and new_path.exists():
-            raise PathNotFoundError(f"Both paths must be valid: '{old_path}' & '{new_path}'.")
+        if old_path == new_path:
+            _logger.warning(f"Both paths are equals: '{old_path}' & '{new_path}'.")
+            return
+
+        if not old_path.exists():
+            _logger.error(f"Old path does not exist: '{old_path}'.")
+            raise InvalidPathError("Old path does not exist. Must be set before moving.")
+
+        if new_path.exists():
+            _logger.error(f"New path already exists: '{new_path}'.")
+            raise InvalidPathError("New path already exists. Must be an empty path.")
 
         self.folder_manager.update_file_path(old_path, new_path)
 
     def delete_file(self, str_file_path) -> None:
         if not isinstance(str_file_path, str):
-            _logger.error(f"Cannot delete the file. The path is not valid: {str_file_path}")
-            raise PathNotFoundError("File path does not exist. Must be set before deleting.")
+            _logger.error(f"Cannot delete the file. The path is not valid: '{str_file_path}'.")
+            raise InvalidPathError("File path does not exist. Must be set before deleting.")
 
         file_path = Path(str_file_path)
 
         if not file_path.is_file():
-            raise PathNotFoundError(f"File not found or it is not a file: '{file_path}'.")
+            _logger.error(f"File not found or it is not a file: '{file_path}'.")
+            raise InvalidPathError(f"File not found or it is not a file. Try another one.")
 
         self.folder_manager.delete_file(file_path)
 
