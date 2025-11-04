@@ -5,13 +5,11 @@ from pathlib import Path
 from unidecode import unidecode
 
 from ..services.file_service import FolderManager
+from ..utils.constants import SYMBOL_MAP
 from ..utils.exceptions import InvalidPathError
 
 
 _logger = logging.getLogger(__name__)
-
-
-SYMBOL_MAP = {"$": "s", "&": "_and_", "+": "_plus_", "@": "_at_", "!!!": "three_exclamation_marks"}
 
 
 class FileServiceAdapter:

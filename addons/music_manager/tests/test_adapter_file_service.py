@@ -4,12 +4,8 @@ from unittest.mock import MagicMock, patch
 from odoo.tests.common import TransactionCase
 
 from ..adapters.file_service_adapter import FileServiceAdapter
+from ..utils.constants import ROOT_DIR, EXTENSION, PATH_PATTERN
 from ..utils.exceptions import InvalidPathError
-
-
-ROOT_DIR = "/music"
-EXTENSION = "mp3"
-PATH_PATTERN = r'^\/music\/\w+\/\w+\/[0-9]{2}_\w+\.[a-zA-Z0-9]{3,4}$'
 
 
 class TestAdapterFileService(TransactionCase):

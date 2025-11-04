@@ -4,11 +4,8 @@ from odoo.tests.common import TransactionCase
 
 from .mocks.file_mock import FileMock
 from ..services.file_service import FolderManager
+from ..utils.constants import ROOT_DIR, EXTENSION
 from ..utils.exceptions import FilePersistenceError, InvalidPathError, MusicManagerError
-
-
-ROOT_DIR = "/music"
-EXTENSION = "mp3"
 
 
 class TestFileService(TransactionCase):
