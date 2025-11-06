@@ -1,25 +1,19 @@
 # -*- coding: utf-8 -*-
-import base64
-import io
 import logging
 
-# noinspection PyPackageRequirements
-import magic
 # noinspection PyProtectedMember
 from odoo import _, api
-from odoo.exceptions import ValidationError
 from odoo.models import Model
 from odoo.fields import Binary, Boolean, Char, Integer, Many2one, One2many
 
-from ..services.image_service import ImageToPNG
-from ..utils.custom_types import CustomWarningMessage, AlbumVals
-from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
+from .mixins.process_image_mixin import ProcessImageMixin
+from ..utils.custom_types import AlbumVals
 
 
 _logger = logging.getLogger(__name__)
 
 
-class Album(Model):
+class Album(Model, ProcessImageMixin):
 
     _name = 'music_manager.album'
     _description = 'album_table'
@@ -35,10 +29,10 @@ class Album(Model):
     track_ids = One2many(comodel_name='music_manager.track', inverse_name='album_id', string=_("Tracks"))
 
     # Computed fields
-    cover = Binary(
-        string=_("Cover"),
-        compute='_compute_album_cover',
-        inverse='_inverse_album_cover',
+    picture = Binary(
+        string=_("Picture"),
+        compute='_compute_album_picture',
+        inverse='_inverse_album_picture',
         store=True,
     )
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
@@ -48,7 +42,7 @@ class Album(Model):
     @api.model_create_multi
     def create(self, list_vals: list[AlbumVals]):
         for vals in list_vals:
-            self._process_cover_image(vals)
+            self._process_picture_image(vals)
 
         # noinspection PyNoneFunctionAssignment
         albums = super().create(list_vals)
@@ -69,7 +63,7 @@ class Album(Model):
         return albums
 
     def write(self, vals: AlbumVals):
-        self._process_cover_image(vals)
+        self._process_picture_image(vals)
 
         res = super().write(vals)
 
@@ -105,20 +99,20 @@ class Album(Model):
             disk_amount = album.track_ids.mapped('total_disk')
             album.disk_amount = max(disk_amount) if disk_amount else 0
 
-    @api.depends('track_ids', 'track_ids.cover')
-    def _compute_album_cover(self) -> None:
+    @api.depends('track_ids', 'track_ids.picture')
+    def _compute_album_picture(self) -> None:
         for album in self:
-            if not album.cover:
-                track_cover = next((t.cover for t in album.track_ids if t.cover), False)
-                album.cover = track_cover
+            if not album.picture:
+                track_picture = next((t.picture for t in album.track_ids if t.picture), False)
+                album.picture = track_picture
 
-    def _inverse_album_cover(self) -> None:
+    def _inverse_album_picture(self) -> None:
         for album in self:
-            if album.cover:
-                album.track_ids.write({'cover': album.cover})
+            if album.picture:
+                album.track_ids.write({'picture': album.picture})
 
             else:
-                album.track_ids.write({'cover': False})
+                album.track_ids.write({'picture': False})
 
     @api.depends('track_ids', 'track_ids.year')
     def _compute_album_year(self) -> None:
@@ -134,28 +128,6 @@ class Album(Model):
 
             else:
                 album.track_ids.write({'year': False})
-
-    @api.onchange('cover')
-    def _validate_cover_image(self) -> CustomWarningMessage | None:
-        for album in self:
-            if not (album.cover and isinstance(album.cover, (str, bytes))):
-                continue
-
-            image = base64.b64decode(album.cover)
-            mime_type = magic.from_buffer(image, mime=True)
-
-            if mime_type == 'image/webp':
-                album.cover = False
-                return {
-                    'warning': {
-                        'title': _("Not today! ❌"),
-                        'message': _(
-                            "\nI'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷", mime_type
-                        )
-                    }
-                }
-
-        return None
 
     def set_favorite(self) -> None:
         for album in self:
@@ -209,33 +181,3 @@ class Album(Model):
                 'sticky': False,
             }
         }
-
-    @staticmethod
-    def _process_cover_image(value: AlbumVals) -> None:
-        if 'cover' in value and value['cover']:
-            try:
-                if isinstance(value['cover'], (str, bytes)):
-                    image = base64.b64decode(value['cover'])
-                    mime_type = magic.from_buffer(image, mime=True)
-
-                    if mime_type == 'image/webp':
-                        raise ValidationError(_("\nThis track cover has an invalid format: %s", mime_type))
-
-                    cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=350, height=350).build()
-                    value['cover'] = base64.b64encode(cover)
-
-            except InvalidImageFormatError as format_error:
-                _logger.error(f"Image has an invalid format or file is corrupt: {format_error}.")
-                raise ValidationError(_("\nThe uploaded file has an invalid format or is corrupt."))
-
-            except ImagePersistenceError as service_error:
-                _logger.error(f"Failed to process cover image: {service_error}.")
-                raise ValidationError(
-                    _("\nAn internal issue ocurred while processing the image. Please, try a different file.")
-                )
-
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing image: {unknown_error}.")
-                raise ValidationError(
-                    _("\nDamn! Something went wrong while processing cover image.\nPlease, contact with your Admin.")
-                )

@@ -1,25 +1,20 @@
 # -*- coding: utf-8 -*-
-import base64
-import io
 import logging
 
-# noinspection PyPackageRequirements
-import magic
 # noinspection PyProtectedMember
 from odoo import _, api
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError
 from odoo.models import Model
 from odoo.fields import Binary, Char, Date, Integer, Many2many, One2many, Text
 
-from ..services.image_service import ImageToPNG
-from ..utils.custom_types import CustomWarningMessage, ArtistVals
-from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
+from .mixins.process_image_mixin import ProcessImageMixin
+from ..utils.custom_types import ArtistVals
 
 
 _logger = logging.getLogger(__name__)
 
 
-class Artist(Model):
+class Artist(Model, ProcessImageMixin):
 
     _name = 'music_manager.artist'
     _description = 'artist_table'
@@ -100,28 +95,6 @@ class Artist(Model):
             if isinstance(artist.name, str):
                 artist.real_name = artist.name
 
-    @api.onchange('picture')
-    def _validate_picture_image(self) -> CustomWarningMessage | None:
-        for artist in self:
-            if not (artist.picture and isinstance(artist.picture, (str, bytes))):
-                continue
-
-            image = base64.b64decode(artist.picture)
-            mime_type = magic.from_buffer(image, mime=True)
-
-            if mime_type == 'image/webp':
-                artist.picture = False
-                return {
-                    'warning': {
-                        'title': _("Not today! ❌"),
-                        'message': _(
-                            "\nI'm sooo sorry but, actually WEBP image format is not admited: %s. 🤷", mime_type
-                        )
-                    }
-                }
-
-        return None
-
     def update_songs(self):
         self.ensure_one()
 
@@ -170,33 +143,3 @@ class Artist(Model):
                 'sticky': False,
             }
         }
-
-    @staticmethod
-    def _process_picture_image(value: ArtistVals) -> None:
-        if 'picture' in value and value['picture']:
-            try:
-                if isinstance(value['picture'], (str, bytes)):
-                    image = base64.b64decode(value['picture'])
-                    mime_type = magic.from_buffer(image, mime=True)
-
-                    if mime_type == 'image/webp':
-                        raise ValidationError(_("\nThis artist picture has an invalid format: %s", mime_type))
-
-                    picture = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=250, height=250).build()
-                    value['picture'] = base64.b64encode(picture)
-
-            except InvalidImageFormatError as format_error:
-                _logger.error(f"Image has an invalid format or file is corrupt: {format_error}.")
-                raise ValidationError(_("\nThe uploaded file has an invalid format or is corrupt."))
-
-            except ImagePersistenceError as service_error:
-                _logger.error(f"Failed to process cover image: {service_error}.")
-                raise ValidationError(
-                    _("\nAn internal issue ocurred while processing the image. Please, try a different file.")
-                )
-
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing image: {unknown_error}.")
-                raise ValidationError(
-                    _("\nDamn! Something went wrong while processing cover image.\nPlease, contact with your Admin.")
-                )

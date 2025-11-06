@@ -32,7 +32,7 @@ class Track:
     ensure_one: Callable[[], Self]
     search: Callable[..., Self]
 
-    cover: bytes | None
+    picture: bytes | None
     disk_no: int | None
     duration: str | None
     file_type: str | None
@@ -141,11 +141,6 @@ class Track:
         :return: Warning Message (dict) | None
         """
 
-    def _validate_cover_image(self: Iterable[Self]) -> CustomWarningMessage | None:
-        """Checks cover image format. If image is WEBP format, clears the field `cover` and returns a warning message.
-        :return: Warning Message (dict) | None
-        """
-
     def _display_album_artist_changes(self: Iterable[Self]) -> None:
         """Updates album artist name visuals.
         :return: None
@@ -234,10 +229,12 @@ class Track:
         :return: An string with MM:SS format
         """
 
-    @staticmethod
-    def _process_cover_image(value: TrackVals) -> None:
-        """Process & normalize cover image before create or update records. It converts the image into PNG format,
-        center it & scale it to 350x350 px. An error is raised if image has an invalid format.
-        :param value: Dictionary with track values, 'cover' field could be included.
+    def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
+        """MIXIN: See process_image_mixin documentation.
+        """
+
+    def _process_picture_image(self, vals: TrackVals) -> None:
+        """MIXIN: See process_image_mixin documentation.
+        :param vals: Dictionary with vals to write
         :return: None
         """

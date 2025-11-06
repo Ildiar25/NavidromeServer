@@ -77,22 +77,17 @@ class Artist:
         :return: None
         """
 
-    def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
-        """Checks profile image format. If image is WEBP format, clears the field `picture`
-        and returns a warning message.
-        :return: Warning Message (dict) | None
-        """
-
     def update_songs(self) -> DisplayNotification | None:
         """Update track metadata linked to this artist. It calls to the `save_changes()` method for each track.
         :return: None | Dictionary with UI information
         """
 
-    @staticmethod
-    def _process_picture_image(value: ArtistVals) -> None:
-        """Process & normalizes profile picture before create or update records. It converts
-        the image into PNG format, center it & scale it to 250x250 px. An error is raised if
-        image has an invalid format.
-        :param value: Dictionary with album values, 'picture' field could be included.
+    def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
+        """MIXIN: See process_image_mixin documentation.
+        """
+
+    def _process_picture_image(self, vals: ArtistVals) -> None:
+        """MIXIN: See process_image_mixin documentation.
+        :param vals: Dictionary with vals to write
         :return: None
         """

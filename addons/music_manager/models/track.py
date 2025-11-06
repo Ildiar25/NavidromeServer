@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import base64
+import magic
 import io
 import logging
 import os
 
-# noinspection PyPackageRequirements
-import magic
 from urllib.parse import urlparse
 # noinspection PyProtectedMember
 from odoo import _, api
@@ -13,36 +12,36 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
+from .mixins.process_image_mixin import ProcessImageMixin
 from ..adapters.file_service_adapter import FileServiceAdapter
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
-from ..services.image_service import ImageToPNG
 from ..services.metadata_service import MP3File
+from ..utils.constants import ALLOWED_IMAGE_FORMAT, ALLOWED_MUSIC_FORMAT
 from ..utils.custom_types import CustomWarningMessage, TrackVals
 from ..utils.exceptions import (
     ClientPlatformError,
     FilePersistenceError,
-    ImagePersistenceError,
     InvalidFileFormatError,
-    InvalidImageFormatError,
     MetadataPersistenceError,
     MusicManagerError,
     InvalidPathError,
     ReadingFileError,
     VideoProcessingError
 )
+from ..utils.file_utils import validate_allowed_mimes
 
 
 _logger = logging.getLogger(__name__)
 
 
-class Track(Model):
+class Track(Model, ProcessImageMixin):
 
     _name = 'music_manager.track'
     _description = 'track_table'
     _order = 'album_name, disk_no, track_no'
 
     # Basic fields
-    cover = Binary(string=_("Cover"), attachment=True)
+    picture = Binary(string=_("Picture"), attachment=True)
     disk_no = Integer(string=_("Disk no"))
     duration = Char(string=_("Duration (min)"), readonly=True)
     file_type = Char(string=_("Type"), readonly=True)
@@ -103,7 +102,7 @@ class Track(Model):
     @api.model_create_multi
     def create(self, list_vals: list[TrackVals]):
         for vals in list_vals:
-            self._process_cover_image(vals)
+            self._process_picture_image(vals)
 
         # noinspection PyNoneFunctionAssignment
         tracks = super().create(list_vals)
@@ -117,7 +116,7 @@ class Track(Model):
         return tracks
 
     def write(self, vals: TrackVals):
-        self._process_cover_image(vals)
+        self._process_picture_image(vals)
 
         res = super().write(vals)
 
@@ -189,7 +188,6 @@ class Track(Model):
     @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
     def _compute_file_path(self) -> None:
         for track in self:
-
             track.file_path = FileServiceAdapter().set_new_path(
                 artist=track.album_artist_id.name or '',
                 album=track.album_id.name or '',
@@ -276,15 +274,17 @@ class Track(Model):
             if not (track.file and isinstance(track.file, bytes)):
                 continue
 
-            file_data = base64.b64decode(track.file)
-            mime_type = magic.from_buffer(file_data, mime=True)
+            try:
+                validate_allowed_mimes(track.file, ALLOWED_MUSIC_FORMAT)
 
-            if mime_type not in ["audio/mpeg", "audio/mpg", "audio/x-mpeg"]:
+            except InvalidFileFormatError as invalid_file:
                 track.file = False
                 return {
                     'warning': {
                         'title': _("Wait a minute! 👮"),
-                        'message': _("\nActually only MP3 files are allowed. Don't f*ck the system: %s", mime_type)
+                        'message': _(
+                            "\nActually only MP3 files are allowed. Don't f*ck the system! \n%s.", invalid_file
+                        )
                     }
                 }
 
@@ -303,28 +303,6 @@ class Track(Model):
                     'warning': {
                         'title': _("C'mon dude! 🙄"),
                         'message': _("\nThe web address has to be valid and we both know it is not.")
-                    }
-                }
-
-        return None
-
-    @api.onchange('cover')
-    def _validate_cover_image(self) -> CustomWarningMessage | None:
-        for track in self:
-            if not (track.cover and isinstance(track.cover, (str, bytes))):
-                continue
-
-            image = base64.b64decode(track.cover)
-            mime_type = magic.from_buffer(image, mime=True)
-
-            if mime_type == 'image/webp':
-                track.cover = False
-                return {
-                    'warning': {
-                        'title': _("Not today! ❌"),
-                        'message': _(
-                            "\nI'm sooo sorry but, actually WEBP image format is not allowed: %s. 🤷", mime_type
-                        )
                     }
                 }
 
@@ -450,7 +428,7 @@ class Track(Model):
                 track.write(
                     {
                         'url': False,
-                        'file': base64.b64encode(bytes_file)
+                        'file': base64.b64encode(bytes_file).decode()
                     }
                 )
 
@@ -634,7 +612,11 @@ class Track(Model):
                     track.collection = True
 
                 if metadata.APIC:
-                    track.cover = base64.b64encode(metadata.APIC)
+
+                    # NOTE: Update fields y update metadata deberían hacerse mediante un metadata_service_adapter.
+                    # INFO: el campo picture almacena una cadena de texto en base64, no bytes. Utilizar ImageServiceAdapter para decodificar.
+
+                    track.picture = base64.b64encode(metadata.APIC).decode()
 
                 track.track_artist_ids = self._find_or_create_artist(metadata.TPE1)
                 track.album_id = self._find_or_create_album(metadata.TALB)
@@ -673,7 +655,11 @@ class Track(Model):
                 'TPOS': (track.disk_no, track.total_disk),
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,
-                'APIC': base64.b64decode(track.cover) if track.cover else None,
+
+                # NOTE: Update fields y update metadata deberían hacerse mediante un metadata_service_adapter.
+                # INFO: Los datos asignados a APIC deben ser bytes. Utilizar ImageServiceAdapter para codificar.
+
+                'APIC': base64.b64decode(track.picture) if track.picture else None,
             }
 
             try:
@@ -701,33 +687,3 @@ class Track(Model):
     def _format_track_duration(duration: int):
         minutes, seconds = divmod(duration, 60)
         return f"{minutes:02}:{seconds:02}"
-
-    @staticmethod
-    def _process_cover_image(value: TrackVals) -> None:
-        if 'cover' in value and value['cover']:
-            try:
-                if isinstance(value['cover'], (str, bytes)):
-                    image = base64.b64decode(value['cover'])
-                    mime_type = magic.from_buffer(image, mime=True)
-
-                    if mime_type == 'image/webp':
-                        raise ValidationError(_("\nThis track cover has an invalid format: %s", mime_type))
-
-                    cover = ImageToPNG(io.BytesIO(image)).center_image().with_size(width=350, height=350).build()
-                    value['cover'] = base64.b64encode(cover)
-
-            except InvalidImageFormatError as format_error:
-                _logger.error(f"Image has an invalid format or file is corrupt: {format_error}.")
-                raise ValidationError(_("\nThe uploaded file has an invalid format or is corrupt."))
-
-            except ImagePersistenceError as service_error:
-                _logger.error(f"Failed to process cover image: {service_error}.")
-                raise ValidationError(
-                    _("\nAn internal issue ocurred while processing the image. Please, try a different file.")
-                )
-
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing image: {unknown_error}.")
-                raise ValidationError(
-                    _("\nDamn! Something went wrong while processing cover image.\nPlease, contact with your Admin.")
-                )
