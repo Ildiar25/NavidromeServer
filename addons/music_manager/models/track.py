@@ -16,7 +16,7 @@ from .mixins.process_image_mixin import ProcessImageMixin
 from ..adapters.file_service_adapter import FileServiceAdapter
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
 from ..services.metadata_service import MP3File
-from ..utils.constants import ALLOWED_IMAGE_FORMAT, ALLOWED_MUSIC_FORMAT
+from ..utils.constants import ALLOWED_MUSIC_FORMAT
 from ..utils.custom_types import CustomWarningMessage, TrackVals
 from ..utils.exceptions import (
     ClientPlatformError,
