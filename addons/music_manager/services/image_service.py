@@ -2,9 +2,9 @@
 import io
 import logging
 from abc import ABC, abstractmethod
-from typing import Type, TypeVar
+from typing import TypeVar
 
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 
 from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
 
