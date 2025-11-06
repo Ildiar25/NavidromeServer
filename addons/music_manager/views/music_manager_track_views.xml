@@ -22,7 +22,7 @@
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
                 <tree string="Songs" decoration-danger="is_deleted" decoration-warning="not is_saved">
-                    <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
+                    <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}" optional="hide"/>
                     <field name="disk_no" string="Disk no" optional="hide"/>
                     <field name="track_no" string="Track no" optional="hide"/>
                     <field name="name" string="Title"/>
@@ -125,7 +125,7 @@
                                         <separator string="Actual file metadata"/>
                                         <div class="d-flex flex-row justify-content-start">
                                             <div class="mx-3">
-                                                <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}" readonly="True"/>
+                                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}" readonly="True"/>
                                             </div>
                                             <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                                             <div class="d-flex flex-row justify-content-between w-100">
@@ -182,7 +182,7 @@
                                         <separator string="New metadata"/>
                                         <div class="d-flex flex-row justify-content-start">
                                             <div class="mx-3">
-                                                <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
+                                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
                                             </div>
                                             <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                                             <div class="d-flex flex-row justify-content-between w-100">
@@ -248,7 +248,7 @@
                                         <separator string="Last checking"/>
                                         <div class="d-flex flex-row justify-content-start">
                                             <div class="mx-3">
-                                                <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}" readonly="True"/>
+                                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}" readonly="True"/>
                                             </div>
                                             <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                                             <div class="d-flex flex-row justify-content-between w-100">
@@ -309,7 +309,7 @@
                                         <div>
                                             <div class="d-flex flex-row justify-content-start">
                                                 <div class="mx-3">
-                                                    <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
+                                                    <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
                                                 </div>
                                                 <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                                                 <div class="d-flex flex-row justify-content-between w-100">

@@ -28,7 +28,7 @@
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click d-flex flex-column h-100" t-att-title="record.name.value" style="overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                                 <div class="position-relative" style="width: 100%; overflow: hidden; background: #f8f9fa;">
-                                    <field name="cover" string="" widget="image" class="oe_kanban_image" options="{'preview_image': 'cover'}"/>
+                                    <field name="picture" string="" widget="image" class="oe_kanban_image" options="{'preview_image': 'picture'}"/>
                                     <button name="set_favorite" type="object" class="oe_stat_button btn-light position-absolute top-0 end-0 m-1 p-1 shadow-sm" style="z-index: 10;" help="Set favorite">
                                         <i t-if="record.is_favorite.raw_value" class="fa fa-heart text-danger heartbeat"/>
                                         <i t-else="" class="fa fa-heart-o"/>
@@ -47,7 +47,7 @@
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}"/>
+                    <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
                     <field name="name" string="Album title"/>
                     <field name="album_artist_id" string="Album artist"/>
                     <field name="genre_id" string="Genre"/>
@@ -71,7 +71,7 @@
                         <div class="d-flex flex-column justify-content-between">
                             <div class="d-flex flex-row justify-content-start">
                                 <div class="mx-3">
-                                    <field name="cover" string="" widget="image" options="{'preview_image': 'cover', 'size': [200, 200]}"/>
+                                    <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
                                 </div>
                                 <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                                 <div class="d-flex flex-column justify-content-between w-100">

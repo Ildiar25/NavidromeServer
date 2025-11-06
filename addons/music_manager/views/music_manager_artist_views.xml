@@ -57,7 +57,7 @@
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="picture" string="Picture" widget="image" options="{'preview_image': 'cover', 'size': [28]}" optional="hide"/>
+                    <field name="picture" string="Picture" widget="image" options="{'preview_image': 'picture', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Artist or Group"/>
                     <field name="real_name" string="Real name"/>
                     <field name="founded_in" string="Founded in" optional="hide"/>
@@ -99,7 +99,7 @@
                             <page string="Albums">
                                 <field name="album_ids" readonly="True">
                                     <tree>
-                                        <field name="cover" string="Cover" widget="image" options="{'preview_image': 'cover', 'size': [28]}"/>
+                                        <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
                                         <field name="name" string="Title"/>
                                         <field name="album_artist_id" string="Album artist"/>
                                         <field name="track_amount" string="Track amount"/>
