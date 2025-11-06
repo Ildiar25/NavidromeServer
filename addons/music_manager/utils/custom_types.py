@@ -7,7 +7,7 @@ class AlbumVals(TypedDict, total=False):
     album_artist_id: int | None
     genre_id: int | None
     track_ids: Sequence[int]
-    cover: bytes
+    picture: str | None
     disk_amount: int
     track_amount: int
     year: str
@@ -17,7 +17,7 @@ class AlbumVals(TypedDict, total=False):
 class ArtistVals(TypedDict, total=False):
     birthdate: date
     name: str
-    picture: bytes
+    picture: str | None
     real_name: str
     is_favorite: bool
     album_ids: Sequence[int]
@@ -37,7 +37,7 @@ class GenreVals(TypedDict, total=False):
 
 
 class TrackVals(TypedDict, total=False):
-    cover: bytes | None
+    picture: str | None
     disk_no: int | None
     duration: str | None
     file_type: str | None
@@ -51,7 +51,7 @@ class TrackVals(TypedDict, total=False):
     genre_id: int | None
     original_artist_id: int | None
     track_artist_ids: Sequence[int]
-    file: bytes | None
+    file: str | None
     tmp_album: str | None
     tmp_album_artist: str | None
     tmp_artists: str | None
