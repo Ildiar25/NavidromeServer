@@ -24,7 +24,7 @@ class ProcessImageMixin(AbstractModel):
     @api.onchange('picture')
     def _validate_picture_image(self) -> CustomWarningMessage | None:
         for record in self:
-            if not record.picture and not isinstance(record.picture, (str, bytes)):
+            if not record.picture and not isinstance(record.picture, bytes):
                 continue
 
             try:
@@ -51,14 +51,6 @@ class ProcessImageMixin(AbstractModel):
         if not isinstance(values['picture'], str):
             _logger.warning(f"Image is not an encoded string. Will be ignored: {type(values['picture'])}.")
             return
-
-        try:
-            validate_allowed_mimes(values['picture'], ALLOWED_IMAGE_FORMAT)
-
-        except InvalidFileFormatError as invalid_file:
-            raise ValidationError(
-                _("\nThis image has an invalid format! \n%s.", invalid_file)
-            )
 
         try:
             image = ImageServiceAdapter(values['picture'])
