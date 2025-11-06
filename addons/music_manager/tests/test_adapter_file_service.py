@@ -4,14 +4,14 @@ from unittest.mock import MagicMock, patch
 from odoo.tests.common import TransactionCase
 
 from ..adapters.file_service_adapter import FileServiceAdapter
-from ..utils.constants import ROOT_DIR, EXTENSION, PATH_PATTERN
+from ..utils.constants import ROOT_DIR, TRACK_EXTENSION, PATH_PATTERN
 from ..utils.exceptions import InvalidPathError
 
 
 class TestAdapterFileService(TransactionCase):
 
     def setUp(self) -> None:
-        self.adapter = FileServiceAdapter(str_root_dir=ROOT_DIR, str_file_extension=EXTENSION)
+        self.adapter = FileServiceAdapter(str_root_dir=ROOT_DIR, str_file_extension=TRACK_EXTENSION)
 
     def tearDown(self) -> None:
         pass
@@ -29,7 +29,7 @@ class TestAdapterFileService(TransactionCase):
             self.adapter.folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
         )
         self.assertEqual(
-            EXTENSION, self.adapter.folder_manager.file_extension, f"File extension default value must be '{EXTENSION}'."
+            TRACK_EXTENSION, self.adapter.folder_manager.file_extension, f"File extension default value must be '{TRACK_EXTENSION}'."
         )
 
     def test_init_with_other_str_root_dir_value(self) -> None:
@@ -47,8 +47,8 @@ class TestAdapterFileService(TransactionCase):
             new_adapter.folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
         )
         self.assertNotEqual(
-            EXTENSION, new_adapter.folder_manager.file_extension,
-            f"File extension default value must be different to '{EXTENSION}'."
+            TRACK_EXTENSION, new_adapter.folder_manager.file_extension,
+            f"File extension default value must be different to '{TRACK_EXTENSION}'."
         )
 
     # =========================================================================================
@@ -285,7 +285,7 @@ class TestAdapterFileService(TransactionCase):
         track = "2"
         title = "Underneath Your Clothes"
 
-        expected_path = f"{ROOT_DIR}/shakira/laundry_service/02_underneath_your_clothes.{EXTENSION}"
+        expected_path = f"{ROOT_DIR}/shakira/laundry_service/02_underneath_your_clothes.{TRACK_EXTENSION}"
 
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
@@ -297,7 +297,7 @@ class TestAdapterFileService(TransactionCase):
         track = "1"
         title = "R&B - !!!"
 
-        expected_path = f"{ROOT_DIR}/k_no_w_name_ft_kesha/a_plus_b/01_r_and_b_three_exclamation_marks.{EXTENSION}"
+        expected_path = f"{ROOT_DIR}/k_no_w_name_ft_kesha/a_plus_b/01_r_and_b_three_exclamation_marks.{TRACK_EXTENSION}"
 
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
@@ -350,7 +350,7 @@ class TestAdapterFileService(TransactionCase):
         track = "1"
         title = "C"
 
-        expected_path = f"{ROOT_DIR}/pustota/b/01_c.{EXTENSION}"
+        expected_path = f"{ROOT_DIR}/pustota/b/01_c.{TRACK_EXTENSION}"
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
         self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
@@ -361,7 +361,7 @@ class TestAdapterFileService(TransactionCase):
         track = "1"
         title = "C"
 
-        expected_path = f"{ROOT_DIR}/a/o_o/01_c.{EXTENSION}"
+        expected_path = f"{ROOT_DIR}/a/o_o/01_c.{TRACK_EXTENSION}"
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
         self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
@@ -372,7 +372,7 @@ class TestAdapterFileService(TransactionCase):
         track = "5"
         title = "C"
 
-        expected_path = f"{ROOT_DIR}/a/b/05_c.{EXTENSION}"
+        expected_path = f"{ROOT_DIR}/a/b/05_c.{TRACK_EXTENSION}"
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
         self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
@@ -383,7 +383,7 @@ class TestAdapterFileService(TransactionCase):
         track = "25"
         title = "C"
 
-        expected_path = f"{ROOT_DIR}/a/b/25_c.{EXTENSION}"
+        expected_path = f"{ROOT_DIR}/a/b/25_c.{TRACK_EXTENSION}"
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
         self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
@@ -394,7 +394,7 @@ class TestAdapterFileService(TransactionCase):
         track = "5"
         title = "Páth! Súb/tle?"
 
-        expected_path = f"{ROOT_DIR}/a/b/05_path_sub_tle.{EXTENSION}"
+        expected_path = f"{ROOT_DIR}/a/b/05_path_sub_tle.{TRACK_EXTENSION}"
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
         self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
