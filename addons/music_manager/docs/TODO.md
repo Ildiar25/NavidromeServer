@@ -12,6 +12,10 @@
  - [x] Que el usuario pueda marcar género o artista para eliminar. El Admin puede eliminar dichos registros.
  - [x] Informar correctamente al usuario mediante notificaciones.
 
+### Adaptadores
+ - [ ] **Crear Numeradores para tipo de archivo (PNG, JPEG, ... ), tipo de descargador (PyTube, ...), tipo de metadatos (MP3, FLAC, ...).**
+
+
 ### Servicios
 
  - [ ] **Añadir Pydub para la conversión de archivos de diferentes formatos.**

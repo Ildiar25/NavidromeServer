@@ -14,18 +14,16 @@ from odoo.models import Model
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..adapters.file_service_adapter import FileServiceAdapter
+from ..adapters.metadata_service_adapter import MetadataServiceAdapter
 from ..services.download_service import YTDLPAdapter, YoutubeDownload
-from ..services.metadata_service import MP3File
 from ..utils.constants import ALLOWED_MUSIC_FORMAT
 from ..utils.custom_types import CustomWarningMessage, TrackVals
 from ..utils.exceptions import (
     ClientPlatformError,
     FilePersistenceError,
     InvalidFileFormatError,
-    MetadataPersistenceError,
     MusicManagerError,
     InvalidPathError,
-    ReadingFileError,
     VideoProcessingError
 )
 from ..utils.file_utils import validate_allowed_mimes
@@ -400,7 +398,7 @@ class Track(Model, ProcessImageMixin):
                     _("\nDamn! Something went wrong while saving the file.\nPlease, contact with your Admin.")
                 )
 
-            self._update_metadata(track.file_path)
+            self._update_metadata()
 
             track.old_path = track.file_path
             track.write(
@@ -423,7 +421,7 @@ class Track(Model, ProcessImageMixin):
 
                 bytes_file = downloader.set_stream_to_buffer(adapter, buffer)
                 mime_type = magic.from_buffer(bytes_file, mime=True)
-                _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}\n")
+                _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}")
 
                 track.write(
                     {
@@ -557,7 +555,7 @@ class Track(Model, ProcessImageMixin):
                 )
 
             if success_counter > 0:
-                self._update_metadata(track.file_path)  # type:ignore
+                self._update_metadata()  # type:ignore
                 track.old_path = track.file_path
 
         return {
@@ -583,66 +581,23 @@ class Track(Model, ProcessImageMixin):
 
     def _update_fields(self) -> None:
         for track in self:  # type:ignore
-            try:
 
-                # TODO: File service debería de encargarse de abrir el archivo y devolver un bytes stream
+            metadata = MetadataServiceAdapter().read_metadata(track.file)
 
-                metadata = MP3File().get_metadata(io.BytesIO(base64.b64decode(track.file)))
+            for attr_name, value in metadata.items():
+                setattr(track, attr_name, value)
 
-                mapping_fields = {
-                    'name': metadata.TIT2,
-                    'tmp_artists': metadata.TPE1,
-                    'tmp_album': metadata.TALB,
-                    'duration': self._format_track_duration(metadata.DUR),
-                    'tmp_genre': metadata.TCON,
-                    'tmp_album_artist': metadata.TPE2,
-                    'tmp_original_artist': metadata.TOPE,
-                    'year': metadata.TDRC,
-                    'track_no': metadata.TRCK[0],
-                    'total_track': metadata.TRCK[1],
-                    'disk_no': metadata.TPOS[0],
-                    'total_disk': metadata.TPOS[1],
-                    'file_type': metadata.MIME,
-                }
+            track.track_artist_ids = self._find_or_create_artist(metadata['tmp_artists'])
+            track.album_id = self._find_or_create_album(metadata['tmp_album'])
+            track.genre_id = self._find_or_create_genre(metadata['tmp_genre'])
+            track.album_artist_id = self._find_or_create_single_artist(
+                metadata['tmp_album_artist'], track.track_artist_ids.ids
+            )
+            track.original_artist_id = self._find_or_create_single_artist(
+                metadata['tmp_original_artist'], track.track_artist_ids.ids
+            )
 
-                for attr_name, value in mapping_fields.items():
-                    setattr(track, attr_name, value)
-
-                if metadata.TPE2 and (metadata.TPE2.lower() == 'various artists' or metadata.TCMP):
-                    track.collection = True
-
-                if metadata.APIC:
-
-                    # NOTE: Update fields y update metadata deberían hacerse mediante un metadata_service_adapter.
-                    # INFO: el campo picture almacena una cadena de texto en base64, no bytes. Utilizar ImageServiceAdapter para decodificar.
-
-                    track.picture = base64.b64encode(metadata.APIC).decode()
-
-                track.track_artist_ids = self._find_or_create_artist(metadata.TPE1)
-                track.album_id = self._find_or_create_album(metadata.TALB)
-                track.genre_id = self._find_or_create_genre(metadata.TCON)
-                track.album_artist_id = self._find_or_create_single_artist(metadata.TPE2, track.track_artist_ids.ids)
-                track.original_artist_id = self._find_or_create_single_artist(metadata.TOPE, track.track_artist_ids.ids)
-
-            except InvalidFileFormatError as corrupt_file:
-                _logger.error(f"There was a problem reading the file: {corrupt_file}")
-                raise ValidationError(
-                    _("\nThe uploaded file has an invalid format or is corrupt.")
-                )
-
-            except ReadingFileError as invalid_metadata:
-                _logger.error(f"Failed to process file metadata: {invalid_metadata}")
-                raise ValidationError(
-                    _("\nAn internal issue ocurred while processing metadata. Please, try a different file.")
-                )
-
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing the file: {unknown_error}")
-                raise ValidationError(
-                    _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
-                )
-
-    def _update_metadata(self, path: str) -> None:
+    def _update_metadata(self) -> None:
         for track in self:
             metadata = {
                 'TIT2': track.name,
@@ -655,35 +610,7 @@ class Track(Model, ProcessImageMixin):
                 'TPOS': (track.disk_no, track.total_disk),
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,
-
-                # NOTE: Update fields y update metadata deberían hacerse mediante un metadata_service_adapter.
-                # INFO: Los datos asignados a APIC deben ser bytes. Utilizar ImageServiceAdapter para codificar.
-
-                'APIC': base64.b64decode(track.picture) if track.picture else None,
+                'APIC': track.picture,
             }
 
-            try:
-                MP3File().set_metadata(path, metadata)
-
-            except ReadingFileError as invalid_metadata:
-                _logger.error(f"Failed to process file metadata: {invalid_metadata}")
-                raise ValidationError(
-                    _("\nAn internal issue ocurred while processing metadata. Please, try a different file.")
-                )
-
-            except MetadataPersistenceError as not_allowed:
-                _logger.error(f"Failed to save metadata into file: {not_allowed}")
-                raise ValidationError(
-                    _("\nUnable to write metadata. Please check your permissions or ensure there is enough disk space.")
-                )
-
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing metadata file: {unknown_error}")
-                raise ValidationError(
-                    _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
-                )
-
-    @staticmethod
-    def _format_track_duration(duration: int):
-        minutes, seconds = divmod(duration, 60)
-        return f"{minutes:02}:{seconds:02}"
+            MetadataServiceAdapter().write_metadata(track.file_path, metadata)

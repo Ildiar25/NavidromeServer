@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import base64
 import io
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Dict
 
 # noinspection PyPackageRequirements
 import magic
@@ -20,20 +21,44 @@ _logger = logging.getLogger(__name__)
 
 class FileMetadata(ABC):
 
+    tag_mapping = {
+        'TIT2': tag_type.TIT2,
+        'TPE1': tag_type.TPE1,
+        'TPE2': tag_type.TPE2,
+        'TOPE': tag_type.TOPE,
+        'TALB': tag_type.TALB,
+        'TCMP': tag_type.TCMP,
+        'TRCK': tag_type.TRCK,
+        'TPOS': tag_type.TPOS,
+        'TDRC': tag_type.TDRC,
+        'TCON': tag_type.TCON,
+        'APIC': tag_type.APIC,
+    }
+
+    @staticmethod
+    def decode_bytes(encoded_bytes_file: bytes) -> io.BytesIO:
+        if not isinstance(encoded_bytes_file, bytes):
+            raise ReadingFileError(f"Invalid file type: {type(encoded_bytes_file)}")
+
+        decoded_bytes = base64.b64decode(encoded_bytes_file)
+        buffer = io.BytesIO(decoded_bytes)
+        buffer.seek(0)
+        return buffer
+
     @abstractmethod
-    def get_metadata(self, file_path: str | io.BytesIO) -> None:
+    def get_metadata(self, encoded_bytes_file: bytes) -> None:
         ...
 
     @abstractmethod
-    def set_metadata(self, file_path: str | io.BytesIO, new_data: TrackMetadata) -> None:
+    def set_metadata(self, str_file_path: str, new_data: TrackMetadata) -> None:
         ...
 
 
 class MP3File(FileMetadata):
 
-    def get_metadata(self, filething: str | io.BytesIO) -> TrackMetadata:
-
-        track = self.__load_metadata_tags(filething)
+    def get_metadata(self, encoded_bytes_file: bytes) -> TrackMetadata:
+        buffered_file = self.decode_bytes(encoded_bytes_file)
+        track = self.__load_metadata_tags(buffered_file)
 
         if not track.tags:
             return TrackMetadata()
@@ -71,42 +96,20 @@ class MP3File(FileMetadata):
 
         try:
             track_data.DUR = round(track.info.length)
-
-            if isinstance(filething, io.BytesIO):
-                mime_type = magic.from_buffer(filething.getvalue(), mime=True)
-
-            else:
-                mime_type = magic.from_file(filething, mime=True)
-
-            track_data.MIME = mime_type
+            track_data.MIME = magic.from_buffer(buffered_file.getvalue(), mime=True)
 
         except Exception as unknown_error:
             _logger.warning(f"There was an issue while trying to read MIME type or track duration: {unknown_error}")
 
         return track_data
 
-    def set_metadata(self, filething: str, new_data: dict[str, Any]) -> None:
-
-        tag_mapping = {
-            'TIT2': tag_type.TIT2,
-            'TPE1': tag_type.TPE1,
-            'TPE2': tag_type.TPE2,
-            'TOPE': tag_type.TOPE,
-            'TALB': tag_type.TALB,
-            'TCMP': tag_type.TCMP,
-            'TRCK': tag_type.TRCK,
-            'TPOS': tag_type.TPOS,
-            'TDRC': tag_type.TDRC,
-            'TCON': tag_type.TCON,
-            'APIC': tag_type.APIC,
-        }
-
-        track = self.__load_metadata_tags(filething)
+    def set_metadata(self, str_file_path: str, new_metadata: Dict[str, Any]) -> None:
+        track = self.__load_metadata_tags(str_file_path)
         self.__reset_metadata(track)
 
-        new_data = TrackMetadata(**new_data)
+        new_data = TrackMetadata(**new_metadata)
 
-        for name, tag in tag_mapping.items():
+        for name, tag in self.tag_mapping.items():
             value = getattr(new_data, name)
 
             if name == 'TRCK' or name == 'TPOS':
@@ -162,12 +165,9 @@ class MP3File(FileMetadata):
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __load_metadata_tags(file: str | io.BytesIO) -> MP3:
+    def __load_metadata_tags(track_file: str | io.BytesIO) -> MP3:
         try:
-
-            # TODO: Esta función debe recibir un bytes stream ya abierto
-
-            return MP3(file, ID3=ID3)
+            return MP3(track_file, ID3=ID3)
 
         except tag_type.ID3NoHeaderError as no_tags:
             _logger.warning(f"No tags founded in this file: {no_tags}")

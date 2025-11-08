@@ -32,7 +32,7 @@ class Track:
     ensure_one: Callable[[], Self]
     search: Callable[..., Self]
 
-    picture: bytes | None
+    picture: str | None
     disk_no: int | None
     duration: str | None
     file_type: str | None
@@ -216,17 +216,9 @@ class Track:
         :return: None
         """
 
-    def _update_metadata(self: Iterable[Self], path: str) -> None:
+    def _update_metadata(self: Iterable[Self]) -> None:
         """Updates track metadata according to field values.
-        :param path:
         :return: None
-        """
-
-    @staticmethod
-    def _format_track_duration(duration: int) -> str:
-        """Gives a format to track duration.
-        :param duration: Total seconds
-        :return: An string with MM:SS format
         """
 
     def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:

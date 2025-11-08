@@ -16,7 +16,7 @@ class FileServiceAdapter:
 
     def __init__(self, str_root_dir: str = "/music", str_file_extension: str = "mp3") -> None:
         self.root_dir = Path(str_root_dir)
-        self.folder_manager = FolderManager(self.root_dir, str_file_extension)
+        self._folder_manager = FolderManager(self.root_dir, str_file_extension)
 
     def save_file(self, str_file_path: str, data: bytes) -> None:
         if not isinstance(str_file_path, str):
@@ -29,7 +29,7 @@ class FileServiceAdapter:
 
         file_path = Path(str_file_path)
 
-        self.folder_manager.create_folders(file_path).save_file(file_path, data)
+        self._folder_manager.create_folders(file_path).save_file(file_path, data)
 
     def read_file(self, str_file_path) -> bytes:
         if not isinstance(str_file_path, str):
@@ -38,7 +38,7 @@ class FileServiceAdapter:
 
         file_path = Path(str_file_path)
 
-        return self.folder_manager.read_file(file_path)
+        return self._folder_manager.read_file(file_path)
 
     def update_file_path(self, old_str_path: str, new_str_path: str) -> None:
         if not isinstance(old_str_path, str) or not isinstance(new_str_path, str):
@@ -60,7 +60,7 @@ class FileServiceAdapter:
             _logger.error(f"New path already exists: '{new_path}'.")
             raise InvalidPathError("New path already exists. Must be an empty path.")
 
-        self.folder_manager.update_file_path(old_path, new_path)
+        self._folder_manager.update_file_path(old_path, new_path)
 
     def delete_file(self, str_file_path) -> None:
         if not isinstance(str_file_path, str):
@@ -73,7 +73,7 @@ class FileServiceAdapter:
             _logger.error(f"File not found or it is not a file: '{file_path}'.")
             raise InvalidPathError(f"File not found or it is not a file. Try another one.")
 
-        self.folder_manager.delete_file(file_path)
+        self._folder_manager.delete_file(file_path)
 
     def set_new_path(self, artist: str, album: str, track: str, title: str) -> str:
         new_artist = self.__clean_path_name(artist)
@@ -81,7 +81,7 @@ class FileServiceAdapter:
         new_track = self.__clean_path_name(track).zfill(2)
         new_title = self.__clean_path_name(title)
 
-        return self.folder_manager.set_path(new_artist, new_album, new_track, new_title).as_posix()
+        return self._folder_manager.set_path(new_artist, new_album, new_track, new_title).as_posix()
 
     def is_valid_path(self, path: str) -> bool:
         artist = r'\w+'

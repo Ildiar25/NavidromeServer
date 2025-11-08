@@ -47,6 +47,11 @@ class FilePersistenceError(FileServiceError):
     ...
 
 
+class InvalidFileFormatError(FileServiceError):
+    """Raised when file has no header or is a corrupt file."""
+    ...
+
+
 class InvalidPathError(FileServiceError):
     """Raised when file has an invalid path or is not found."""
     ...
@@ -66,7 +71,7 @@ class InvalidImageFormatError(ImageServiceError):
 
 # ---- Specific METADATA SERVICE exceptions ---- #
 
-class InvalidFileFormatError(MetadataServiceError):
+class InvalidFileFormatmError(MetadataServiceError):
     """Raised when file has no header or is a corrupt file."""
     ...
 
