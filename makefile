@@ -12,12 +12,12 @@ YELLOW:=\033[33m
 
 .PHONY: help venv install permissions gitinit gitcommit dkinit dkup dkdown dkrestart test
 
-
 # Set main functions
 help: ## Show this help
 	@echo "\n$(PURPLE)⚠️  NOTICE: All next commands are for Linux$(NC)\n"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo "\n"
+
 
 
 venv: ## Create new virtual environment
