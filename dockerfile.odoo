@@ -27,8 +27,12 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Permissions
+RUN permissions.sh
+
 # Back to standard user
 USER odoo
+
 
 # Define entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
