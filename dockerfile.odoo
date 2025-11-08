@@ -23,12 +23,14 @@ ENV LC_ALL=en_US.UTF-8
 
 # Update requirements file container
 COPY requirements.txt .
+COPY permissions.sh .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Permissions
-RUN sh ./permissions.sh
+# Normalize line endings (in case the file was edited on Windows)
+RUN sed -i 's/\r$//' permissions.sh && bash ./permissions.sh
 
 # Back to standard user
 USER odoo
