@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN sed -i 's/\r$//' permissions.sh && bash ./permissions.sh
 
 # Back to standard user
-USER odoo
+# USER odoo
 
 
 # Define entrypoint
