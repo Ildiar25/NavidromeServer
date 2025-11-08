@@ -12,7 +12,6 @@ YELLOW:=\033[33m
 
 .PHONY: help venv install permissions gitinit gitcommit dkinit dkup dkdown dkrestart test
 
-
 # Set main functions
 help: ## Show this help
 	@echo "\n$(PURPLE)⚠️  NOTICE: All next commands are for Linux$(NC)\n"
