@@ -3,7 +3,7 @@
 # Settings
 DB_NAME="odoo_db"
 DB_USER="odoo_user"
-DB_HOST="postgres_db"
+DB_HOST="database"
 DB_PASSWORD="odoo_password"
 
 echo -e "\n⏳ Waiting for PostgreSQL to start on host '$DB_HOST'..."
