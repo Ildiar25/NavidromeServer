@@ -5,7 +5,7 @@
 services:
   database:
     image: postgres:15
-    container_name: postgres_db
+    # container_name: postgres_db
     ports:
       - "5432:5432"
     environment:
@@ -27,13 +27,16 @@ services:
     build:
       context: .
       dockerfile: ./dockerfile.odoo
-    container_name: odoo_app
+    # container_name: odoo_app
     depends_on:
       database:
         condition: service_healthy
-    ports:
-      - "8069:8069"
-      - "8071:8071"  # Livechat
+    expose:
+      - "8069"
+      - "8071"  # Livechat
+    # ports:
+    #   - "8069:8069"
+    #   - "8071:8071"  # Livechat
     environment:
       ODOO_RC: /etc/odoo/odoo.conf
     volumes:
@@ -49,7 +52,7 @@ services:
   navidrome:
     image: deluan/navidrome:latest
     # user: 1000:1000
-    container_name: navidrome
+    # container_name: navidrome
     ports:
       - "4533:4533"
     environment:
