@@ -20,7 +20,6 @@ help: ## Show this help
 	@echo "\n"
 
 
-
 venv: ## Create new virtual environment
 	@echo "\n$(YELLOW)WARNING: Make sure 'Venv' is installed before create a new virtual environment!$(NC)"
 	@if [ ! -d $(VENV_DIR) ]; then \
