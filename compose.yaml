@@ -53,8 +53,10 @@ services:
     image: deluan/navidrome:latest
     # user: 1000:1000
     # container_name: navidrome
-    ports:
-      - "4533:4533"
+    # ports:
+      # - "4533:4533"
+    expose:
+      - "4533"
     environment:
       # Navidrome developing
       ND_DATAFOLDER: /data
