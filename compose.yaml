@@ -20,6 +20,8 @@ services:
       start_period: 20s
       timeout: 60s
     restart: always
+    networks:
+      - dokploy-network
 
   odoo:
     build:
@@ -41,6 +43,8 @@ services:
       - "./addons:/mnt/extra-addons"
       - "./music:/music"
     restart: always
+    networks:
+      - dokploy-network
 
   navidrome:
     image: deluan/navidrome:latest
@@ -61,3 +65,7 @@ services:
       - "./data/navidrome:/data"
       - "./music:/music:ro"
     restart: unless-stopped
+
+networks:
+  dokploy-network:
+    external: true
