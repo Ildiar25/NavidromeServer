@@ -28,7 +28,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Permissions
-RUN permissions.sh
+RUN sh ./permissions.sh
 
 # Back to standard user
 USER odoo
