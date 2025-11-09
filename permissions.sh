@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # Project root
 ROOT_DIR="$(dirname "$0")"
