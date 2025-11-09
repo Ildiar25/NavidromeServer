@@ -9,6 +9,12 @@ ODOO_DIR="${ROOT_DIR}/data/odoo_files"
 POSTGRES_DIR="${ROOT_DIR}/data/postgres_db"
 MUSIC_DIR="${ROOT_DIR}/music"
 
+# Determine whether to use sudo (not present in most containers; also unnecessary as root)
+if command -v sudo >/dev/null 2>&1 && [ "$(id -u)" != "0" ]; then
+    SUDO="sudo"
+else
+    SUDO=""
+fi
 
 echo -e "\n📦️  Preparing persistent volumes..."
 
