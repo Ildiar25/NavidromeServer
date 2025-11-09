@@ -7,21 +7,29 @@ import magic
 from PIL import Image, UnidentifiedImageError
 
 from ..services.image_service import ImageToPNG
-from ..utils.exceptions import InvalidImageFormatError, MusicManagerError
-
+from ..utils.enums import ImageType
+from ..utils.exceptions import ImageServiceError, InvalidImageFormatError, MusicManagerError
 
 _logger = logging.getLogger(__name__)
 
 
 class ImageServiceAdapter:
 
-    def __init__(self, str_bytes_image: str) -> None:
+    def __init__(self, str_bytes_image: str, image_type: ImageType = ImageType.PNG) -> None:
         decoded_image = self.decode_data(str_bytes_image)
         image_stream = io.BytesIO(decoded_image)
         pil_image = self.__load_image(image_stream)
 
         self.mime_type = magic.from_buffer(decoded_image, mime=True)
-        self._image_processor = ImageToPNG(pil_image)
+
+        self._image_processor = None
+
+        match image_type:
+            case ImageType.PNG:
+                self._image_processor = ImageToPNG(pil_image)
+
+        if not self._image_processor:
+            raise ImageServiceError("Image service is not selected")
 
     def save_to_bytes(self, width: int, height: int) -> str:
         image_to_encode = self._image_processor.center_image().with_size(width, height).to_bytes()

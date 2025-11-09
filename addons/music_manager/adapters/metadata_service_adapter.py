@@ -6,6 +6,7 @@ from odoo.exceptions import ValidationError
 
 from .image_service_adapter import ImageServiceAdapter
 from ..services.metadata_service import MP3File
+from ..utils.enums import FileType
 from ..utils.exceptions import (
     InvalidFileFormatError, MetadataServiceError, MetadataPersistenceError, MusicManagerError, ReadingFileError
 )
@@ -16,12 +17,12 @@ _logger = logging.getLogger(__name__)
 
 class MetadataServiceAdapter:
 
-    def __init__(self, file_type: str = "mp3") -> None:
+    def __init__(self, file_type: FileType = FileType.MP3) -> None:
 
         self._metadata_service = None
 
         match file_type:
-            case "mp3":
+            case FileType.MP3:
                 self._metadata_service = MP3File()
 
         if not self._metadata_service:
