@@ -28,6 +28,7 @@ if [ -n "$1" ]; then
     exit $?
 fi
 
+
 # Odoo database checking
 
 echo -e "\n🔍  Checking if Odoo database '$DB_NAME' exists..."
