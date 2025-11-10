@@ -6,9 +6,6 @@ FROM odoo:17.0
 # Work directory
 WORKDIR /opt/odoo
 
-# Set permissions
-USER root
-
 # Set environment dependencies
 RUN apt-get update && \
     apt-get install -y locales libmagic1 libmagic-dev ffmpeg && \
@@ -31,11 +28,11 @@ RUN sed -i 's/\r$//' permissions.sh && bash ./permissions.sh
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Back to standard user
-USER odoo
-
 # Define entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
+
+# Back to standard user
+USER odoo
 
 # Default command (empty — handled by entrypoint)
 CMD []
