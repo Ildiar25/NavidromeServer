@@ -25,6 +25,9 @@ __pycache__/*.pyc
 # Logs
 **/*.log
 
+# Environment variables
+*.env
+
 # Docker project folders
 music/
 data/navidrome/
