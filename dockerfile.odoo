@@ -20,6 +20,8 @@ ENV LC_ALL=en_US.UTF-8
 COPY requirements.txt .
 COPY permissions.sh .
 
+CHMOD +x entrypoint.sh
+
 # Normalize line endings (in case the file was edited on Windows) & run permissions file
 RUN sed -i 's/\r$//' permissions.sh && bash ./permissions.sh
 
