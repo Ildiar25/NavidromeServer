@@ -41,7 +41,7 @@ done
 # Entrypoint with extra commands
 if [ -n "$1" ]; then
     echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
-    exec su -s /bin/bash odoo -c /etc/odoo/odoo.conf "$*"
+    exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf '$*'"
     exit $?
 fi
 
@@ -60,18 +60,18 @@ if [ "$DB_EXIST" = "1" ]; then
 
     if [ "$DB_INIT" = "1" ]; then
         echo -e "✅  Odoo DB already initialized. Starting Odoo...\n"
-        exec su -s /bin/bash odoo -c /etc/odoo/odoo.conf --without-demo=all
+        exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf --without-demo=all"
     else
         echo -e "⚠️  DB exists but not initialized. Running -i base...\n"
-        su -s /bin/bash odoo -c /etc/odoo/odoo.conf -d "$DB_NAME" -i base --without-demo=all --stop-after-init
+        su -s /bin/bash odoo -c "/etc/odoo/odoo.conf -d '$DB_NAME' -i base --without-demo=all --stop-after-init"
         echo -e "\n🚀  Initial DB created. Now starting Odoo normally...\n"
-        exec su -s /bin/bash odoo -c /etc/odoo/odoo.conf --without-demo=all
+        exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf --without-demo=all"
     fi
 
 else
     echo -e "🆕  Database not found. Initializing...\n"
-    su -s /bin/bash odoo -c /etc/odoo/odoo.conf -d "$DB_NAME" -i base --without-demo=all --stop-after-init
+    su -s /bin/bash odoo -c "/etc/odoo/odoo.conf -d '$DB_NAME' -i base --without-demo=all --stop-after-init"
 
     echo "🚀  Initial DB created. Now starting Odoo normally..."
-    exec su -s /bin/bash odoo -c /etc/odoo/odoo.conf --without-demo=all
+    exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf --without-demo=all"
 fi
