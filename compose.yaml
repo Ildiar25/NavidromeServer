@@ -41,7 +41,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - "./entrypoint.sh:/entrypoint.sh:ro"
-      - "./data/config:/etc/odoo:ro"
+      - "./data/config:/etc/odoo"
       - "./data/odoo_files:/var/lib/odoo"
       - "./addons:/mnt/extra-addons"
       - "./music:/music"
