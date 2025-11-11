@@ -36,9 +36,9 @@ services:
       ODOO_RC: /etc/odoo/odoo.conf
       DB_HOST: database
       DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - "./entrypoint.sh:/entrypoint.sh:ro"
       - "./data/config:/etc/odoo:ro"
