@@ -31,8 +31,5 @@ RUN mkdir -p /var/lib/odoo/.local /mnt/extra-addons /home/odoo && chown -R odoo:
 # Define entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
 
-# Back to standard user
-USER odoo
-
 # Default command (empty — handled by entrypoint)
 CMD []
