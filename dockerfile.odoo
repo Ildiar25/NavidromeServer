@@ -9,8 +9,11 @@ WORKDIR /opt/odoo
 # Set root user
 USER root
 
+# Set locales
+# RUN apt-get update && apt-get install -y --no-install-recommends locales && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Set environment dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends locales libmagic1 libmagic-dev ffmpeg && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 LANGUAGE=en_US:en && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 libmagic-dev ffmpeg && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
@@ -23,14 +26,14 @@ COPY permissions.sh .
 # Normalize line endings (in case the file was edited on Windows) & run permissions file
 RUN sed -i 's/\r$//' permissions.sh && bash ./permissions.sh
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Define entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
 
-# Back to standard user
-
-
 # Default command (empty — handled by entrypoint)
 CMD []
+
+# Back to standard user
+USER odoo
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
