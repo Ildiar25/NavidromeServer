@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Settings
-DB_NAME="${POSTGRES_DB}"
-DB_USER="${POSTGRES_USER}"
+DB_NAME=${POSTGRES_DB}
+DB_USER=${POSTGRES_USER}
 DB_HOST="database"
-DB_PASSWORD="${POSTGRES_PASSWORD}"
+DB_PASSWORD=${POSTGRES_PASSWORD}
 
 echo -e "\n⏳ Waiting for PostgreSQL to start on host '$DB_HOST'..."
 
