@@ -21,6 +21,12 @@ done
 
 echo "✅ PostgreSQL is ready!"
 
+# ⚡ Fix permissions on runtime
+echo -e "\n🔧 Fixing permissions for Odoo runtime paths..."
+mkdir -p /var/lib/odoo/.local /mnt/extra-addons /home/odoo
+chown -R odoo:odoo /var/lib/odoo /mnt/extra-addons /opt/odoo /home/odoo
+chmod -R 755 /var/lib/odoo
+
 # Entrypoint with extra commands
 if [ -n "$1" ]; then
     echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
