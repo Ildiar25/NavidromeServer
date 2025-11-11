@@ -32,18 +32,18 @@ RUNTIME_DIRS=(
 
 for dir in "${RUNTIME_DIRS[@]}"; do
     if [ -d "$dir" ]; then
-        echo "   ➡  Setting owner odoo:odoo on $dir"
+        echo "   ➡  Setting owner 'Odoo' on $dir"
         chown -R odoo:odoo "$dir" 2>/dev/null || true
         chmod -R 755 "$dir" 2>/dev/null || true
     fi
 done
 
 # Entrypoint with extra commands
-if [ -n "$1" ]; then
-    echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
-    exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf '$*'"
-    exit $?
-fi
+# if [ -n "$1" ]; then
+#     echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
+#     exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf '$*'"
+#     exit $?
+# fi
 
 
 # Odoo database checking
