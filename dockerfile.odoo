@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /var/lib/odoo/.local /mnt/extra-addons /home/odoo && chown -R odoo:odoo /var/lib/odoo /mnt/extra-addons /opt/odoo /home/odoo && chmod -R 755 /var/lib/odoo
 
 # Define entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["bash", "/entrypoint.sh"]
 
 # Default command (empty — handled by entrypoint)
 CMD []
