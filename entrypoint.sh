@@ -1,39 +1,10 @@
 #!/bin/bash
-set -e
-
-echo -e "\n🔧 Auto-fixing file permissions..."
-
-fix_permissions() {
-    local path="$1"
-    local user="odoo"
-    local group="odoo"
-
-    if [ -d "$path" ]; then
-        echo "   📁 Fixing directory: $path"
-        chown -R ${user}:${group} "$path" 2>/dev/null || true
-        chmod 755 "$path" 2>/dev/null || true
-    elif [ -f "$path" ]; then
-        echo "   📄 Fixing file: $path"
-        chown ${user}:${group} "$path" 2>/dev/null || true
-        chmod 644 "$path" 2>/dev/null || true
-    fi
-}
-
-# Directorios principales
-for dir in /var/lib/odoo /mnt/extra-addons /home/odoo /music /etc/odoo; do
-    [ -e "$dir" ] && fix_permissions "$dir"
-done
-
-# Archivo de configuración (si existe)
-[ -f /etc/odoo/odoo.conf ] && fix_permissions /etc/odoo/odoo.conf
-
-echo "✅ Permissions verified!"
 
 # Settings
-DB_NAME=${POSTGRES_DB}
-DB_USER=${POSTGRES_USER}
+DB_NAME="${POSTGRES_DB}"
+DB_USER="${POSTGRES_USER}"
 DB_HOST="database"
-DB_PASSWORD=${POSTGRES_PASSWORD}
+DB_PASSWORD="${POSTGRES_PASSWORD}"
 
 echo -e "\n⏳ Waiting for PostgreSQL to start on host '$DB_HOST'..."
 
@@ -50,27 +21,10 @@ done
 
 echo "✅ PostgreSQL is ready!"
 
-# ⚡ Fix permissions on runtime
-#echo -e "\n🔧 Fix permissions on runtime..."
-
-#RUNTIME_DIRS=(
-#    "/var/lib/odoo"
-#    "/mnt/extra-addons"
-#    "/home/odoo"
-#)
-
-#for dir in "${RUNTIME_DIRS[@]}"; do
-#    if [ -d "$dir" ]; then
-#        echo "   ➡  Setting owner 'Odoo' on $dir"
- #       chown -R odoo:odoo "$dir" 2>/dev/null || true
-#        chmod -R 755 "$dir" 2>/dev/null || true
-#    fi
-#done
-
 # Entrypoint with extra commands
 if [ -n "$1" ]; then
     echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
-    exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf '$*'"
+    exec odoo -c /etc/odoo/odoo.conf "$@"
     exit $?
 fi
 
@@ -89,18 +43,18 @@ if [ "$DB_EXIST" = "1" ]; then
 
     if [ "$DB_INIT" = "1" ]; then
         echo -e "✅  Odoo DB already initialized. Starting Odoo...\n"
-        exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf --without-demo=all"
+        exec odoo -c /etc/odoo/odoo.conf --without-demo=all
     else
         echo -e "⚠️  DB exists but not initialized. Running -i base...\n"
-        su -s /bin/bash odoo -c "/etc/odoo/odoo.conf -d '$DB_NAME' -i base --without-demo=all --stop-after-init"
+        odoo -c /etc/odoo/odoo.conf -d "$DB_NAME" -i base --without-demo=all --stop-after-init
         echo -e "\n🚀  Initial DB created. Now starting Odoo normally...\n"
-        exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf --without-demo=all"
+        exec odoo -c /etc/odoo/odoo.conf --without-demo=all
     fi
 
 else
     echo -e "🆕  Database not found. Initializing...\n"
-    su -s /bin/bash odoo -c "/etc/odoo/odoo.conf -d '$DB_NAME' -i base --without-demo=all --stop-after-init"
+    odoo -c /etc/odoo/odoo.conf -d "$DB_NAME" -i base --without-demo=all --stop-after-init
 
     echo "🚀  Initial DB created. Now starting Odoo normally..."
-    exec su -s /bin/bash odoo -c "/etc/odoo/odoo.conf --without-demo=all"
+    exec odoo -c /etc/odoo/odoo.conf --without-demo=all
 fi
