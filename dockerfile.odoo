@@ -10,7 +10,7 @@ WORKDIR /opt/odoo
 USER root
 
 # Set locales
-# RUN apt-get update && apt-get install -y --no-install-recommends locales && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends locales && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set environment dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 libmagic-dev ffmpeg && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -33,7 +33,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD []
 
 # Back to standard user
-USER odoo
+# USER odoo
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
