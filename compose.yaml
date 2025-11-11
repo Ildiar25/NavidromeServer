@@ -40,8 +40,8 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
     volumes:
-      - "./entrypoint.sh:/entrypoint.sh"
-      - "./data/config:/etc/odoo"
+      - "./entrypoint.sh:/entrypoint.sh:ro"
+      - "./data/config:/etc/odoo:ro"
       - "./data/odoo_files:/var/lib/odoo"
       - "./addons:/mnt/extra-addons"
       - "./music:/music"
