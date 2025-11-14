@@ -5,7 +5,7 @@ import logging
 from odoo import _, api
 from odoo.exceptions import UserError
 from odoo.models import Model
-from odoo.fields import Binary, Char, Date, Integer, Many2many, One2many, Text
+from odoo.fields import Binary, Char, Date, Integer, Many2many, Many2one, One2many, Text
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..utils.custom_types import ArtistVals
@@ -35,6 +35,9 @@ class Artist(Model, ProcessImageMixin):
     display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0, store=False)
 
+    # Technical fields
+    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+
     @api.model_create_multi
     def create(self, list_vals: list[ArtistVals]):
         for vals in list_vals:
@@ -45,7 +48,7 @@ class Artist(Model, ProcessImageMixin):
     def write(self, vals: ArtistVals):
         for artist in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if artist.create_uid != self.env.user:
+                if artist.owner != self.env.user:
                     raise UserError(_("\nCannot update this artist because you are not the owner. 🤷"))
 
         self._process_picture_image(vals)
@@ -55,7 +58,7 @@ class Artist(Model, ProcessImageMixin):
     def unlink(self):
         for artist in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if artist.create_uid != self.env.user:
+                if artist.owner != self.env.user:
                     raise UserError(_("\nCannot delete this artist because you are not the owner. 🤷"))
 
                 related_tracks = self.env['music_manager.track'].sudo().search(

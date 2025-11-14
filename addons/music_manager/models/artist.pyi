@@ -20,7 +20,6 @@ class Artist:
     _name: Final[str]
     _description: str | None
     _order: str | None
-    _sql_constraints: list[tuple[str, str, str]] | None
     id: int
     env: Environment
     ensure_one: Callable[[], Self]
@@ -34,7 +33,7 @@ class Artist:
     album_amount: int
     display_title: str | None
     track_amount: int
-    user_id: Users
+    owner: Users
 
     def create(self, list_vals: list[ArtistVals]) -> Self:
         """Overrides 'create' method to process the profile picture if it exists.

@@ -13,7 +13,7 @@
             <field name="res_model">music_manager.album</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
-            <field name="context">{'group_by': 'create_uid'}</field>
+            <field name="context">{'group_by': 'owner'}</field>
         </record>
 
         <!-- Kanban view -->
@@ -54,7 +54,7 @@
                     <field name="track_amount" string="Track amount" optional="hide"/>
                     <field name="disk_amount" string="Disk amount" optional="hide"/>
                     <field name="year" string="Year" optional="hide"/>
-                    <field name="create_uid" string="Owner" optional="hide"/>
+                    <field name="owner" string="Owner" optional="hide"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
                 </tree>
@@ -80,6 +80,7 @@
                                         <field name="year" string="Year"/>
                                         <field name="album_artist_id" string="Album artist"/>
                                         <field name="genre_id" string="Genre"/>
+                                        <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                     </group>
                                     <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
                                 </div>
@@ -116,7 +117,7 @@
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
-                        <filter name="create_uid" string="Owner" context="{'group_by': 'create_uid'}" groups="music_manager.group_music_manager_user_admin"/>
+                        <filter name="owner" string="Owner" context="{'group_by': 'owner'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                         <filter name="genre_id" string="Genre" context="{'group_by': 'genre_id'}"/>

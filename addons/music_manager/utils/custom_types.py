@@ -11,7 +11,7 @@ class AlbumVals(TypedDict, total=False):
     disk_amount: int
     track_amount: int
     year: str
-    user_id: int
+    owner: int
 
 
 class ArtistVals(TypedDict, total=False):
@@ -25,7 +25,7 @@ class ArtistVals(TypedDict, total=False):
     album_amount: int
     display_title: str
     track_amount: int
-    user_id: int
+    owner: int
 
 
 class GenreVals(TypedDict, total=False):
@@ -34,6 +34,7 @@ class GenreVals(TypedDict, total=False):
     album_ids: Sequence[int]
     track_amount: int
     disk_amount: int
+    owner: int
 
 
 class TrackVals(TypedDict, total=False):
@@ -66,8 +67,8 @@ class TrackVals(TypedDict, total=False):
     album_name: str | None
     has_valid_path: bool
     is_saved: bool
+    owner: int
     state: Literal['start', 'uploaded', 'metadata', 'done', 'added']
-    user_id: int
 
 
 # Custom types

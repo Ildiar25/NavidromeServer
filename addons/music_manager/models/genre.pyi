@@ -2,6 +2,7 @@
 from collections.abc import Callable
 from typing import Final, Iterable, Literal, Self, Sequence
 
+from odoo.addons.base.models.res_users import Users
 from odoo.api import Environment
 
 from .album import Album
@@ -24,6 +25,7 @@ class Genre:
     album_ids: Sequence[Album]
     track_amount: int
     disk_amount: int
+    owner: Users
 
     def write(self, vals: GenreVals) -> Literal[True]:
         """Overrides 'write' method to ensure only owner can update records.
