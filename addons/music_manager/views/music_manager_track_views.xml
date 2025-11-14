@@ -11,9 +11,9 @@
         <record id="music_manager_track_view_action_admin" model="ir.actions.act_window">
             <field name="name">Track management</field>
             <field name="res_model">music_manager.track</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
-            <field name="context">{'group_by': 'create_uid'}</field>
+            <field name="context">{'group_by': 'owner'}</field>
         </record>
 
         <!-- Tree view -->
@@ -35,7 +35,7 @@
                     <field name="has_valid_path" column_invisible="True"/>
                     <field name="is_saved" column_invisible="True"/>
                     <field name="is_deleted" column_invisible="True"/>
-                    <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                 </tree>
@@ -305,7 +305,7 @@
                                         <h1>🎯 Edit song metadata</h1>
                                     </header>
                                     <separator/>
-                                    <div style="height: 320px">
+                                    <div style="height: 360px">
                                         <div>
                                             <div class="d-flex flex-row justify-content-start">
                                                 <div class="mx-3">
@@ -321,6 +321,7 @@
                                                             <field name="genre_id" string="Genre"/>
                                                             <field name="collection" string="Part of a collection"/>
                                                             <field name="file_path" string="Path"/>
+                                                            <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                                             <field name="has_valid_path" invisible="True"/>
                                                         </group>
                                                     </div>
@@ -386,7 +387,7 @@
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
-                        <filter name="create_uid" string="Owner" context="{'group_by': 'create_uid'}" groups="music_manager.group_music_manager_user_admin"/>
+                        <filter name="owner" string="Owner" context="{'group_by': 'owner'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                     </group>

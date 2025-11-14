@@ -27,7 +27,7 @@
                                 <div class="o_kanban_record_title d-flex flex-row justify-content-between">
                                     <div class="d-flex flex-column">
                                         <field name="name"/>
-                                        <p class="text-muted"><small><em>by <field name="create_uid"/></em></small></p>
+                                        <p class="text-muted"><small><em>by <field name="owner"/></em></small></p>
                                     </div>
                                 </div>
                                 <hr class="mb-2"/>
@@ -63,7 +63,7 @@
                     <field name="founded_in" string="Founded in" optional="hide"/>
                     <field name="track_amount" string="Total tracks"/>
                     <field name="album_amount" string="Total albums"/>
-                    <field name="create_uid" string="Owner"/>
+                    <field name="owner" string="Owner"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_uid" string="Last update"/>
                 </tree>
@@ -86,10 +86,11 @@
                             </div>
                             <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
                             <div class="d-flex flex-column justify-content-between w-100">
-                                <group>
+                                <group class="w-25">
                                     <field name="name" string="Group or artist name"/>
                                     <field name="real_name" string="Members"/>
                                     <field name="founded_in" string="Founded in"/>
+                                    <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                 </group>
                                 <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
                             </div>
@@ -106,7 +107,7 @@
                                         <field name="disk_amount" string="Disk amount" optional="hide"/>
                                         <field name="genre_id" string="Genre"/>
                                         <field name="year" string="Year"/>
-                                        <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
@@ -124,7 +125,7 @@
                                         <field name="duration" string="Duration"/>
                                         <field name="is_saved" column_invisible="True"/>
                                         <field name="is_deleted" column_invisible="True"/>
-                                        <field name="create_uid" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
