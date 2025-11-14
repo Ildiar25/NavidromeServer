@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
+from email.policy import default
+
 import magic
 import io
 import logging
@@ -85,6 +87,7 @@ class Track(Model, ProcessImageMixin):
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
     is_saved = Boolean(string=_("Is saved"), default=False, readonly=True)
+    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
     state = Selection(
         selection=[
             ('start', _("Start")),
@@ -110,6 +113,8 @@ class Track(Model, ProcessImageMixin):
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
             track._sync_album_with_genre()
+            # noinspection PyProtectedMember
+            track._sync_album_with_owner()
 
         return tracks
 
@@ -125,6 +130,8 @@ class Track(Model, ProcessImageMixin):
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
             track._sync_album_with_genre()
+            # noinspection PyProtectedMember
+            track._sync_album_with_owner()
 
         return res
 
@@ -240,7 +247,7 @@ class Track(Model, ProcessImageMixin):
                     _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
                 )
 
-    @api.constrains('name', 'track_artist_ids', 'create_uid')
+    @api.constrains('name', 'track_artist_ids', 'owner')
     def _check_track_name(self) -> None:
         for current_track in self:  # type:ignore
             if not current_track.track_artist_ids:
@@ -249,7 +256,7 @@ class Track(Model, ProcessImageMixin):
             existing_tracks = self.search([
                 ('id', '!=', current_track.id),
                 ('name', '=', current_track.name),
-                ('create_uid', '=', current_track.create_uid.id)
+                ('owner', '=', current_track.owner.id)
             ])
 
             for track in existing_tracks:  # type:ignore
@@ -578,6 +585,29 @@ class Track(Model, ProcessImageMixin):
                 self.album_id.write(
                     {'genre_id': self.genre_id.id}
                 )
+
+    def _sync_album_with_owner(self) -> None:
+        self.ensure_one()
+        if not self.owner:
+            return
+
+        if self.album_id and self.album_id.owner == self.owner:
+            return
+
+        album_class = self.env['music_manager.album']
+        found_album = album_class.search([('owner', '=', self.owner.id)], limit=1)
+
+        if not found_album:
+            found_album = album_class.create(
+                {
+                    'name': self.album_id.name,
+                    'owner': self.owner.id,
+                    'album_artist_id': self.album_artist_id.id if self.album_artist_id else False,
+                    'genre_id': self.genre_id.id if self.genre_id else False,
+                }
+            )
+
+        self.album_id = found_album.id
 
     def _update_fields(self) -> None:
         for track in self:  # type:ignore

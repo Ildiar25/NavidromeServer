@@ -2,6 +2,7 @@
 from collections.abc import Callable
 from typing import Final, Iterable, Literal, Optional, Self, Sequence
 
+from odoo.addons.base.models.res_users import Users
 from odoo.api import Environment
 
 from .album import Album
@@ -61,6 +62,7 @@ class Track:
     album_name: str | None
     has_valid_path: bool
     is_saved: bool
+    owner: Users
     state: Literal['start', 'uploaded', 'metadata', 'done', 'added']
 
     def create(self, list_vals: list[TrackVals]) -> Self:
@@ -208,6 +210,11 @@ class Track:
 
     def _sync_album_with_genre(self) -> None:
         """Syncronizes album ID with genre ID.
+        :return: None
+        """
+
+    def _sync_album_with_owner(self) -> None:
+        """Syncronizes album owner ID with owner ID if album exists else creates a new one.
         :return: None
         """
 

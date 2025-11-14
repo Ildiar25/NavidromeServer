@@ -3,7 +3,7 @@
 from odoo import _, api
 from odoo.exceptions import UserError
 from odoo.models import Model
-from odoo.fields import Char, Integer, One2many
+from odoo.fields import Char, Integer, Many2one, One2many
 
 from ..utils.custom_types import GenreVals
 
@@ -28,10 +28,13 @@ class Genre(Model):
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
 
+    # Technical fields
+    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+
     def write(self, vals: GenreVals):
         for genre in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if genre.create_uid != self.env.user:
+                if genre.owner != self.env.user:
                     raise UserError(_("\nCannot update this genre because you are not the owner. 🤷"))
 
         return super().write(vals)
@@ -39,7 +42,7 @@ class Genre(Model):
     def unlink(self):
         for genre in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if genre.create_uid != self.env.user:
+                if genre.owner != self.env.user:
                     raise UserError(_("\nCannot delete this genre because you are not the owner. 🤷"))
 
                 related_tracks = self.env['music_manager.track'].sudo().search(

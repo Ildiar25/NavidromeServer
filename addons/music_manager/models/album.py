@@ -39,6 +39,9 @@ class Album(Model, ProcessImageMixin):
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
     year = Char(string=_("Year"), compute='_compute_album_year', inverse='_inverse_album_year', store=True)
 
+    # Techincal fields
+    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+
     @api.model_create_multi
     def create(self, list_vals: list[AlbumVals]):
         for vals in list_vals:
@@ -75,6 +78,9 @@ class Album(Model, ProcessImageMixin):
 
             if 'album_artist_id' in vals:
                 update_vals['album_artist_id'] = vals['album_artist_id']
+
+            if 'owner' in vals:
+                update_vals['owner'] = vals['owner']
 
             if update_vals and album.track_ids:
                 album.track_ids.write(update_vals)
