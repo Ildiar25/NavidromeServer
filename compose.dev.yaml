@@ -5,8 +5,9 @@
 services:
   database:
     image: postgres:15
-    expose:
-      - "5432"
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -14,46 +15,42 @@ services:
     volumes:
       - "./data/postgres_db:/var/lib/postgresql/data"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U odoo_user -d odoo_db"]
       interval: 5s
       start_period: 20s
       timeout: 60s
-    networks:
-      - dokploy-network
     restart: always
 
   odoo:
     build:
       context: .
-      dockerfile: ./dockerfile.odoo
+      dockerfile: ./docker/dockerfile.dev.odoo
+    container_name: odoo_app
     depends_on:
       database:
         condition: service_healthy
-    expose:
-      - "8069"
-      - "8071"  # Livechat
+    ports:
+      - "8069:8069"
+      - "8071:8071"  # Livechat
     environment:
-      ODOO_RC: /etc/odoo/odoo.conf
-      DB_HOST: database
-      DB_PORT: 5432
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      PGHOST: ${POSTGRES_HOST}
+      PGPORT: ${POSTGRES_PORT}
+      PGDATABASE: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - "./entrypoint.sh:/entrypoint.sh"
-      - "./data/config:/etc/odoo"
       - "./data/odoo_files:/var/lib/odoo"
       - "./addons:/mnt/extra-addons"
       - "./music:/music"
-    networks:
-      - dokploy-network
     restart: always
 
   navidrome:
     image: deluan/navidrome:latest
     # user: 1000:1000
-    expose:
-      - "4533"
+    container_name: navidrome
+    ports:
+      - "4533:4533"
     environment:
       # Navidrome developing
       ND_DATAFOLDER: /data
@@ -66,10 +63,4 @@ services:
     volumes:
       - "./data/navidrome:/data"
       - "./music:/music:ro"
-    networks:
-      - dokploy-network
     restart: unless-stopped
-
-networks:
-  dokploy-network:
-    external: true
