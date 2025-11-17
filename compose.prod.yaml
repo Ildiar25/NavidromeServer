@@ -7,8 +7,8 @@ services:
     build:
       context: .
       dockerfile: ./docker/dockerfile.prod.odoo
-    expose:
-      - "8069"
+    ports:
+      - "8069:8069"
     environment:
       HOST: ${POSTGRES_HOST}
       PORT: ${POSTGRES_PORT}
