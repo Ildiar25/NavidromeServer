@@ -589,7 +589,7 @@ class Track(Model, ProcessImageMixin):
         if not self.owner:
             return
 
-        if not (self.album_id or self.album_name):
+        if not (self.album_id.name or self.album_name):
             return
 
         if self.album_id and self.album_id.owner == self.owner:
