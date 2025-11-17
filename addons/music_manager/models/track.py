@@ -113,8 +113,6 @@ class Track(Model, ProcessImageMixin):
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
             track._sync_album_with_genre()
-            # noinspection PyProtectedMember
-            track._sync_album_with_owner()
 
         return tracks
 
@@ -589,6 +587,9 @@ class Track(Model, ProcessImageMixin):
     def _sync_album_with_owner(self) -> None:
         self.ensure_one()
         if not self.owner:
+            return
+
+        if not self.album_id:
             return
 
         if self.album_id and self.album_id.owner == self.owner:
