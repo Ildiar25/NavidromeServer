@@ -1,0 +1,12 @@
+# Copyright (C) 2025 Joan Pastor
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.html).
+
+FROM odoo:17.0
+
+# Add own module
+COPY ./addons /mnt/extra-addons
+
+# Install dependencies
+RUN pip install --no-cache-dir -r /mnt/extra-addons/music_manager/requirements.txt
+
+USER odoo

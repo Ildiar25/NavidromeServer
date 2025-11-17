@@ -26,10 +26,10 @@ class TestAdapterFileService(TransactionCase):
 
     def test_init_with_default_str_file_extension_value(self) -> None:
         self.assertIsInstance(
-            self.adapter.folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
+            self.adapter._folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
         )
         self.assertEqual(
-            TRACK_EXTENSION, self.adapter.folder_manager.file_extension, f"File extension default value must be '{TRACK_EXTENSION}'."
+            TRACK_EXTENSION, self.adapter._folder_manager.file_extension, f"File extension default value must be '{TRACK_EXTENSION}'."
         )
 
     def test_init_with_other_str_root_dir_value(self) -> None:
@@ -44,10 +44,10 @@ class TestAdapterFileService(TransactionCase):
         new_adapter = FileServiceAdapter(str_root_dir="/mogambo", str_file_extension="flac")
 
         self.assertIsInstance(
-            new_adapter.folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
+            new_adapter._folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
         )
         self.assertNotEqual(
-            TRACK_EXTENSION, new_adapter.folder_manager.file_extension,
+            TRACK_EXTENSION, new_adapter._folder_manager.file_extension,
             f"File extension default value must be different to '{TRACK_EXTENSION}'."
         )
 

@@ -1,0 +1,24 @@
+# version: '3.8'
+# Copyright (C) 2025 Joan Pastor
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.html).
+
+services:
+  odoo:
+    build:
+      context: .
+      dockerfile: ./docker/dockerfile.prod.odoo
+    expose:
+      - "8069"
+    environment:
+      HOST: ${POSTGRES_HOST}
+      PORT: ${POSTGRES_PORT}
+      DB_NAME: ${POSTGRES_DB}
+      USER: ${POSTGRES_USER}
+      PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - dokploy-network
+    restart: always
+
+networks:
+  dokploy-network:
+    external: true
