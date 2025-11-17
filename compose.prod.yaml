@@ -16,7 +16,8 @@ services:
       USER: ${POSTGRES_USER}
       PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - "./opt/shared/music:/music"
+      - "/opt/shared/music:/music"
+      - "/opt/odoo/filestore:/var/lib/odoo/filestore"
     networks:
       - dokploy-network
     restart: always
