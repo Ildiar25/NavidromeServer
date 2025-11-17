@@ -10,11 +10,13 @@ services:
     expose:
       - "8069"
     environment:
-      PGHOST: ${POSTGRES_HOST}
-      PGPORT: ${POSTGRES_PORT}
-      PGDATABASE: ${POSTGRES_DB}
-      PGUSER: ${POSTGRES_USER}
-      PGPASSWORD: ${POSTGRES_PASSWORD}
+      HOST: ${POSTGRES_HOST}
+      PORT: ${POSTGRES_PORT}
+      DB_NAME: ${POSTGRES_DB}
+      USER: ${POSTGRES_USER}
+      PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - "./music:/opt/shared/music"
     networks:
       - dokploy-network
     restart: always
