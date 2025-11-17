@@ -15,6 +15,8 @@ services:
       DB_NAME: ${POSTGRES_DB}
       USER: ${POSTGRES_USER}
       PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - "./opt/shared/music:/music"
     networks:
       - dokploy-network
     restart: always
