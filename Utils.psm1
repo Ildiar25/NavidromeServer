@@ -16,6 +16,7 @@ $EmojiDict = @{
     "rocket" = "1F680";
     "smiling_face_with_smiling_eyes" = "1F60A";
     "sunglasses" = "1F60E";
+    "stop_sign" = "1F6D1";
     "test_tube" = "1F9EA";
     "thinking_face" = "1F914";
     "top_hat" = "1F3A9";
@@ -190,11 +191,11 @@ function DkUp {
     if (Get-Process 'com.docker.build' -ErrorAction SilentlyContinue) {
         if ($DevMode) {
             Write-Host "`n$(_SetEmoji $EmojiDict['eyes'])  ...Starting docker services in DEBUG mode... $(_SetEmoji $EmojiDict['eyes'])"
-            docker compose -f compose.yaml up
+            docker compose --env-file .env -f compose.dev.yaml up
         }
         else {
             Write-Host "`n$(_SetEmoji $EmojiDict['whale'])  ...Starting docker services... $(_SetEmoji $EmojiDict['whale'])"
-            docker compose -f compose.yaml up -d
+            docker compose --env-file .env -f compose.dev.yaml up -d
         }
 
         Write-Host "`n$(_SetEmoji $EmojiDict['check_mark_button'])  Compose Image is running!`n"
@@ -220,7 +221,7 @@ function DkDown {
     if (Get-Process 'com.docker.build' -ErrorAction SilentlyContinue) {
         Write-Host "`n$(_SetEmoji $EmojiDict['whale'])  ...Closing docker services... $(_SetEmoji $EmojiDict['whale'])"
 
-        docker compose -f compose.yaml down
+        docker compose --env-file .env -f compose.dev.yaml down
 
         Write-Host ""
     }
@@ -281,9 +282,14 @@ function Test{
     Start Odoo module testing #>
 
     if (Get-Process 'com.docker.build' -ErrorAction SilentlyContinue) {
-        Write-Host "`n$(_SetEmoji $EmojiDict['test_tube'])  Running Music Manager tests...`n"
+        Write-Host "`n$(_SetEmoji $EmojiDict['hammer_and_wrench'])  Spinning up required containers...`n"
+        docker compose up -d odoo
 
-        docker compose run --rm odoo --test-enable --test-tags /music_manager --stop-after-init
+        Write-Host "`n$(_SetEmoji $EmojiDict['test_tube'])  Running Music Manager tests...`n"
+        docker compose exec odoo odoo --test-enable --test-tags /music_manager --stop-after-init
+
+        Write-Host "`n$(_SetEmoji $EmojiDict['stop_sign'])  Tearing down services...`n"
+        docker compose -f compose.dev.yaml down
 
         Write-Host ""
     }
