@@ -10,11 +10,10 @@ WORKDIR /opt/odoo
 USER root
 
 # Set environment dependencies
-RUN apt-get update && apt-get install -y locales libmagic1 libmagic-dev ffmpeg && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 libmagic-dev ffmpeg && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 # Update requirements & permissions files
 COPY requirements.txt .
@@ -26,11 +25,11 @@ RUN sed -i 's/\r$//' permissions.sh && bash ./permissions.sh
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Fix permissions for Odoo runtime paths
+# RUN mkdir -p /var/lib/odoo/.local /mnt/extra-addons /home/odoo && chown -R odoo:odoo /var/lib/odoo /mnt/extra-addons /opt/odoo /home/odoo && chmod -R 755 /var/lib/odoo
+
 # Define entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
-
-# Back to standard user
-
 
 # Default command (empty — handled by entrypoint)
 CMD []
