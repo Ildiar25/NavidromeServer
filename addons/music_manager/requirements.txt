@@ -5,7 +5,7 @@ mutagen==1.47.0
 python-magic==0.4.27
 
 # Photo editing
-pillow ==11.3.0
+pillow==11.3.0
 
 # Text manipulation
 unidecode==1.4.0
