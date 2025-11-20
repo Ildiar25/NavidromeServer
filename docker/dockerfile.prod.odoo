@@ -4,7 +4,7 @@
 FROM odoo:17.0
 
 # Add own module
-ADD ./addons /mnt/extra-addons
+COPY ./addons /mnt/extra-addons
 
 # Install dependencies
 RUN pip install --no-cache-dir -r /mnt/extra-addons/music_manager/requirements.txt

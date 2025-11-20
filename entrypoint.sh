@@ -24,7 +24,7 @@ echo "✅️  PostgreSQL is ready!"
 # Entrypoint with extra commands
 if [ -n "$1" ]; then
     echo -e "\n⚙️  Ejecutando comando personalizado: $*\n"
-    exec odoo -c /etc/odoo/odoo.conf "$@"
+    exec odoo "$@"
     exit $?
 fi
 
@@ -43,18 +43,18 @@ if [ "$DB_EXIST" = "1" ]; then
 
     if [ "$DB_INIT" = "1" ]; then
         echo -e "✅️  Odoo DB already initialized. Starting Odoo...\n"
-        exec odoo -c /etc/odoo/odoo.conf --without-demo=all
+        exec odoo --without-demo=all
     else
         echo -e "⚠️  DB exists but not initialized. Running -i base...\n"
-        odoo -c /etc/odoo/odoo.conf -d "$DATABASE_NAME" -i base --without-demo=all --stop-after-init
+        odoo -d "$DATABASE_NAME" -i base --without-demo=all --stop-after-init
         echo -e "\n🚀  Initial DB created. Now starting Odoo normally...\n"
-        exec odoo -c /etc/odoo/odoo.conf --without-demo=all
+        exec odoo --without-demo=all
     fi
 
 else
     echo -e "♻️  Database not found. Initializing...\n"
-    odoo -c /etc/odoo/odoo.conf -d "$DATABASE_NAME" -i base --without-demo=all --stop-after-init
+    odoo -d "$DATABASE_NAME" -i base --without-demo=all --stop-after-init
 
     echo "🚀  Initial DB created. Now starting Odoo normally..."
-    exec odoo -c /etc/odoo/odoo.conf --without-demo=all
+    exec odoo --without-demo=all
 fi

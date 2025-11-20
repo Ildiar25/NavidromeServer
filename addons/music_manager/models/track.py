@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import base64
-from email.policy import default
 
 import magic
 import io

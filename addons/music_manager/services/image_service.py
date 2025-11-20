@@ -21,6 +21,14 @@ class ImageProcessor(ABC):
     def __init__(self, image: Image.Image) -> None:
         self._image = image
 
+    @property
+    def image(self) -> Image.Image:
+        return self._image
+
+    @property
+    def size(self) -> tuple[int, int]:
+        return self._image.size
+
     def center_image(self) -> I:
         width, height = self._image.size
         min_dimension = min(width, height)
