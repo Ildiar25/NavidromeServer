@@ -5,13 +5,14 @@ from odoo.tests.common import TransactionCase
 
 from ..adapters.file_service_adapter import FileServiceAdapter
 from ..utils.constants import ROOT_DIR, TRACK_EXTENSION, PATH_PATTERN
+from ..utils.enums import FileType
 from ..utils.exceptions import InvalidPathError
 
 
 class TestAdapterFileService(TransactionCase):
 
     def setUp(self) -> None:
-        self.adapter = FileServiceAdapter(str_root_dir=ROOT_DIR, str_file_extension=TRACK_EXTENSION)
+        self.adapter = FileServiceAdapter(str_root_dir=ROOT_DIR, file_extension=FileType(TRACK_EXTENSION))
 
     def tearDown(self) -> None:
         pass
@@ -33,7 +34,9 @@ class TestAdapterFileService(TransactionCase):
         )
 
     def test_init_with_other_str_root_dir_value(self) -> None:
-        new_adapter = FileServiceAdapter(str_root_dir="/mogambo", str_file_extension="flac")
+        new_extension = MagicMock(spec=FileType)
+        new_extension.value = 'flac'
+        new_adapter = FileServiceAdapter(str_root_dir="/mogambo", file_extension=new_extension)
 
         self.assertIsInstance(new_adapter.root_dir, Path, f"Root dir value must be a 'Path' instance.")
         self.assertNotEqual(
@@ -41,7 +44,9 @@ class TestAdapterFileService(TransactionCase):
         )
 
     def test_init_with_other_str_file_extension_value(self) -> None:
-        new_adapter = FileServiceAdapter(str_root_dir="/mogambo", str_file_extension="flac")
+        new_extension = MagicMock(spec=FileType)
+        new_extension.value = 'flac'
+        new_adapter = FileServiceAdapter(str_root_dir="/mogambo", file_extension=new_extension)
 
         self.assertIsInstance(
             new_adapter._folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
@@ -333,7 +338,10 @@ class TestAdapterFileService(TransactionCase):
         track = "3"
         title = "The lowest song (ft. Someone Important)"
 
-        manager_with_bad_extension = FileServiceAdapter(str_file_extension="mogambo")
+        bad_extension = MagicMock(spec=FileType)
+        bad_extension.value = 'mogambo'
+
+        manager_with_bad_extension = FileServiceAdapter(file_extension=bad_extension)
         result_path = manager_with_bad_extension.set_new_path(artist, album, track, title)
 
         self.assertFalse(

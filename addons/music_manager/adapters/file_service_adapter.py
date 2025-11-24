@@ -6,6 +6,7 @@ from unidecode import unidecode
 
 from ..services.file_service import FolderManager
 from ..utils.constants import SYMBOL_MAP
+from ..utils.enums import FileType
 from ..utils.exceptions import InvalidPathError
 
 
@@ -14,9 +15,9 @@ _logger = logging.getLogger(__name__)
 
 class FileServiceAdapter:
 
-    def __init__(self, str_root_dir: str = "/music", str_file_extension: str = "mp3") -> None:
+    def __init__(self, str_root_dir: str = "/music", file_extension: FileType = FileType.MP3) -> None:
         self.root_dir = Path(str_root_dir)
-        self._folder_manager = FolderManager(self.root_dir, str_file_extension)
+        self._folder_manager = FolderManager(self.root_dir, file_extension)
 
     def save_file(self, str_file_path: str, data: bytes) -> None:
         if not isinstance(str_file_path, str):
