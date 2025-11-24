@@ -33,16 +33,17 @@ services:
       - "8069:8069"
       - "8071:8071"  # Livechat
     environment:
+      ODOO_RC: /etc/odoo/odoo.conf
       PGHOST: ${POSTGRES_HOST}
       PGPORT: ${POSTGRES_PORT}
       PGDATABASE: ${POSTGRES_DB}
       PGUSER: ${POSTGRES_USER}
       PGPASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - "./entrypoint.sh:/entrypoint.sh"
       - "./data/odoo_files:/var/lib/odoo"
       - "./addons:/mnt/extra-addons"
       - "./music:/music"
+      - "./data/settings:/etc/odoo"
     restart: always
 
   navidrome:

@@ -126,8 +126,8 @@ dkrestart: dkinit ## Restart docker services
 
 test: ## Run module tests
 	@echo "\n🛠️  Spinning up required containers...\n"
-	@docker compose up -d odoo
+	@docker compose --env-file .env -f compose.dev.yaml up -d odoo
 	@echo "\n🧪  Running Music Manager tests...\n"
-	@docker compose exec odoo odoo --test-enable --test-tags /music_manager --stop-after-init
+	@docker compose --env-file .env -f compose.dev.yaml run --rm odoo -c /etc/odoo/odoo.conf --test-enable --test-tags /music_manager --stop-after-init
 	@echo "\n🛑  Tearing down services...\n"
 	@docker compose -f compose.dev.yaml down

@@ -16,11 +16,12 @@ ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
 # Update requirements & permissions files
-COPY requirements.txt .
+COPY addons/music_manager/requirements.txt .
 COPY permissions.sh .
+COPY entrypoint.sh /entrypoint.sh
 
 # Normalize line endings (in case the file was edited on Windows) & run permissions file
-RUN sed -i 's/\r$//' permissions.sh && bash ./permissions.sh
+RUN sed -i 's/\r$//' permissions.sh && sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh && bash ./permissions.sh
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -30,6 +31,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Define entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
+
+# Set odoo user
+USER odoo
 
 # Default command (empty — handled by entrypoint)
 CMD []
