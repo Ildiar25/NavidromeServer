@@ -58,13 +58,20 @@ class ImageToPNG(ImageProcessor):
 
     def to_bytes(self) -> bytes:
         buffer = io.BytesIO()
-        self._image.save(buffer, format='png')
+
+        try:
+            self._image.save(buffer, format='png')
+
+        except OSError as coding_error:
+            _logger.error(f"There was a problem while coding image: {coding_error}")
+            raise InvalidImageFormatError(coding_error)
+
         buffer.seek(0)
         return buffer.read()
 
     def to_file(self, output_path: str) -> None:
         if not output_path.lower().endswith('.png'):
-            raise InvalidImageFormatError(f"Image must have 'PNG' extension.")
+            raise InvalidImageFormatError(f"Image must have 'PNG' extension: '{output_path}'.")
 
         try:
             self._image.save(output_path.lower())

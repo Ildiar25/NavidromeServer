@@ -40,8 +40,12 @@ class ImageMock(BaseMock):
         return cls._mock_image_helper('resize', return_value=new_image_size_mock)
 
     @classmethod
-    def save_image_success(cls):
+    def save_image_success(cls) -> MagicMock:
         return cls._mock_image_helper('save')
+
+    @classmethod
+    def save_image_with_os_error(cls) -> MagicMock:
+        return cls._mock_image_helper('save', error_name=OSError)
 
     @classmethod
     def save_image_with_permission_error(cls) -> MagicMock:
