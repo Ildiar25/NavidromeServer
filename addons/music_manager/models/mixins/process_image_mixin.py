@@ -7,7 +7,7 @@ from odoo import _, api
 from odoo.exceptions import ValidationError
 from odoo.models import AbstractModel
 
-from ...adapters.image_service_adapter import ImageServiceAdapter
+from ...adapters import ImageServiceAdapter
 from ...utils.constants import ALLOWED_IMAGE_FORMAT
 from ...utils.custom_types import CustomWarningMessage
 from ...utils.exceptions import InvalidFileFormatError, InvalidImageFormatError, ImagePersistenceError, MusicManagerError
