@@ -5,6 +5,7 @@ from odoo.tests.common import TransactionCase
 from .mocks.file_mock import FileMock
 from ..services.file_service import FolderManager
 from ..utils.constants import ROOT_DIR, TRACK_EXTENSION
+from ..utils.enums import FileType
 from ..utils.exceptions import FilePersistenceError, InvalidPathError, MusicManagerError
 
 
@@ -12,7 +13,7 @@ class TestFileService(TransactionCase):
 
     def setUp(self) -> None:
         self.initial_path = Path(f"{ROOT_DIR}/artist/album/01_title.{TRACK_EXTENSION}")
-        self.manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        self.manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
     def tearDown(self) -> None:
         pass
@@ -88,7 +89,7 @@ class TestFileService(TransactionCase):
         pathlib_mock.iterdir.return_value = []
         pathlib_mock.rmdir.return_value = None
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         fake_manager._clean_empty_dirs(pathlib_mock)
 
@@ -99,7 +100,7 @@ class TestFileService(TransactionCase):
         pathlib_mock.iterdir.return_value = [FileMock.create_mock(Path)]
         pathlib_mock.rmdir.return_value = None
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         fake_manager._clean_empty_dirs(pathlib_mock)
 
@@ -110,7 +111,7 @@ class TestFileService(TransactionCase):
         pathlib_mock.iterdir.return_value = []
         pathlib_mock.rmdir.return_value = None
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         fake_manager._clean_empty_dirs(Path(ROOT_DIR))
 
@@ -121,7 +122,7 @@ class TestFileService(TransactionCase):
         pathlib_mock.iterdir.return_value = []
         pathlib_mock.rmdir.side_effect = PermissionError("SIMULATING ERROR || PermissionError ||")
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         fake_manager._clean_empty_dirs(pathlib_mock)
 
@@ -132,7 +133,7 @@ class TestFileService(TransactionCase):
         pathlib_mock.iterdir.return_value = []
         pathlib_mock.rmdir.side_effect = Exception("SIMULATING ERROR || Exception ||")
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         fake_manager._clean_empty_dirs(pathlib_mock)
 
@@ -144,7 +145,7 @@ class TestFileService(TransactionCase):
 
     def test_save_file_success(self) -> None:
         pathlib_mock = FileMock.write_bytes_file_pathlib_success()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         data_to_save = b"Fake data"
 
@@ -154,7 +155,7 @@ class TestFileService(TransactionCase):
 
     def test_save_file_with_permission_error(self) -> None:
         pathlib_mock = FileMock.write_bytes_file_pathlib_with_permission_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         data_to_save = b"Fake data"
 
@@ -166,7 +167,7 @@ class TestFileService(TransactionCase):
 
     def test_save_file_with_exception_error(self) -> None:
         pathlib_mock = FileMock.write_bytes_file_pathlib_with_exception_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         data_to_save = b"Fake data"
 
@@ -178,7 +179,7 @@ class TestFileService(TransactionCase):
 
     def test_save_file_with_unknown_error(self) -> None:
         pathlib_mock = FileMock.create_mock(Path)
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         data_to_save = b"Fake data"
         pathlib_mock.write_bytes.side_effect = OSError("SIMULATING ERROR || OSError ||")
@@ -195,7 +196,7 @@ class TestFileService(TransactionCase):
 
     def test_read_file_success(self) -> None:
         pathlib_mock = FileMock.open_bytes_file_pathlib_success()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         expected_data = b"Fake data"
 
@@ -205,7 +206,7 @@ class TestFileService(TransactionCase):
 
     def test_read_file_with_file_not_found_error(self) -> None:
         pathlib_mock = FileMock.open_bytes_file_pathlib_with_file_not_found_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.read_file(pathlib_mock)
@@ -215,7 +216,7 @@ class TestFileService(TransactionCase):
 
     def test_read_file_with_permission_error(self) -> None:
         pathlib_mock = FileMock.open_bytes_file_pathlib_with_permission_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(FilePersistenceError) as caught_error:
             fake_manager.read_file(pathlib_mock)
@@ -225,7 +226,7 @@ class TestFileService(TransactionCase):
 
     def test_read_file_with_exception_error(self) -> None:
         pathlib_mock = FileMock.open_bytes_file_pathlib_with_exception_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.read_file(pathlib_mock)
@@ -235,7 +236,7 @@ class TestFileService(TransactionCase):
 
     def test_read_file_with_unknown_error(self) -> None:
         pathlib_mock = FileMock.create_mock(Path)
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         pathlib_mock.read_bytes.side_effect = OSError("SIMULATING ERROR || OSError ||")
 
@@ -258,7 +259,7 @@ class TestFileService(TransactionCase):
         parent_mock.rmdir.return_value = None
 
         old_path_mock.parent = parent_mock
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         fake_manager.update_file_path(old_path_mock, new_path_mock)
 
@@ -269,7 +270,7 @@ class TestFileService(TransactionCase):
         old_path_mock = FileMock.replace_file_pathlib_with_file_not_found_error()
         new_path_mock = FileMock.create_mock(Path)
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
@@ -281,7 +282,7 @@ class TestFileService(TransactionCase):
         old_path_mock = FileMock.replace_file_pathlib_with_permission_error()
         new_path_mock = FileMock.create_mock(Path)
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(FilePersistenceError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
@@ -293,7 +294,7 @@ class TestFileService(TransactionCase):
         old_path_mock = FileMock.replace_file_pathlib_with_exception_error()
         new_path_mock = FileMock.create_mock(Path)
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
@@ -307,7 +308,7 @@ class TestFileService(TransactionCase):
 
         old_path_mock.replace.side_effect = OSError("SIMULATING ERROR || OSError ||")
 
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
@@ -327,7 +328,7 @@ class TestFileService(TransactionCase):
         parent_mock.rmdir.return_value = None
 
         pathlib_mock.parent = parent_mock
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         fake_manager.delete_file(pathlib_mock)
 
@@ -336,7 +337,7 @@ class TestFileService(TransactionCase):
 
     def test_delete_file_with_file_not_found_error(self) -> None:
         pathlib_mock = FileMock.remove_file_pathlib_with_file_not_found_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
@@ -346,7 +347,7 @@ class TestFileService(TransactionCase):
 
     def test_delete_file_with_permission_error(self) -> None:
         pathlib_mock = FileMock.remove_file_pathlib_with_permission_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(FilePersistenceError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
@@ -356,7 +357,7 @@ class TestFileService(TransactionCase):
 
     def test_delete_file_with_exception_error(self) -> None:
         pathlib_mock = FileMock.remove_file_pathlib_with_exception_error()
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
@@ -366,7 +367,7 @@ class TestFileService(TransactionCase):
 
     def test_delete_file_with_unknown_error(self) -> None:
         pathlib_mock = FileMock.create_mock(Path)
-        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=TRACK_EXTENSION)
+        fake_manager = FolderManager(root_dir=Path(ROOT_DIR), file_extension=FileType(TRACK_EXTENSION))
 
         pathlib_mock.unlink.side_effect = OSError("SIMULATING ERROR || OSError ||")
 

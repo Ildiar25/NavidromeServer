@@ -2,13 +2,13 @@ from enum import Enum
 
 
 class FileType(Enum):
-    MP3 = "mp3"
+    MP3 = 'mp3'
 
 
 class ImageType(Enum):
-    PNG = "png"
+    PNG = 'png'
 
 
 class AdapterType(Enum):
-    PYTUBE = "pytube"
-    YTDLP = "ytdlp"
+    PYTUBE = 'pytube'
+    YTDLP = 'ytdlp'

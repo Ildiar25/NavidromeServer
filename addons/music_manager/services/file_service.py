@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 
+from ..utils.enums import FileType
 from ..utils.exceptions import FilePersistenceError, InvalidPathError, MusicManagerError
 
 
@@ -10,7 +11,7 @@ _logger = logging.getLogger(__name__)
 
 class FolderManager:
 
-    def __init__(self, root_dir: Path, file_extension: str) -> None:
+    def __init__(self, root_dir: Path, file_extension: FileType) -> None:
         self.__root_dir = root_dir
         self.__file_extension = file_extension
 
@@ -20,7 +21,7 @@ class FolderManager:
 
     @property
     def file_extension(self) -> str:
-        return self.__file_extension
+        return self.__file_extension.value
 
     def create_folders(self, file_path: Path) -> 'FolderManager':
         if not file_path.parent.exists():
@@ -29,7 +30,7 @@ class FolderManager:
         return self
 
     def set_path(self, artist: str, album: str, track: str, title: str) -> Path:
-        return self.__root_dir / artist / album / f"{track}_{title}.{self.__file_extension}"
+        return self.__root_dir / artist / album / f"{track}_{title}.{self.__file_extension.value}"
 
     def _clean_empty_dirs(self, path: Path) -> None:
         if path == self.__root_dir:
