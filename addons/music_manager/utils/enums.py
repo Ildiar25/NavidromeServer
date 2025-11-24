@@ -7,3 +7,8 @@ class FileType(Enum):
 
 class ImageType(Enum):
     PNG = "png"
+
+
+class AdapterType(Enum):
+    PYTUBE = "pytube"
+    YTDLP = "ytdlp"

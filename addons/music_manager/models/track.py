@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 import base64
-
-import magic
-import io
 import logging
 import os
 
@@ -14,9 +11,7 @@ from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Sel
 from odoo.models import Model
 
 from .mixins.process_image_mixin import ProcessImageMixin
-from ..adapters.file_service_adapter import FileServiceAdapter
-from ..adapters.metadata_service_adapter import MetadataServiceAdapter
-from ..services.download_service import YTDLPAdapter, YoutubeDownload
+from ..adapters import DownloadServiceAdapter, FileServiceAdapter, MetadataServiceAdapter
 from ..utils.constants import ALLOWED_MUSIC_FORMAT
 from ..utils.custom_types import CustomWarningMessage, TrackVals
 from ..utils.exceptions import (
@@ -419,13 +414,8 @@ class Track(Model, ProcessImageMixin):
                 continue
 
             try:
-                buffer = io.BytesIO()
-                adapter = YTDLPAdapter(url=track.url)
-                downloader = YoutubeDownload()
-
-                bytes_file = downloader.set_stream_to_buffer(adapter, buffer)
-                mime_type = magic.from_buffer(bytes_file, mime=True)
-                _logger.info(f"Download bytes length: {len(bytes_file)} | MIME type: {mime_type}")
+                download_service = DownloadServiceAdapter(track.url)
+                bytes_file = download_service.to_buffer()
 
                 track.write(
                     {
