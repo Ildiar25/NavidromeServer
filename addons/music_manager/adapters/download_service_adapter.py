@@ -1,9 +1,10 @@
 import io
 import logging
+from pathlib import Path
 
 from ..services.download_service import PyTubeAdapter, StreamProtocol, YoutubeDownload, YTDLPAdapter
 from ..utils.enums import AdapterType
-from ..utils.exceptions import DownloadServiceError
+from ..utils.exceptions import DownloadServiceError, InvalidPathError
 
 
 _logger = logging.getLogger(__name__)
@@ -21,9 +22,15 @@ class DownloadServiceAdapter:
         adapter = self._get_download_adapter()
         return self._downloader.set_stream_to_buffer(adapter, buffer)
 
-    def to_file(self, filepath:str) -> None:
+    def to_file(self, str_file_path: str) -> None:
         adapter = self._get_download_adapter()
-        self._downloader.set_stream_to_file(adapter, filepath)
+
+        if not isinstance(str_file_path, str):
+            _logger.error(f"Cannot save the file. The path is not valid: '{str_file_path}'.")
+            raise InvalidPathError("File path does not exist. Must be set before saving.")
+
+        file_path = Path(str_file_path)
+        self._downloader.set_stream_to_file(adapter, file_path)
 
     def _get_download_adapter(self) -> StreamProtocol:
         match self.adapter_type:
