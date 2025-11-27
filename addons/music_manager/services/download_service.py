@@ -2,9 +2,9 @@
 import io
 import hashlib
 import logging
-import os
 import subprocess
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from pathlib import Path
 from typing import Protocol
 
@@ -13,6 +13,7 @@ from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked,
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError, MaxDownloadsReached, RegexNotFoundError, UnavailableVideoError, YoutubeDLError
 
+from ..utils.custom_types import OptionDownloadSettings
 from ..utils.exceptions import ClientPlatformError, VideoProcessingError, MusicManagerError
 
 
@@ -21,7 +22,7 @@ _logger = logging.getLogger(__name__)
 
 # ---- Protocol ---- #
 class StreamProtocol(Protocol):
-    def stream_to_file(self, output_path: str) -> None:
+    def stream_to_file(self, output_path: Path) -> None:
         ...
 
     def stream_to_buffer(self, buffer: io.BytesIO) -> None:
@@ -29,174 +30,138 @@ class StreamProtocol(Protocol):
 
 
 # ---- Adapters ---- #
-class PyTubeAdapter(StreamProtocol):  # ❌ Library no updated -> It does not work
+class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not work
     def __init__(self, url: str) -> None:
-        self.__url = url
+        self._url = url
+        self._tmp_path = Path('/tmp')
 
-    def stream_to_file(self, output_path: str) -> None:
+    def stream_to_file(self, output_path: Path) -> None:
+        filename = hashlib.sha256(self._url.encode()).hexdigest()
+        download_path = self._download_track(self._tmp_path, filename)
 
-        filename = hashlib.sha256(self.__url.encode()).hexdigest()
-        tmp_path = '/tmp/'
+        self._subprocess_track_to_mp3(download_path, output_path)
+        self._clean_temp_file(download_path)
+
+    def stream_to_buffer(self, buffer: io.BytesIO) -> None:
+        filename = hashlib.sha256(self._url.encode()).hexdigest()
+        download_path = self._download_track(self._tmp_path, filename)
+        final_path = self._tmp_path / f'{filename}.mp3'
+
+        self._subprocess_track_to_mp3(download_path, final_path)
 
         try:
-            video = YouTube(self.__url)
+            with open(final_path, 'rb') as new_song:
+                buffer.write(new_song.read())
+
+        except FileNotFoundError as not_found:
+            _logger.info(f"Failed to open file '{final_path}': {not_found}")
+            raise VideoProcessingError(not_found)
+
+        self._clean_temp_file(download_path)
+        self._clean_temp_file(final_path)
+
+    def _download_track(self, tmp_path: Path, filename: str) -> Path:
+        try:
+            video = YouTube(self._url)
             stream = video.streams.filter(only_audio=True).first()
-            download_path = stream.download(output_path=tmp_path, filename=filename)
+            download_path = stream.download(output_path=f'{tmp_path}', filename=filename)
+            return Path(download_path)
 
         except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
-            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {video_error}")
+            _logger.warning(f"Failed to process YouTube URL '{self._url}': {video_error}")
             raise ClientPlatformError(video_error)
 
         except Exception as unknown_error:
             _logger.error(f"Unexpected error while processing the download: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
-        result = subprocess.run(
-                args=['ffmpeg', '-i', download_path, '-vn', '-ab', '192k', '-ar', '44100', '-y', f'{output_path}.mp3'],
-                capture_output=True
-            )
-
-        if result.returncode != 0:
-            _logger.error(f"FFmpeg failed: {result.stderr.decode()}")
-            raise VideoProcessingError(result.stderr.decode())
-
+    @staticmethod
+    def _clean_temp_file(filepath: Path) -> None:
         try:
-            os.remove(f'{download_path}')
+            filepath.unlink()
 
         except (PermissionError, FileNotFoundError) as system_error:
-            _logger.error(f"File not found or no permission to delete: {system_error}")
+            _logger.info(f"File not found or no permission to delete: {system_error}")
             raise VideoProcessingError(system_error)
 
         except Exception as unknown_error:
-            _logger.error(f"Something went wrong while deleting path '{download_path}': {unknown_error}")
+            _logger.error(f"Something went wrong while deleting path '{filepath}': {unknown_error}")
             raise MusicManagerError(unknown_error)
 
-    def stream_to_buffer(self, buffer: io.BytesIO) -> None:
-
-        filename = hashlib.sha256(self.__url.encode()).hexdigest()
-        tmp_path = Path('/tmp/')
-
-        try:
-            video = YouTube(self.__url)
-            stream = video.streams.filter(only_audio=True).first()
-            download_path = stream.download(output_path=tmp_path, filename=filename)
-
-        except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
-            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {video_error}")
-            raise ClientPlatformError(video_error)
-
-        except Exception as unknown_error:
-            _logger.error(f"Unexpected error while processing the download: {unknown_error}")
-            raise MusicManagerError(unknown_error)
-
+    @staticmethod
+    def _subprocess_track_to_mp3(download_path: Path, output_path: Path) -> None:
         result = subprocess.run(
-            args=['ffmpeg', '-i', download_path, '-vn', '-ab', '192k',
-                  '-ar', '44100', '-y', f'{tmp_path.joinpath(filename)}.mp3'],
-            capture_output=True
+            args=['ffmpeg', '-i', f'{download_path}', '-vn', '-ab', '192k', '-ar', '44100', '-y', f'{output_path}'],
+            capture_output=True,
         )
 
         if result.returncode != 0:
             _logger.error(f"FFmpeg failed: {result.stderr.decode()}")
             raise ClientPlatformError(result.stderr.decode())
 
-        try:
-            with open(f'{tmp_path.joinpath(filename)}.mp3', 'rb') as new_song:
-                track = new_song.read()
-                buffer.write(track)
-
-        except FileNotFoundError as not_found:
-            _logger.info(f"Failed to open file '{tmp_path}.mp3': {not_found}")
-            raise VideoProcessingError(not_found)
-
-        try:
-            os.remove(f'{download_path}')
-
-        except (PermissionError, FileNotFoundError) as system_error:
-            _logger.info(f"File not found or no permission to delete: {system_error}")
-            raise VideoProcessingError(system_error)
-
-        except Exception as unknown_error:
-            _logger.error(f"Something went wrong while deleting path '{download_path}': {unknown_error}")
-            raise MusicManagerError(unknown_error)
-
 
 class YTDLPAdapter(StreamProtocol):
-    def __init__(self, url: str) -> None:
-        self.__url = url
 
-    def stream_to_file(self, output_path: str) -> None:
-        options = {
-            'format': 'bestaudio/best',
-            'outtmpl': output_path,
-            'quiet': False,
-            'no_warnings': True,
-            'prefer_ffmpeg': True,
-            'postprocessors': [
-                {
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192'
-                },
-            ]
-        }
+    DEFAULT_OPTIONS = {
+        'format': 'bestaudio/best',
+        'quiet': False,
+        'keepvideo': False,
+        'noplaylist': True,
+        'no_warnings': True,
+        'prefer_ffmpeg': True,
+        'postprocessors': [
+            {
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192'
+            },
+            {
+                'key': 'FFmpegMetadata'
+            },
+        ]
+    }
 
-        try:
-            with YoutubeDL(options) as yotube_dl:
-                yotube_dl.download(
-                    [self.__url]
-                )
+    def __init__(self, url: str, options: OptionDownloadSettings | None = None) -> None:
+        self._url = url
+        self._options = deepcopy(self.DEFAULT_OPTIONS)
+        self._tmp_path = Path('/tmp')
 
-        except RegexNotFoundError as invalid_url:
-            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {invalid_url}")
-            raise ClientPlatformError(invalid_url)
+        if options:
+            self._options.update(options)
 
-        except (DownloadError, MaxDownloadsReached, UnavailableVideoError) as download_error:
-            _logger.warning(f"Failed to download '{self.__url}': {download_error}")
-            raise ClientPlatformError(download_error)
-
-        except YoutubeDLError as service_error:
-            _logger.error(f"Something went wrong while processing the video: {service_error}")
-            raise VideoProcessingError(service_error)
-
-        except Exception as unknown_error:
-            _logger.error(f"Unexpected error while processing the download: {unknown_error}")
-            raise MusicManagerError(unknown_error)
+    def stream_to_file(self, output_path: Path) -> None:
+        options = self._get_download_options(output_path)
+        self._download_track(options)
 
     def stream_to_buffer(self, buffer: io.BytesIO) -> None:
+        filename = hashlib.sha256(self._url.encode()).hexdigest()
+        tmp_path = self._tmp_path / filename
+        final_path = self._tmp_path / f'{filename}.mp3'
 
-        filename = hashlib.sha256(self.__url.encode()).hexdigest()
-        tmp_path = f'/tmp/{filename}'
-
-        options = {
-            'format': 'bestaudio/best',
-            'outtmpl': tmp_path,
-            'quiet': False,
-            'no_warnings': True,
-            'prefer_ffmpeg': True,
-            'postprocessors': [
-                {
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192'
-                },
-                {
-                    'key': 'FFmpegMetadata'
-                },
-            ]
-        }
+        options = self._get_download_options(tmp_path)
+        self._download_track(options)
 
         try:
-            with YoutubeDL(options) as yotube_dl:
-                yotube_dl.download(
-                    [self.__url]
-                )
+            with open(final_path, 'rb') as new_song:
+                buffer.write(new_song.read())
+
+        except FileNotFoundError as not_found:
+            _logger.info(f"Failed to open file '{final_path}': {not_found}")
+            raise VideoProcessingError(not_found)
+
+        self._clean_temp_file(final_path)
+
+    def _download_track(self, options: OptionDownloadSettings) -> None:
+        try:
+            with YoutubeDL(options) as youtube_dl:
+                youtube_dl.download([self._url])
 
         except RegexNotFoundError as invalid_url:
-            _logger.warning(f"Failed to process YouTube URL '{self.__url}': {invalid_url}")
+            _logger.warning(f"Failed to process YouTube URL '{self._url}': {invalid_url}")
             raise ClientPlatformError(invalid_url)
 
         except (DownloadError, MaxDownloadsReached, UnavailableVideoError) as download_error:
-            _logger.warning(f"Failed to download '{self.__url}': {download_error}")
+            _logger.warning(f"Failed to download '{self._url}': {download_error}")
             raise ClientPlatformError(download_error)
 
         except YoutubeDLError as service_error:
@@ -207,24 +172,22 @@ class YTDLPAdapter(StreamProtocol):
             _logger.error(f"Unexpected error while processing the download: {unknown_error}")
             raise MusicManagerError(unknown_error)
 
-        try:
-            with open(f'{tmp_path}.mp3', 'rb') as new_song:
-                track = new_song.read()
-                buffer.write(track)
+    def _get_download_options(self, file_path: Path) -> OptionDownloadSettings:
+        options = self._options.copy()
+        options['outtmpl'] = str(file_path.with_suffix(".%(ext)s"))
+        return options
 
-        except FileNotFoundError as not_found:
-            _logger.info(f"Failed to open file '{tmp_path}.mp3': {not_found}")
-            raise VideoProcessingError(not_found)
-
+    @staticmethod
+    def _clean_temp_file(file_path: Path) -> None:
         try:
-            os.remove(f'{tmp_path}.mp3')
+            file_path.unlink()
 
         except (PermissionError, FileNotFoundError) as system_error:
             _logger.info(f"File not found or no permission to delete: {system_error}")
             raise VideoProcessingError(system_error)
 
         except Exception as unknown_error:
-            _logger.error(f"Something went wrong while deleting path '{tmp_path}': {unknown_error}")
+            _logger.error(f"Something went wrong while deleting path '{file_path}': {unknown_error}")
             raise MusicManagerError(unknown_error)
 
 
@@ -232,7 +195,7 @@ class YTDLPAdapter(StreamProtocol):
 class DownloadTrack(ABC):
 
     @abstractmethod
-    def set_stream_to_file(self, stream: StreamProtocol, output_path: str) -> None:
+    def set_stream_to_file(self, stream: StreamProtocol, output_path: Path) -> None:
         ...
 
     @abstractmethod
@@ -242,7 +205,7 @@ class DownloadTrack(ABC):
 
 class YoutubeDownload(DownloadTrack):
 
-    def set_stream_to_file(self, stream: StreamProtocol, output_path: str) -> None:
+    def set_stream_to_file(self, stream: StreamProtocol, output_path: Path) -> None:
         stream.stream_to_file(output_path)
 
     def set_stream_to_buffer(self, stream: StreamProtocol, buffer: io.BytesIO) -> bytes:

@@ -434,6 +434,10 @@ class Track(Model, ProcessImageMixin):
                     _("\nAn internal issue ocurred while processing the video. Please, try a different URL.")
                 )
 
+            except InvalidPathError as invalid_path:
+                _logger.error(f"There was an issue with file path: {invalid_path}")
+                raise ValidationError(_("\nActually, the final path where to save file is not valid."))
+
             except MusicManagerError as unknown_error:
                 _logger.error(f"Unexpected error while processing video URL '{track.url}': {unknown_error}")
                 raise ValidationError(
