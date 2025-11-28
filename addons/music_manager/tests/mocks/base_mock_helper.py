@@ -2,7 +2,7 @@ from typing import Any, Type, TypeVar
 from unittest.mock import MagicMock
 
 
-E = TypeVar("E", bound=BaseException)
+ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 
 class BaseMock:
@@ -21,7 +21,7 @@ class BaseMock:
         return mock
 
     @classmethod
-    def simulate_error(cls, error_type: Type[E], message: str | None = None) -> E:
+    def simulate_error(cls, error_type: Type[ExceptionType], message: str | None = None) -> ExceptionType:
         msg = message or f"SIMULATING ERROR || {error_type.__name__} ||"
 
         return error_type(msg)

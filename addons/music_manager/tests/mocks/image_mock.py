@@ -6,7 +6,7 @@ from PIL import Image
 from .base_mock_helper import BaseMock
 
 
-E = TypeVar("E", bound=BaseException)
+ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 
 class ImageMock(BaseMock):
@@ -64,7 +64,7 @@ class ImageMock(BaseMock):
             cls,
             method_name: str,
             return_value: Optional[Any] = None,
-            error_name: Type[E] | None = None,
+            error_name: Type[ExceptionType] | None = None,
             message: str | None = None
     ) -> MagicMock:
 

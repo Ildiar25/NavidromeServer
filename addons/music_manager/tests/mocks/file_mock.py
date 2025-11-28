@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from .base_mock_helper import BaseMock
 
 
-E = TypeVar("E", bound=BaseException)
+ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 
 class FileMock(BaseMock):
@@ -114,7 +114,7 @@ class FileMock(BaseMock):
             cls,
             method_name: str,
             return_value: Optional[Any] = None,
-            error_name: Type[E] | None = None,
+            error_name: Type[ExceptionType] | None = None,
             message: str | None = None
     ) -> MagicMock:
 
