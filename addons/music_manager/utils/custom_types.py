@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Dict, List, Literal, Sequence, Tuple, TypeAlias, TypedDict
+from unittest.mock import MagicMock
 
 
 class AlbumVals(TypedDict, total=False):
@@ -71,10 +72,13 @@ class TrackVals(TypedDict, total=False):
     state: Literal['start', 'uploaded', 'metadata', 'done', 'added']
 
 
-# Custom types
+# Custom Odoo types
 MessageCounter: TypeAlias = Dict[str, int | List[str]]
 CustomWarningMessage: TypeAlias = Dict[str, Dict[str, str]]
 DisplayNotification: TypeAlias = Dict[str, str | Dict[str, str | bool]]
 ReplaceItemCommand: TypeAlias = Tuple[int, int, List[int]]
 DomainCustomFilter: TypeAlias = List[Tuple[str, str, List[int]]]
 OptionDownloadSettings: TypeAlias = Dict[str, str | bool | List[Dict[str, str]]]
+
+# Techincal custom types
+StreamToFileContext: TypeAlias = Dict[str, MagicMock | List[MagicMock]]
