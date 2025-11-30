@@ -1,8 +1,13 @@
 import io
+from contextlib import contextmanager
+from typing import Any, Iterator, Optional, Type, TypeVar
 from unittest.mock import MagicMock
-from typing import Optional, Any, TypeVar, Type
 
 from .base_mock_helper import BaseMock
+from .ffmpeg_mock import FFmpegMock
+from .path_mock import PathMock
+from .youtube_mock import YouTubeMock
+from ...utils.custom_types import StreamToFileContext
 from ...services.download_service import StreamProtocol
 
 
@@ -70,18 +75,125 @@ class PytubeAdapterMock(BaseMock):
     For each operation, mocks are provided for:
     -------------------------------------------
     - Success case
-    -
+    - RegexMatchError
+    - VideoPrivate
+    - VideoRegionBlocked
+    - VideoUnavailable
+    - FileNotFoundError
+    - Exception
     """
 
     @classmethod
-    def _mock_pytube_helper(
-            cls,
-            method_name: str,
-            return_value: Optional[Any] = None,
-            error_name: Type[ExceptionType] | None = None,
-            message: str | None = None
-    ) -> MagicMock:
-        pass
+    @contextmanager
+    def stream_to_file_success(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.success() as youtube_mock,
+            FFmpegMock.success() as ffmpeg_mock,
+            PathMock.success() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
+
+    @classmethod
+    @contextmanager
+    def stream_to_file_with_regex_match_error(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.with_regex_match_error() as youtube_mock,
+            FFmpegMock.success() as ffmpeg_mock,
+            PathMock.success() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
+
+    @classmethod
+    @contextmanager
+    def stream_to_file_with_video_private_error(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.with_video_private_error() as youtube_mock,
+            FFmpegMock.success() as ffmpeg_mock,
+            PathMock.success() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
+
+    @classmethod
+    @contextmanager
+    def stream_to_file_with_video_region_blocked_error(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.with_video_region_blocked_error() as youtube_mock,
+            FFmpegMock.success() as ffmpeg_mock,
+            PathMock.success() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
+
+    @classmethod
+    @contextmanager
+    def stream_to_file_with_video_unavailable_error(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.with_video_unavailable_error() as youtube_mock,
+            FFmpegMock.success() as ffmpeg_mock,
+            PathMock.success() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
+
+    @classmethod
+    @contextmanager
+    def stream_to_file_with_subprocess_error(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.success() as youtube_mock,
+            FFmpegMock.error() as ffmpeg_mock,
+            PathMock.success() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
+
+    @classmethod
+    @contextmanager
+    def stream_to_file_with_file_not_found_error(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.success() as youtube_mock,
+            FFmpegMock.success() as ffmpeg_mock,
+            PathMock.with_file_not_found_error() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
+
+    @classmethod
+    @contextmanager
+    def stream_to_file_with_permission_error(cls) -> Iterator[StreamToFileContext]:
+        with (
+            YouTubeMock.success() as youtube_mock,
+            FFmpegMock.success() as ffmpeg_mock,
+            PathMock.with_permission_error() as path_mock
+        ):
+            yield {
+                'youtube': youtube_mock,
+                'ffmpeg': ffmpeg_mock,
+                'unlink': path_mock
+            }
 
 
 class YTDLPAdapterMock(BaseMock):

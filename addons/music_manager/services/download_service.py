@@ -35,6 +35,14 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
         self._url = url
         self._tmp_path = Path('/tmp')
 
+    @property
+    def url(self) -> str:
+        return self._url
+
+    @property
+    def tmp_path(self) -> Path:
+        return self._tmp_path
+
     def stream_to_file(self, output_path: Path) -> None:
         filename = hashlib.sha256(self._url.encode()).hexdigest()
         download_path = self._download_track(self._tmp_path, filename)
@@ -54,7 +62,7 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
                 buffer.write(new_song.read())
 
         except FileNotFoundError as not_found:
-            _logger.info(f"Failed to open file '{final_path}': {not_found}")
+            _logger.error(f"Failed to open file '{final_path}': {not_found}")
             raise VideoProcessingError(not_found)
 
         self._clean_temp_file(download_path)
@@ -68,7 +76,7 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
             return Path(download_path)
 
         except (RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable) as video_error:
-            _logger.warning(f"Failed to process YouTube URL '{self._url}': {video_error}")
+            _logger.error(f"Failed to process YouTube URL '{self._url}': {video_error}")
             raise ClientPlatformError(video_error)
 
         except Exception as unknown_error:
@@ -81,7 +89,7 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
             filepath.unlink()
 
         except (PermissionError, FileNotFoundError) as system_error:
-            _logger.info(f"File not found or no permission to delete: {system_error}")
+            _logger.error(f"File not found or no permission to delete: {system_error}")
             raise VideoProcessingError(system_error)
 
         except Exception as unknown_error:
@@ -97,7 +105,7 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
 
         if result.returncode != 0:
             _logger.error(f"FFmpeg failed: {result.stderr.decode()}")
-            raise ClientPlatformError(result.stderr.decode())
+            raise VideoProcessingError(result.stderr.decode())
 
 
 class YTDLPAdapter(StreamProtocol):
@@ -146,7 +154,7 @@ class YTDLPAdapter(StreamProtocol):
                 buffer.write(new_song.read())
 
         except FileNotFoundError as not_found:
-            _logger.info(f"Failed to open file '{final_path}': {not_found}")
+            _logger.error(f"Failed to open file '{final_path}': {not_found}")
             raise VideoProcessingError(not_found)
 
         self._clean_temp_file(final_path)
@@ -157,11 +165,11 @@ class YTDLPAdapter(StreamProtocol):
                 youtube_dl.download([self._url])
 
         except RegexNotFoundError as invalid_url:
-            _logger.warning(f"Failed to process YouTube URL '{self._url}': {invalid_url}")
+            _logger.error(f"Failed to process YouTube URL '{self._url}': {invalid_url}")
             raise ClientPlatformError(invalid_url)
 
         except (DownloadError, MaxDownloadsReached, UnavailableVideoError) as download_error:
-            _logger.warning(f"Failed to download '{self._url}': {download_error}")
+            _logger.error(f"Failed to download '{self._url}': {download_error}")
             raise ClientPlatformError(download_error)
 
         except YoutubeDLError as service_error:
@@ -183,7 +191,7 @@ class YTDLPAdapter(StreamProtocol):
             file_path.unlink()
 
         except (PermissionError, FileNotFoundError) as system_error:
-            _logger.info(f"File not found or no permission to delete: {system_error}")
+            _logger.error(f"File not found or no permission to delete: {system_error}")
             raise VideoProcessingError(system_error)
 
         except Exception as unknown_error:
