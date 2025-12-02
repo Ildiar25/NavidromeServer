@@ -1,7 +1,7 @@
 import io
 import hashlib
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 
 from odoo.tests.common import TransactionCase
 
@@ -60,10 +60,12 @@ class TestPyTubeAdapter(TransactionCase):
 
         self.fake_url = "https://www.fake-url.com/"
         self.tmp_path = Path('/tmp')
+        self.buffer = io.BytesIO()
+
         self.pytube_adapter = PyTubeAdapter(self.fake_url)
 
     def tearDown(self) -> None:
-        pass
+        self.buffer.close()
 
     # =========================================================================================
     # Testing for '__init__'
@@ -81,7 +83,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_success(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_success(),
+            PytubeAdapterMock.stream_to_success(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -103,7 +105,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_with_regex_match_error(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_with_regex_match_error(),
+            PytubeAdapterMock.stream_to_with_regex_match_error(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -127,7 +129,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_with_video_private_error(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_with_video_private_error(),
+            PytubeAdapterMock.stream_to_with_video_private_error(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -151,7 +153,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_with_video_region_blocked_error(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_with_video_region_blocked_error(),
+            PytubeAdapterMock.stream_to_with_video_region_blocked_error(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -175,7 +177,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_with_video_unavailable_error(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_with_video_unavailable_error(),
+            PytubeAdapterMock.stream_to_with_video_unavailable_error(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -199,7 +201,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_with_ffmpeg_process_error(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_with_subprocess_error(),
+            PytubeAdapterMock.stream_to_with_subprocess_error(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -223,7 +225,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_with_file_not_found_error(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_with_file_not_found_error(),
+            PytubeAdapterMock.stream_to_with_file_not_found_error(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -247,7 +249,7 @@ class TestPyTubeAdapter(TransactionCase):
 
     def test_pytube_stream_to_file_with_permission_error(self) -> None:
         with (
-            PytubeAdapterMock.stream_to_file_with_permission_error(),
+            PytubeAdapterMock.stream_to_with_permission_error(),
             patch.object(
                 PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
             ) as mock_clean,
@@ -272,6 +274,267 @@ class TestPyTubeAdapter(TransactionCase):
     # =========================================================================================
     # Testing for 'stream_to_buffer'
     # =========================================================================================
+
+    def test_pytube_stream_to_buffer_success(self) -> None:
+        expected_data = b"Fake mp3"
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_success(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+            final_path = self.tmp_path / f'{filename}.mp3'
+
+            self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_called_once_with(self.fake_download_path, final_path)
+            mock_open_method.assert_called_once_with(final_path, 'rb')
+            self.assertEqual(
+                mock_clean.call_count,
+                2,
+                f"Method '_clean_temp_file' must called twice. Called {mock_clean.call_count} time(s)."
+            )
+            self.assertEqual(self.buffer.getvalue(), expected_data, f"Return value must be {expected_data}.")
+
+    def test_pytube_stream_to_buffer_with_regex_match_error(self) -> None:
+        expected_data = b""
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_with_regex_match_error(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+
+            with self.assertRaises(ClientPlatformError) as caught_error:
+                self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            self.assertIsInstance(caught_error.exception, ClientPlatformError)
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_not_called()
+            mock_open_method.assert_not_called()
+            mock_clean.assert_not_called()
+
+            self.assertEqual(
+                self.buffer.getvalue(), expected_data, f"Return value must be empty, got {self.buffer.getvalue()}."
+            )
+
+    def test_pytube_stream_to_buffer_with_video_private_error(self) -> None:
+        expected_data = b""
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_with_video_private_error(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+
+            with self.assertRaises(ClientPlatformError) as caught_error:
+                self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            self.assertIsInstance(caught_error.exception, ClientPlatformError)
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_not_called()
+            mock_open_method.assert_not_called()
+            mock_clean.assert_not_called()
+            self.assertEqual(
+                self.buffer.getvalue(), expected_data, f"Return value must be empty, got {self.buffer.getvalue()}."
+            )
+
+    def test_pytube_stream_to_buffer_with_video_region_blocked_error(self) -> None:
+        expected_data = b""
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_with_video_region_blocked_error(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+
+            with self.assertRaises(ClientPlatformError) as caught_error:
+                self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            self.assertIsInstance(caught_error.exception, ClientPlatformError)
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_not_called()
+            mock_open_method.assert_not_called()
+            mock_clean.assert_not_called()
+            self.assertEqual(
+                self.buffer.getvalue(), expected_data, f"Return value must be empty, got {self.buffer.getvalue()}."
+            )
+
+    def test_pytube_stream_to_buffer_with_video_unavailable_error(self) -> None:
+        expected_data = b""
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_with_video_unavailable_error(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+
+            with self.assertRaises(ClientPlatformError) as caught_error:
+                self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            self.assertIsInstance(caught_error.exception, ClientPlatformError)
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_not_called()
+            mock_open_method.assert_not_called()
+            mock_clean.assert_not_called()
+            self.assertEqual(
+                self.buffer.getvalue(), expected_data, f"Return value must be empty, got {self.buffer.getvalue()}."
+            )
+
+    def test_pytube_stream_to_buffer_with_ffmpeg_process_error(self) -> None:
+        expected_data = b""
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_with_subprocess_error(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+            final_path = self.tmp_path / f'{filename}.mp3'
+
+            with self.assertRaises(VideoProcessingError) as caught_error:
+                self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            self.assertIsInstance(caught_error.exception, VideoProcessingError)
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_called_once_with(self.fake_download_path, final_path)
+            mock_open_method.assert_not_called()
+            mock_clean.assert_not_called()
+            self.assertEqual(
+                self.buffer.getvalue(), expected_data, f"Return value must be empty, got {self.buffer.getvalue()}."
+            )
+
+    def test_pytube_stream_to_buffer_with_file_not_found_error(self) -> None:
+        expected_data = b""
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_with_file_not_found_error(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+            final_path = self.tmp_path / f'{filename}.mp3'
+
+            with self.assertRaises(VideoProcessingError) as caught_error:
+                self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            self.assertIsInstance(caught_error.exception, VideoProcessingError)
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_called_once_with(self.fake_download_path, final_path)
+            mock_open_method.assert_called_once_with(final_path, 'rb')
+            mock_clean.assert_called_once_with(self.fake_download_path)
+            self.assertEqual(
+                self.buffer.getvalue(), expected_data, f"Return value must be empty, got {self.buffer.getvalue()}."
+            )
+
+    def test_pytube_stream_to_buffer_with_permission_error(self) -> None:
+        expected_data = b""
+        open_mock_method = mock_open(read_data=expected_data)
+
+        with (
+            PytubeAdapterMock.stream_to_with_permission_error(),
+            patch.object(
+                PyTubeAdapter, '_clean_temp_file', wraps=self.pytube_adapter._clean_temp_file
+            ) as mock_clean,
+            patch.object(
+                PyTubeAdapter, '_download_track', wraps=self.pytube_adapter._download_track
+            ) as mock_download,
+            patch.object(
+                PyTubeAdapter, '_subprocess_track_to_mp3', wraps=self.pytube_adapter._subprocess_track_to_mp3
+            ) as mock_subprocess,
+            patch('builtins.open', open_mock_method) as mock_open_method
+        ):
+
+            filename = hashlib.sha256(self.fake_url.encode()).hexdigest()
+            final_path = self.tmp_path / f'{filename}.mp3'
+
+            with self.assertRaises(VideoProcessingError) as caught_error:
+                self.pytube_adapter.stream_to_buffer(self.buffer)
+
+            self.assertIsInstance(caught_error.exception, VideoProcessingError)
+            mock_download.assert_called_once_with(self.tmp_path, filename)
+            mock_subprocess.assert_called_once_with(self.fake_download_path, final_path)
+            mock_open_method.assert_called_once_with(final_path, 'rb')
+            mock_clean.assert_called_once_with(self.fake_download_path)
+            self.assertEqual(
+                self.buffer.getvalue(), expected_data, f"Return value must be empty, got {self.buffer.getvalue()}."
+            )
 
 
 class TestYTDLPAdapter(TransactionCase):
