@@ -69,8 +69,7 @@ class PytubeAdapterMock(BaseMock):
 
     Operations covered:
     -------------------
-    - stream_to_buffer
-    - stream_to_file
+    - stream_to (default class behaviour)
 
     For each operation, mocks are provided for:
     -------------------------------------------
@@ -80,12 +79,12 @@ class PytubeAdapterMock(BaseMock):
     - VideoRegionBlocked
     - VideoUnavailable
     - FileNotFoundError
-    - Exception
+    - PermissionError
     """
 
     @classmethod
     @contextmanager
-    def stream_to_file_success(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_success(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.success() as youtube_mock,
             FFmpegMock.success() as ffmpeg_mock,
@@ -99,7 +98,7 @@ class PytubeAdapterMock(BaseMock):
 
     @classmethod
     @contextmanager
-    def stream_to_file_with_regex_match_error(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_with_regex_match_error(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.with_regex_match_error() as youtube_mock,
             FFmpegMock.success() as ffmpeg_mock,
@@ -113,7 +112,7 @@ class PytubeAdapterMock(BaseMock):
 
     @classmethod
     @contextmanager
-    def stream_to_file_with_video_private_error(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_with_video_private_error(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.with_video_private_error() as youtube_mock,
             FFmpegMock.success() as ffmpeg_mock,
@@ -127,7 +126,7 @@ class PytubeAdapterMock(BaseMock):
 
     @classmethod
     @contextmanager
-    def stream_to_file_with_video_region_blocked_error(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_with_video_region_blocked_error(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.with_video_region_blocked_error() as youtube_mock,
             FFmpegMock.success() as ffmpeg_mock,
@@ -141,7 +140,7 @@ class PytubeAdapterMock(BaseMock):
 
     @classmethod
     @contextmanager
-    def stream_to_file_with_video_unavailable_error(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_with_video_unavailable_error(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.with_video_unavailable_error() as youtube_mock,
             FFmpegMock.success() as ffmpeg_mock,
@@ -155,7 +154,7 @@ class PytubeAdapterMock(BaseMock):
 
     @classmethod
     @contextmanager
-    def stream_to_file_with_subprocess_error(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_with_subprocess_error(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.success() as youtube_mock,
             FFmpegMock.error() as ffmpeg_mock,
@@ -169,7 +168,7 @@ class PytubeAdapterMock(BaseMock):
 
     @classmethod
     @contextmanager
-    def stream_to_file_with_file_not_found_error(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_with_file_not_found_error(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.success() as youtube_mock,
             FFmpegMock.success() as ffmpeg_mock,
@@ -183,7 +182,7 @@ class PytubeAdapterMock(BaseMock):
 
     @classmethod
     @contextmanager
-    def stream_to_file_with_permission_error(cls) -> Iterator[StreamToFileContext]:
+    def stream_to_with_permission_error(cls) -> Iterator[StreamToFileContext]:
         with (
             YouTubeMock.success() as youtube_mock,
             FFmpegMock.success() as ffmpeg_mock,
