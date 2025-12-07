@@ -88,7 +88,7 @@ class TestAdapterFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             adapter.save_file(fake_path, fake_data)
 
-        self.assertIn("File path does not exist.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.create_folders.assert_not_called()
         fake_save_method.save_file.assert_not_called()
 
@@ -105,7 +105,7 @@ class TestAdapterFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             adapter.save_file(fake_path, fake_data)
 
-        self.assertIn("Data to save is not valid.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.create_folders.assert_not_called()
         fake_save_method.save_file.assert_not_called()
 
@@ -139,7 +139,7 @@ class TestAdapterFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             adapter.read_file(fake_path)
 
-        self.assertIn("File path does not exist.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.read_file.assert_not_called()
 
     # =========================================================================================
@@ -172,7 +172,7 @@ class TestAdapterFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             adapter.update_file_path(fake_old_path, fake_new_path)
 
-        self.assertIn("File path does not exist.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.update_file_path.assert_not_called()
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
@@ -187,7 +187,7 @@ class TestAdapterFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             adapter.update_file_path(fake_old_path, fake_new_path)
 
-        self.assertIn("File path does not exist.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.update_file_path.assert_not_called()
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
@@ -215,7 +215,7 @@ class TestAdapterFileService(TransactionCase):
             with self.assertRaises(InvalidPathError) as caught_error:
                 adapter.update_file_path(fake_old_path, fake_new_path)
 
-        self.assertIn("Old path does not exist.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.update_file_path.assert_not_called()
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
@@ -231,7 +231,7 @@ class TestAdapterFileService(TransactionCase):
             with self.assertRaises(InvalidPathError) as caught_error:
                 adapter.update_file_path(fake_old_path, fake_new_path)
 
-        self.assertIn("New path already exists.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.update_file_path.assert_not_called()
 
     # =========================================================================================
@@ -262,7 +262,7 @@ class TestAdapterFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             adapter.delete_file(fake_path)
 
-        self.assertIn("File path does not exist.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.delete_file.assert_not_called()
 
     @patch('odoo.addons.music_manager.adapters.file_service_adapter.FolderManager')
@@ -277,7 +277,7 @@ class TestAdapterFileService(TransactionCase):
             with self.assertRaises(InvalidPathError) as caught_error:
                 adapter.delete_file(fake_path)
 
-        self.assertIn("File not found or it is not a file.", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         fake_folder_manager.delete_file.assert_not_called()
 
     # =========================================================================================

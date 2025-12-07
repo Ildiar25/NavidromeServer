@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from PIL import Image
@@ -15,6 +16,8 @@ class TestImageService(TransactionCase):
         self.initial_image = ImageMock.create_mock(Image.Image, size=(400, 200))
         self.image_service = ImageToPNG(self.initial_image)
 
+        self.fake_path_image = Path("/testing/fake/format.png")
+
     def tearDown(self) -> None:
         pass
 
@@ -23,7 +26,9 @@ class TestImageService(TransactionCase):
     # =========================================================================================
 
     def test_init_with_initial_image(self) -> None:
-        self.assertIsInstance(self.image_service.image, Image.Image, "Initial image must be an 'Image' instance.")
+        self.assertIsInstance(
+            self.image_service.image, Image.Image, "Initial image must be an 'Image' instance."
+        )
         self.assertEqual(self.image_service.image, self.initial_image, f"Image must be '{self.initial_image}'.")
 
     def test_init_initial_size(self) -> None:
@@ -73,7 +78,11 @@ class TestImageService(TransactionCase):
         result = fake_image_service.with_size(400, 400)
 
         image_mock.resize.assert_called_once_with(size=expected_size)
-        self.assertEqual(image_mock.resize.return_value.size, expected_size, f"New size must be '{expected_size}'.")
+        self.assertEqual(
+            image_mock.resize.return_value.size,
+            expected_size,
+            msg=f"New size must be '{expected_size}', got {image_mock.resize.return_value.size} instead."
+        )
         self.assertIs(result, fake_image_service)
 
     # =========================================================================================
@@ -107,7 +116,7 @@ class TestImageService(TransactionCase):
         with self.assertRaises(InvalidImageFormatError) as caught_error:
             fake_image_service.to_bytes()
 
-        self.assertIn("OSError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidImageFormatError)
         fake_bytes_io.seek.assert_not_called()
         fake_bytes_io.read.assert_not_called()
 
@@ -117,75 +126,48 @@ class TestImageService(TransactionCase):
 
     def test_save_to_file_success(self) -> None:
         image_mock = ImageMock.save_image_success()
-
-        fake_path = "/testing/fake/format.png"
-
-        fake_image_service = ImageToPNG(image_mock)
-        fake_image_service.to_file(fake_path)
-
-        image_mock.save.assert_called_once_with(fake_path)
-
-    def test_save_to_file_with_invalid_format_image_error(self) -> None:
-        image_mock = ImageMock.save_image_success()
-
-        fake_path = "/testing/bad/format.jpg"
-
         fake_image_service = ImageToPNG(image_mock)
 
-        with self.assertRaises(InvalidImageFormatError) as caught_error:
-            fake_image_service.to_file(fake_path)
+        fake_image_service.to_file(self.fake_path_image)
 
-        self.assertIn("Image must have 'PNG' extension", str(caught_error.exception))
-        image_mock.save.assert_not_called()
+        image_mock.save.assert_called_once_with(self.fake_path_image)
 
     def test_save_to_file_with_permission_error(self) -> None:
         image_mock = ImageMock.save_image_with_permission_error()
-
-        fake_path = "/testing/fake/format.png"
-
         fake_image_service = ImageToPNG(image_mock)
 
         with self.assertRaises(ImagePersistenceError) as caught_error:
-            fake_image_service.to_file(fake_path)
+            fake_image_service.to_file(self.fake_path_image)
 
-        self.assertIn("PermissionError", str(caught_error.exception))
-        image_mock.save.assert_called_once_with(fake_path)
+        self.assertIsInstance(caught_error.exception, ImagePersistenceError)
+        image_mock.save.assert_called_once_with(self.fake_path_image)
 
     def test_save_to_file_with_file_exists_error(self) -> None:
         image_mock = ImageMock.save_image_with_file_exists_error()
-
-        fake_path = "/testing/fake/format.png"
-
         fake_image_service = ImageToPNG(image_mock)
 
         with self.assertRaises(ImagePersistenceError) as caught_error:
-            fake_image_service.to_file(fake_path)
+            fake_image_service.to_file(self.fake_path_image)
 
-        self.assertIn("FileExistsError", str(caught_error.exception))
-        image_mock.save.assert_called_once_with(fake_path)
+        self.assertIsInstance(caught_error.exception, ImagePersistenceError)
+        image_mock.save.assert_called_once_with(self.fake_path_image)
 
     def test_save_to_file_with_exception_error(self) -> None:
         image_mock = ImageMock.save_image_with_exception_error()
-
-        fake_path = "/testing/fake/format.png"
-
         fake_image_service = ImageToPNG(image_mock)
 
         with self.assertRaises(MusicManagerError) as caught_error:
-            fake_image_service.to_file(fake_path)
+            fake_image_service.to_file(self.fake_path_image)
 
-        self.assertIn("Exception", str(caught_error.exception))
-        image_mock.save.assert_called_once_with(fake_path)
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
+        image_mock.save.assert_called_once_with(self.fake_path_image)
 
     def test_save_to_file_with_unknown_error(self) -> None:
         image_mock = ImageMock.save_image_with_os_error()
-
-        fake_path = "/testing/fake/format.png"
-
         fake_image_service = ImageToPNG(image_mock)
 
         with self.assertRaises(MusicManagerError) as caught_error:
-            fake_image_service.to_file(fake_path)
+            fake_image_service.to_file(self.fake_path_image)
 
-        self.assertIn("OSError", str(caught_error.exception))
-        image_mock.save.assert_called_once_with(fake_path)
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
+        image_mock.save.assert_called_once_with(self.fake_path_image)

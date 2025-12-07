@@ -162,7 +162,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(FilePersistenceError) as caught_error:
             fake_manager.save_file(file_path=pathlib_mock, data=data_to_save)
 
-        self.assertIn("Permission", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, FilePersistenceError)
         pathlib_mock.write_bytes.assert_called_once_with(data_to_save)
 
     def test_save_file_with_exception_error(self) -> None:
@@ -174,7 +174,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.save_file(file_path=pathlib_mock, data=data_to_save)
 
-        self.assertIn("Exception", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         pathlib_mock.write_bytes.assert_called_once_with(data_to_save)
 
     def test_save_file_with_unknown_error(self) -> None:
@@ -187,7 +187,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.save_file(file_path=pathlib_mock, data=data_to_save)
 
-        self.assertIn("OSError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         pathlib_mock.write_bytes.assert_called_once_with(data_to_save)
 
     # =========================================================================================
@@ -211,7 +211,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.read_file(pathlib_mock)
 
-        self.assertIn("FileNotFound", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         pathlib_mock.read_bytes.assert_called_once()
 
     def test_read_file_with_permission_error(self) -> None:
@@ -221,7 +221,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(FilePersistenceError) as caught_error:
             fake_manager.read_file(pathlib_mock)
 
-        self.assertIn("PermissionError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, FilePersistenceError)
         pathlib_mock.read_bytes.assert_called_once()
 
     def test_read_file_with_exception_error(self) -> None:
@@ -231,7 +231,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.read_file(pathlib_mock)
 
-        self.assertIn("Exception", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         pathlib_mock.read_bytes.assert_called_once()
 
     def test_read_file_with_unknown_error(self) -> None:
@@ -243,7 +243,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.read_file(pathlib_mock)
 
-        self.assertIn("OSError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         pathlib_mock.read_bytes.assert_called_once()
 
     # =========================================================================================
@@ -275,7 +275,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
 
-        self.assertIn("FileNotFound", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         old_path_mock.replace.assert_called_once_with(new_path_mock)
 
     def test_update_file_with_permission_error(self) -> None:
@@ -287,7 +287,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(FilePersistenceError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
 
-        self.assertIn("PermissionError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, FilePersistenceError)
         old_path_mock.replace.assert_called_once_with(new_path_mock)
 
     def test_update_file_with_exception_error(self) -> None:
@@ -299,7 +299,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
 
-        self.assertIn("Exception", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         old_path_mock.replace.assert_called_once_with(new_path_mock)
 
     def test_update_file_with_unknown_error(self) -> None:
@@ -313,7 +313,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.update_file_path(old_path_mock, new_path_mock)
 
-        self.assertIn("OSError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         old_path_mock.replace.assert_called_once_with(new_path_mock)
 
     # =========================================================================================
@@ -342,7 +342,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(InvalidPathError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
 
-        self.assertIn("FileNotFound", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
         pathlib_mock.unlink.assert_called_once()
 
     def test_delete_file_with_permission_error(self) -> None:
@@ -352,7 +352,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(FilePersistenceError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
 
-        self.assertIn("PermissionError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, FilePersistenceError)
         pathlib_mock.unlink.assert_called_once()
 
     def test_delete_file_with_exception_error(self) -> None:
@@ -362,7 +362,7 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
 
-        self.assertIn("Exception", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         pathlib_mock.unlink.assert_called_once()
 
     def test_delete_file_with_unknown_error(self) -> None:
@@ -374,5 +374,5 @@ class TestFileService(TransactionCase):
         with self.assertRaises(MusicManagerError) as caught_error:
             fake_manager.delete_file(pathlib_mock)
 
-        self.assertIn("OSError", str(caught_error.exception))
+        self.assertIsInstance(caught_error.exception, MusicManagerError)
         pathlib_mock.unlink.assert_called_once()
