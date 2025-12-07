@@ -1,14 +1,12 @@
-from contextlib import contextmanager
-from pathlib import Path
+from typing import ContextManager
 from unittest.mock import MagicMock, patch
-from typing import Iterator
 
 from .base_mock_helper import BaseMock
 
 
 class PathMock(BaseMock):
     """
-    Simulates different Path behaviours.
+    Simulates different Path behaviours ONLY in DOWNLOAD SERVICE.
 
     Operations covered:
     -------------------
@@ -24,20 +22,17 @@ class PathMock(BaseMock):
     UNLINK_METHOD = 'odoo.addons.music_manager.services.download_service.Path.unlink'
 
     @classmethod
-    @contextmanager
-    def success(cls) -> Iterator[None]:
-        with patch(cls.UNLINK_METHOD, return_value=None):
-            yield
-
+    def success(cls) -> ContextManager[MagicMock]:
+        return patch(cls.UNLINK_METHOD, return_value=None)
 
     @classmethod
-    @contextmanager
-    def with_file_not_found_error(cls) -> Iterator[None]:
-        with patch(cls.UNLINK_METHOD, side_effect=FileNotFoundError("SIMULATING ERROR || FileNotFound ||")):
-            yield
+    def with_file_not_found_error(cls) -> ContextManager[MagicMock]:
+        return patch(cls.UNLINK_METHOD, side_effect=cls.simulate_error(FileNotFoundError))
 
     @classmethod
-    @contextmanager
-    def with_permission_error(cls) -> Iterator[None]:
-        with patch(cls.UNLINK_METHOD, side_effect=PermissionError("SIMULATING ERROR || PermissionError ||")):
-            yield
+    def with_permission_error(cls) -> ContextManager[MagicMock]:
+        return patch(cls.UNLINK_METHOD, side_effect=cls.simulate_error(PermissionError))
+
+    @classmethod
+    def with_unknown_error(cls) -> ContextManager[MagicMock]:
+        return patch(cls.UNLINK_METHOD, side_effect=cls.simulate_error(Exception))

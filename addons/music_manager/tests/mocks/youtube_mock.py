@@ -1,10 +1,15 @@
-from typing import Any, List, ContextManager, Type
+import io
+from typing import ContextManager, Type, TypeVar
 from unittest.mock import MagicMock, patch
+from urllib.error import HTTPError
 
 from pytube import YouTube, Stream, StreamQuery
 from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable
 
 from .base_mock_helper import BaseMock
+
+
+ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 
 class YouTubeMock(BaseMock):
@@ -24,58 +29,70 @@ class YouTubeMock(BaseMock):
     - VideoPrivate
     - VideoRegionBlocked
     - VideoUnavailable
+    - HTTPError
+    - OSError
     """
 
     YT_CONSTRUCTOR = 'odoo.addons.music_manager.services.download_service.YouTube'
-    EXTRACT_VIDEO_ID = 'pytube.extract.video_id'
 
     @classmethod
-    def success(cls) -> ContextManager[List[MagicMock]]:
-        stream_mock = cls.create_mock(Stream)
-        stream_mock.download.return_value = '/fake/video.mp4'
-
-        youtube_mock = cls.create_mock(YouTube, streams=cls.create_mock(StreamQuery))
-        youtube_mock.streams.filter.return_value.first.return_value = stream_mock
-
-        patch_video = patch(cls.EXTRACT_VIDEO_ID, return_value="Fake video ID")
-        patch_youtube = patch(cls.YT_CONSTRUCTOR, return_value=youtube_mock)
-
-        return cls._stack(patch_video, patch_youtube)
+    def success(cls) -> ContextManager[MagicMock]:
+        youtube_mocked = cls._youtube_mock_helper()
+        return patch(cls.YT_CONSTRUCTOR, return_value=youtube_mocked)
 
     @classmethod
     def with_regex_match_error(cls) -> ContextManager[MagicMock]:
-        return patch(cls.EXTRACT_VIDEO_ID, side_effect=RegexMatchError(caller='Fake caller', pattern='Fake pattern'))
+        return patch(
+            cls.YT_CONSTRUCTOR,
+            side_effect=cls.simulate_error(RegexMatchError, caller='Fake caller', pattern='Fake pattern')
+        )
 
     @classmethod
-    def with_video_private_error(cls):
-        patch_video = patch(cls.EXTRACT_VIDEO_ID, return_value="Fake video ID")
-        patch_youtube = patch(cls.YT_CONSTRUCTOR, side_effect=cls.simulate_error(VideoPrivate))
-
-        return cls._stack(patch_video, patch_youtube)
+    def with_video_private_error(cls) -> ContextManager[MagicMock]:
+        return patch(cls.YT_CONSTRUCTOR, side_effect=cls.simulate_error(VideoPrivate))
 
     @classmethod
-    def with_video_region_blocked_error(cls) -> ContextManager[List[MagicMock]]:
-        patch_video = patch(cls.EXTRACT_VIDEO_ID, return_value="Fake video ID")
-        patch_youtube = patch(cls.YT_CONSTRUCTOR, side_effect=cls.simulate_error(VideoRegionBlocked))
-
-        return cls._stack(patch_video, patch_youtube)
+    def with_video_region_blocked_error(cls) -> ContextManager[MagicMock]:
+        return patch(cls.YT_CONSTRUCTOR, side_effect=cls.simulate_error(VideoRegionBlocked))
 
     @classmethod
-    def with_video_unavailable_error(cls) -> ContextManager[List[MagicMock]]:
-        patch_video = patch(cls.EXTRACT_VIDEO_ID, return_value="Fake video ID")
-        patch_youtube = patch(cls.YT_CONSTRUCTOR, side_effect=cls.simulate_error(VideoUnavailable))
-
-        return cls._stack(patch_video, patch_youtube)
+    def with_video_unavailable_error(cls) -> ContextManager[MagicMock]:
+        return patch(cls.YT_CONSTRUCTOR, side_effect=cls.simulate_error(VideoUnavailable))
 
     @classmethod
-    def _stack(cls, *patchers) -> ContextManager[Any]:
-        class _Context:
-            def __enter__(self) -> List[Any]:
-                self.started = [new_patch.start() for new_patch in patchers]
-                return self.started
+    def with_http_error(cls) -> ContextManager[MagicMock]:
+        youtube_mocked = cls._youtube_mock_helper(
+            error_name=HTTPError,
+            url="https://www.testing.com/",
+            code=404,
+            msg="Test file not found",
+            hdrs={'Content-Type': 'text/plain'},
+            fp=io.BytesIO(b'File not found')
+        )
+        return patch(cls.YT_CONSTRUCTOR, return_value=youtube_mocked)
 
-            def __exit__(self, exc_type: Type[BaseException], exc_val: BaseException, exc_tb: Any | None) -> None:
-                for new_patch in patchers:
-                    new_patch.stop()
+    @classmethod
+    def with_os_error(cls) -> ContextManager[MagicMock]:
+        youtube_mocked = cls._youtube_mock_helper(error_name=OSError)
+        return patch(cls.YT_CONSTRUCTOR, return_value=youtube_mocked)
 
-        return _Context()
+    @classmethod
+    def _youtube_mock_helper(
+            cls,
+            error_name: Type[ExceptionType] | None = None,
+            message: str | None = None,
+            **kwargs,
+    ) -> MagicMock:
+
+        stream_instance = cls.create_mock(Stream)
+
+        if error_name:
+            stream_instance.download.side_effect = cls.simulate_error(error_name, message, **kwargs)
+
+        else:
+            stream_instance.download.return_value = '/fake/video/path.mp4'
+
+        stream_query = cls.create_mock(StreamQuery)
+        stream_query.filter.return_value.first.return_value = stream_instance
+
+        return cls.create_mock(YouTube, streams=stream_query)

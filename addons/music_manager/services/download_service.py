@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import io
 import hashlib
+import io
 import logging
 import subprocess
 from abc import ABC, abstractmethod
@@ -14,7 +14,7 @@ from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError, MaxDownloadsReached, RegexNotFoundError, UnavailableVideoError, YoutubeDLError
 
 from ..utils.custom_types import OptionDownloadSettings
-from ..utils.exceptions import ClientPlatformError, VideoProcessingError, MusicManagerError
+from ..utils.exceptions import ClientPlatformError, MusicManagerError, VideoProcessingError
 
 
 _logger = logging.getLogger(__name__)
@@ -61,9 +61,13 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
             with open(final_path, 'rb') as new_song:
                 buffer.write(new_song.read())
 
-        except FileNotFoundError as not_found:
-            _logger.error(f"Failed to open file '{final_path}': {not_found}")
-            raise VideoProcessingError(not_found)
+        except (FileNotFoundError, PermissionError) as not_allowed:
+            _logger.error(f"Failed to open file '{final_path}': {not_allowed}")
+            raise VideoProcessingError(not_allowed)
+
+        except Exception as unknown_error:
+            _logger.error(f"Unexpected error while reading downloaded file: {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
         self._clean_temp_file(download_path)
         self._clean_temp_file(final_path)
@@ -153,9 +157,13 @@ class YTDLPAdapter(StreamProtocol):
             with open(final_path, 'rb') as new_song:
                 buffer.write(new_song.read())
 
-        except FileNotFoundError as not_found:
-            _logger.error(f"Failed to open file '{final_path}': {not_found}")
-            raise VideoProcessingError(not_found)
+        except (FileNotFoundError, PermissionError) as not_allowed:
+            _logger.error(f"Failed to open file '{final_path}': {not_allowed}")
+            raise VideoProcessingError(not_allowed)
+
+        except Exception as unknown_error:
+            _logger.error(f"Unexpected error while reading downloaded file: {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
         self._clean_temp_file(final_path)
 
@@ -168,7 +176,7 @@ class YTDLPAdapter(StreamProtocol):
             _logger.error(f"Failed to process YouTube URL '{self._url}': {invalid_url}")
             raise ClientPlatformError(invalid_url)
 
-        except (DownloadError, MaxDownloadsReached, UnavailableVideoError) as download_error:
+        except (MaxDownloadsReached, UnavailableVideoError, DownloadError) as download_error:
             _logger.error(f"Failed to download '{self._url}': {download_error}")
             raise ClientPlatformError(download_error)
 
