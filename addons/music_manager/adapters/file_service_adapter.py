@@ -32,7 +32,7 @@ class FileServiceAdapter:
 
         self._folder_manager.create_folders(file_path).save_file(file_path, data)
 
-    def read_file(self, str_file_path) -> bytes:
+    def read_file(self, str_file_path: str | None) -> bytes:
         if not isinstance(str_file_path, str):
             _logger.error(f"Cannot read the file. The path is not valid: '{str_file_path}'.")
             raise InvalidPathError("File path does not exist. Must be set before reading.")
@@ -41,7 +41,7 @@ class FileServiceAdapter:
 
         return self._folder_manager.read_file(file_path)
 
-    def update_file_path(self, old_str_path: str, new_str_path: str) -> None:
+    def update_file_path(self, old_str_path: str | None, new_str_path: str | None) -> None:
         if not isinstance(old_str_path, str) or not isinstance(new_str_path, str):
             _logger.error(f"Cannot move the file. One of the paths is not valid: '{old_str_path}' & '{new_str_path}'.")
             raise InvalidPathError("File path does not exist. Must be set before saving.")
@@ -63,7 +63,7 @@ class FileServiceAdapter:
 
         self._folder_manager.update_file_path(old_path, new_path)
 
-    def delete_file(self, str_file_path) -> None:
+    def delete_file(self, str_file_path: str | None) -> None:
         if not isinstance(str_file_path, str):
             _logger.error(f"Cannot delete the file. The path is not valid: '{str_file_path}'.")
             raise InvalidPathError("File path does not exist. Must be set before deleting.")
