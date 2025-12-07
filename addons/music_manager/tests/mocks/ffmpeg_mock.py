@@ -1,7 +1,6 @@
-from contextlib import contextmanager
 from subprocess import CompletedProcess
+from typing import ContextManager
 from unittest.mock import MagicMock, patch
-from typing import Iterator
 
 from .base_mock_helper import BaseMock
 
@@ -23,27 +22,31 @@ class FFmpegMock(BaseMock):
     SUBPROCESS_RUN_PATH = 'odoo.addons.music_manager.services.download_service.subprocess.run'
 
     @classmethod
-    @contextmanager
-    def success(cls) -> Iterator[MagicMock]:
-        with patch(cls.SUBPROCESS_RUN_PATH) as mocked_subprocess_run:
-            mocked_subprocess_run.return_value = cls.create_mock(
-                CompletedProcess,
-                returncode=0,
-                stdout=b'Simulate MP3 conversion successful',
-                stderr=b'',
-            )
-
-            yield mocked_subprocess_run
+    def success(cls) -> ContextManager[MagicMock]:
+        mock_subprocess = cls._subprocess_mock_helper("Successful MP3 convertion...")
+        return patch(cls.SUBPROCESS_RUN_PATH, return_value=mock_subprocess)
 
     @classmethod
-    @contextmanager
-    def error(cls, stderr_msg: str = 'SIMULATING ERROR || Simulate MP3 conversion error ||') -> Iterator[MagicMock]:
-        with patch(cls.SUBPROCESS_RUN_PATH) as mocked_subprocess_run:
-            mocked_subprocess_run.return_value = cls.create_mock(
-                CompletedProcess,
-                returncode=1,
-                stdout=b'',
-                stderr=stderr_msg.encode()
-            )
+    def error(cls) -> ContextManager[MagicMock]:
+        mock_subprocess = cls._subprocess_mock_helper("Failed MP3 convertion...", with_error=True)
+        return patch(cls.SUBPROCESS_RUN_PATH, return_value=mock_subprocess)
 
-            yield mocked_subprocess_run
+    @classmethod
+    def _subprocess_mock_helper(cls, message: str, with_error: bool = False) -> MagicMock:
+        mock_completed_process = cls.create_mock(CompletedProcess)
+
+        options = {
+            'returncode': 1 if with_error else 0,
+            'stdout': b'' if with_error else message.encode(),
+            'stderr': message.encode() if with_error else b'',
+        }
+
+        if with_error:
+            for key, value in options.items():
+                setattr(mock_completed_process, key, value)
+
+        else:
+            for key, value in options.items():
+                setattr(mock_completed_process, key, value)
+
+        return mock_completed_process
