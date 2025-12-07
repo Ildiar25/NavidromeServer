@@ -1,14 +1,20 @@
 import logging
+from pathlib import Path
 
 # noinspection PyProtectedMember
 from odoo import _
 from odoo.exceptions import ValidationError
 
 from .image_service_adapter import ImageServiceAdapter
-from ..services.metadata_service import MP3File
+from ..services.metadata_service import FileMetadata, MP3File
 from ..utils.enums import FileType
 from ..utils.exceptions import (
-    InvalidFileFormatError, MetadataServiceError, MetadataPersistenceError, MusicManagerError, ReadingFileError
+    InvalidFileFormatError,
+    InvalidPathError,
+    MetadataServiceError,
+    MetadataPersistenceError,
+    MusicManagerError,
+    ReadingFileError
 )
 
 
@@ -18,19 +24,12 @@ _logger = logging.getLogger(__name__)
 class MetadataServiceAdapter:
 
     def __init__(self, file_type: FileType = FileType.MP3) -> None:
-
-        self._metadata_service = None
-
-        match file_type:
-            case FileType.MP3:
-                self._metadata_service = MP3File()
-
-        if not self._metadata_service:
-            raise MetadataServiceError("Metadata service is not selected")
+        self.file_type = file_type
 
     def read_metadata(self, track: bytes) -> dict[str, str | int | None]:
         try:
-            metadata = self._metadata_service.get_metadata(track)
+            service = self._get_metadata_service()
+            metadata = service.get_metadata(track)
 
             return {
                 'name': metadata.TIT2,
@@ -68,7 +67,13 @@ class MetadataServiceAdapter:
                 _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
             )
 
-    def write_metadata(self, file_path: str, track: dict[str, str | int | None]) -> None:
+    def write_metadata(self, str_file_path: str | None, track: dict[str, str | int | None]) -> None:
+        if not isinstance(str_file_path, str):
+            _logger.error(f"Cannot save metadata. The path is not valid: '{str_file_path}'.")
+            raise InvalidPathError("File path does not exist. A valid path must be set before saving.")
+
+        output_path = Path(str_file_path).with_suffix(f'.{self.file_type.value}')
+
         metadata = {
             'TIT2': track['TIT2'],
             'TPE1': track['TPE1'],
@@ -84,13 +89,18 @@ class MetadataServiceAdapter:
         }
 
         try:
-            self._metadata_service.set_metadata(file_path, metadata)
+            service = self._get_metadata_service()
+            service.set_metadata(output_path, metadata)
 
         except ReadingFileError as invalid_metadata:
             _logger.error(f"Failed to process file metadata: {invalid_metadata}")
             raise ValidationError(
                 _("\nAn internal issue ocurred while processing metadata. Please, try a different file.")
             )
+
+        except InvalidPathError as invalid_path:
+            _logger.error(f"There was an issue with file path: {invalid_path}")
+            raise ValidationError(_("\nActually, the file path of this record is not valid."))
 
         except MetadataPersistenceError as not_allowed:
             _logger.error(f"Failed to save metadata into file: {not_allowed}")
@@ -103,6 +113,14 @@ class MetadataServiceAdapter:
             raise ValidationError(
                 _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
             )
+
+    def _get_metadata_service(self) -> FileMetadata:
+        match self.file_type:
+            case FileType.MP3:
+                return MP3File()
+
+            case _:
+                raise MetadataServiceError("Unsupported metadata file type")
 
     @staticmethod
     def _format_track_duration(duration: int):

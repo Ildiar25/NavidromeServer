@@ -3,7 +3,8 @@ import base64
 import io
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from pathlib import Path
+from typing import Dict
 
 # noinspection PyPackageRequirements
 import magic
@@ -46,11 +47,11 @@ class FileMetadata(ABC):
         return buffer
 
     @abstractmethod
-    def get_metadata(self, encoded_bytes_file: bytes) -> None:
+    def get_metadata(self, encoded_bytes_file: bytes) -> TrackMetadata:
         ...
 
     @abstractmethod
-    def set_metadata(self, str_file_path: str, new_data: TrackMetadata) -> None:
+    def set_metadata(self, output_path: Path, new_data: Dict[str, str | int | None]) -> None:
         ...
 
 
@@ -103,8 +104,8 @@ class MP3File(FileMetadata):
 
         return track_data
 
-    def set_metadata(self, str_file_path: str, new_metadata: Dict[str, Any]) -> None:
-        track = self.__load_metadata_tags(str_file_path)
+    def set_metadata(self, output_path: Path, new_metadata: Dict[str, str | int | None]) -> None:
+        track = self.__load_metadata_tags(output_path)
         self.__reset_metadata(track)
 
         new_data = TrackMetadata(**new_metadata)
@@ -165,7 +166,7 @@ class MP3File(FileMetadata):
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __load_metadata_tags(track_file: str | io.BytesIO) -> MP3:
+    def __load_metadata_tags(track_file: Path | io.BytesIO) -> MP3:
         try:
             return MP3(track_file, ID3=ID3)
 

@@ -2,17 +2,19 @@
 import io
 import logging
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TypeVar
 
 from PIL import Image
 
+from ..utils.enums import ImageType
 from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
 
 
 _logger = logging.getLogger(__name__)
 
 
-I = TypeVar("I", bound='ImageProcessor')
+ImgProcessor = TypeVar("ImgProcessor", bound='ImageProcessor')
 
 
 # ---- Image service ---- #
@@ -29,7 +31,7 @@ class ImageProcessor(ABC):
     def size(self) -> tuple[int, int]:
         return self._image.size
 
-    def center_image(self) -> I:
+    def center_image(self) -> ImgProcessor:
         width, height = self._image.size
         min_dimension = min(width, height)
 
@@ -41,7 +43,7 @@ class ImageProcessor(ABC):
         self._image = self._image.crop(box=(left, top, right, bottom))
         return self
 
-    def with_size(self, width: int, height: int) -> I:
+    def with_size(self, width: int, height: int) -> ImgProcessor:
         self._image = self._image.resize(size=(width, height))
         return self
 
@@ -50,7 +52,7 @@ class ImageProcessor(ABC):
         ...
 
     @abstractmethod
-    def to_file(self, output_path) -> None:
+    def to_file(self, output_path: Path) -> None:
         ...
 
 
@@ -60,7 +62,7 @@ class ImageToPNG(ImageProcessor):
         buffer = io.BytesIO()
 
         try:
-            self._image.save(buffer, format='png')
+            self._image.save(buffer, format=ImageType.PNG.value)
 
         except OSError as coding_error:
             _logger.error(f"There was a problem while coding image: {coding_error}")
@@ -69,12 +71,9 @@ class ImageToPNG(ImageProcessor):
         buffer.seek(0)
         return buffer.read()
 
-    def to_file(self, output_path: str) -> None:
-        if not output_path.lower().endswith('.png'):
-            raise InvalidImageFormatError(f"Image must have 'PNG' extension: '{output_path}'.")
-
+    def to_file(self, output_path: Path) -> None:
         try:
-            self._image.save(output_path.lower())
+            self._image.save(output_path)
 
         except (PermissionError, FileExistsError) as not_allowed:
             _logger.error(f"File already exists or is not allowed to write file: {not_allowed}")
