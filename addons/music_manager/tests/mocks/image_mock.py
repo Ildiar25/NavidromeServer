@@ -11,21 +11,21 @@ ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 class ImageMock(BaseMock):
     """
-        Simulates different behaviours when working with images.
+    Simulates different behaviours when working with images.
 
-        Operations covered:
-        -------------------
-        - Crop
-        - Resize
-        - Save
+    Operations covered:
+    -------------------
+    - Crop
+    - Resize
+    - Save
 
-        For each operation, mocks are provided for:
-        -------------------------------------------
-        - Success case
-        - PermissionError
-        - FileExistsError
-        - Exception
-        """
+    For each operation, mocks are provided for:
+    -------------------------------------------
+    - Success case
+    - PermissionError
+    - FileExistsError
+    - Exception
+    """
 
     @classmethod
     def crop_image_success(cls, new_size: tuple[int, int] | None = None) -> MagicMock:
@@ -65,14 +65,15 @@ class ImageMock(BaseMock):
             method_name: str,
             return_value: Optional[Any] = None,
             error_name: Type[ExceptionType] | None = None,
-            message: str | None = None
+            message: str | None = None,
+            **kwargs
     ) -> MagicMock:
 
         image_mock = cls.create_mock(Image.Image)
         method_mock = getattr(image_mock, method_name)
 
         if error_name:
-            method_mock.side_effect = cls.simulate_error(error_name, message)
+            method_mock.side_effect = cls.simulate_error(error_name, message, **kwargs)
 
         else:
             method_mock.return_value = return_value

@@ -115,14 +115,15 @@ class FileMock(BaseMock):
             method_name: str,
             return_value: Optional[Any] = None,
             error_name: Type[ExceptionType] | None = None,
-            message: str | None = None
+            message: str | None = None,
+            **kwargs
     ) -> MagicMock:
 
         pathlib_mock_path = cls.create_mock(Path)
         method_mock = getattr(pathlib_mock_path, method_name)
 
         if error_name:
-            method_mock.side_effect = cls.simulate_error(error_name, message)
+            method_mock.side_effect = cls.simulate_error(error_name, message, **kwargs)
 
         else:
             method_mock.return_value = return_value
