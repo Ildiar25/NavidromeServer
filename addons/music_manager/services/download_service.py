@@ -40,8 +40,8 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
         return self._url
 
     @property
-    def tmp_path(self) -> Path:
-        return self._tmp_path
+    def tmp_path(self) -> str:
+        return str(self._tmp_path)
 
     def stream_to_file(self, output_path: Path) -> None:
         filename = hashlib.sha256(self._url.encode()).hexdigest()
@@ -140,6 +140,18 @@ class YTDLPAdapter(StreamProtocol):
 
         if options:
             self._options.update(options)
+
+    @property
+    def url(self) -> str:
+        return self._url
+
+    @property
+    def options(self) -> OptionDownloadSettings:
+        return self._options
+
+    @property
+    def tmp_path(self) -> str:
+        return str(self._tmp_path)
 
     def stream_to_file(self, output_path: Path) -> None:
         options = self._get_download_options(output_path)

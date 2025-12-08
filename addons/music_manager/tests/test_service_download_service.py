@@ -80,18 +80,28 @@ class TestPyTubeAdapter(TransactionCase):
     # =========================================================================================
 
     def test_init_url_instance(self) -> None:
+        self.assertIsNotNone(self.pytube_adapter._url, msg="URL is mandatory before instantiate the adapter.")
         self.assertIsInstance(
-            self.pytube_adapter.url,
+            self.pytube_adapter._url,
             str,
             msg=f"URL path must be a 'str' instance, got {type(self.pytube_adapter.url)} instead."
         )
 
-    def test_init_temp_path_instance(self) -> None:
+    def test_init_path_instance(self) -> None:
+        self.assertIsNotNone(self.pytube_adapter._tmp_path, msg="Path is mandatory before instantiate the adapter.")
         self.assertIsInstance(
-            self.pytube_adapter.tmp_path,
+            self.pytube_adapter._tmp_path,
             Path,
             msg=f"Path must be a 'Path' instance, got {type(self.pytube_adapter.tmp_path)} instead."
         )
+
+    def test_init_with_given_url(self) -> None:
+        self.assertIsInstance(self.pytube_adapter.url, str, msg=f"URL must be returned as 'str' instance.")
+        self.assertEqual(self.pytube_adapter.url, self.fake_url, msg=f"URL must be {self.fake_url}")
+
+    def test_init_with_initial_path(self) -> None:
+        self.assertIsInstance(self.pytube_adapter.tmp_path, str, msg=f"Path must be returned as 'str' instance.")
+        self.assertEqual(self.pytube_adapter.tmp_path, str(self.tmp_path), msg=f"Path must be {self.tmp_path}.")
 
     # =========================================================================================
     # Testing for 'stream_to_file'
@@ -539,30 +549,57 @@ class TestYTDLPAdapter(TransactionCase):
     # Testing for '__init__'
     # =========================================================================================
 
-    def test_init_with_given_url(self) -> None:
-        self.assertEqual(
-            self.ytdlp_adapter._url,
-            self.fake_url,
-            msg=f"URL must be equal to '{self.fake_url}': got '{self.ytdlp_adapter._url}' instead."
-        )
-
-    def test_init_url_str_instance(self) -> None:
+    def test_class_options_attribute(self) -> None:
+        self.assertIsNotNone(self.ytdlp_adapter.DEFAULT_OPTIONS, msg="Default Options is a mandatory field.")
         self.assertIsInstance(
-            self.ytdlp_adapter._url,
-            str,
-            msg=f"URL path must be 'str' instance: Got '{type(self.ytdlp_adapter._url)}' instead."
-        )
-
-    def test_init_path_instance(self) -> None:
-        self.assertIsInstance(
-            self.ytdlp_adapter._tmp_path,
-            Path,
-            msg=f"Path must be a 'Path' instance, got {type(self.ytdlp_adapter._tmp_path)} instead."
+            self.ytdlp_adapter.DEFAULT_OPTIONS,
+            dict,
+            msg=f"Default options must be 'dict' instance, got '{type(self.ytdlp_adapter.DEFAULT_OPTIONS)}' instead."
         )
 
     def test_init_default_options(self) -> None:
         self.assertFalse(
             'outtmpl' in self.ytdlp_adapter.DEFAULT_OPTIONS, msg="Default options must not have 'outtmpl' key."
+        )
+
+    def test_init_url_instance(self) -> None:
+        self.assertIsNotNone(self.ytdlp_adapter._url, msg="URL is mandatory before instantiate the adapter.")
+        self.assertIsInstance(
+            self.ytdlp_adapter._url,
+            str,
+            msg=f"URL path must be 'str' instance, got '{type(self.ytdlp_adapter._url)}' instead."
+        )
+
+    def test_init_options_instance(self) -> None:
+        self.assertIsNotNone(self.ytdlp_adapter._options, msg="Options is mandatory before instantiate the adapter.")
+        self.assertIsInstance(
+            self.ytdlp_adapter._options,
+            dict,
+            msg=f"Options must be 'dict' instance, got '{type(self.ytdlp_adapter._options)}' instead."
+        )
+
+    def test_init_options_equal_to_default_options(self) -> None:
+        self.assertEqual(
+            self.ytdlp_adapter._options,
+            self.ytdlp_adapter.DEFAULT_OPTIONS,
+            msg=(f"Without a given parameter, options must be equal to "
+                 f"default options, got '{self.ytdlp_adapter._options}' instead.")
+        )
+
+    def test_init_with_given_url(self) -> None:
+        self.assertIsInstance(self.ytdlp_adapter.url, str, msg="URL must be returned as 'str' instance.")
+        self.assertEqual(self.ytdlp_adapter.url, self.fake_url, msg=f"URL must be '{self.fake_url}'.")
+
+    def test_init_with_initial_path(self) -> None:
+        self.assertIsInstance(self.ytdlp_adapter.tmp_path, str, msg="Path must be returned as 'str' instance.")
+        self.assertEqual(self.ytdlp_adapter.tmp_path, str(self.tmp_path), msg=f"Path must be '{self.tmp_path}'.")
+
+    def test_init_with_initial_options(self) -> None:
+        self.assertIsInstance(self.ytdlp_adapter.options, dict, msg="Options must be returned as 'dict' instance.")
+        self.assertEqual(
+            self.ytdlp_adapter.options,
+            self.ytdlp_adapter.DEFAULT_OPTIONS,
+            msg=f"Options must be equal to {self.ytdlp_adapter.DEFAULT_OPTIONS}"
         )
 
     # =========================================================================================
