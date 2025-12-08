@@ -1,7 +1,7 @@
 from typing import Optional, Any, TypeVar, Type
 from unittest.mock import MagicMock
 
-from PIL import Image
+from PIL.Image import Image
 
 from .base_mock_helper import BaseMock
 
@@ -29,13 +29,13 @@ class ImageMock(BaseMock):
 
     @classmethod
     def crop_image_success(cls, new_size: tuple[int, int] | None = None) -> MagicMock:
-        new_image_size_mock = cls.create_mock(Image.Image)
+        new_image_size_mock = cls.create_mock(Image)
         new_image_size_mock.size = new_size
         return cls._mock_image_helper('crop', return_value=new_image_size_mock)
 
     @classmethod
     def resize_image_success(cls, new_size: tuple[int, int] | None = None) -> MagicMock:
-        new_image_size_mock = cls.create_mock(Image.Image)
+        new_image_size_mock = cls.create_mock(Image)
         new_image_size_mock.size = new_size
         return cls._mock_image_helper('resize', return_value=new_image_size_mock)
 
@@ -69,7 +69,7 @@ class ImageMock(BaseMock):
             **kwargs
     ) -> MagicMock:
 
-        image_mock = cls.create_mock(Image.Image)
+        image_mock = cls.create_mock(Image)
         method_mock = getattr(image_mock, method_name)
 
         if error_name:

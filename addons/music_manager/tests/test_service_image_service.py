@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from PIL import Image
+from PIL.Image import Image
 
 from odoo.tests.common import TransactionCase
 
@@ -13,7 +13,7 @@ from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, M
 class TestImageService(TransactionCase):
 
     def setUp(self) -> None:
-        self.initial_image = ImageMock.create_mock(Image.Image, size=(400, 200))
+        self.initial_image = ImageMock.create_mock(Image, size=(400, 200))
         self.image_service = ImageToPNG(self.initial_image)
 
         self.fake_path_image = Path("/testing/fake/format.png")
@@ -25,14 +25,23 @@ class TestImageService(TransactionCase):
     # Testing for '__init__'
     # =========================================================================================
 
-    def test_init_with_initial_image(self) -> None:
+    def test_init_image_instance(self) -> None:
+        self.assertIsNotNone(self.image_service._image, msg="Image is mandatory before instantiate the service.")
         self.assertIsInstance(
-            self.image_service.image, Image.Image, "Initial image must be an 'Image' instance."
+            self.image_service._image,
+            Image,
+            msg=f"Image must be an 'Image' instance, got {type(self.image_service._image)} instead."
         )
-        self.assertEqual(self.image_service.image, self.initial_image, f"Image must be '{self.initial_image}'.")
 
-    def test_init_initial_size(self) -> None:
+    def test_init_with_given_image(self) -> None:
+        self.assertIsInstance(self.image_service.image, Image, msg="Image must be returned as an 'Image' instance.")
+        self.assertEqual(self.image_service.image, self.initial_image, msg=f"Image must be '{self.initial_image}'.")
+
+    def test_init_with_given_size(self) -> None:
         initial_size = (400, 200)
+        self.assertIsInstance(self.image_service.size, tuple, msg="Size must be returned as 'tuple' instance.")
+        self.assertIsInstance(self.image_service.size[0], int, msg="Tuple values must be 'int' instance.")
+        self.assertIsInstance(self.image_service.size[1], int, msg="Tuple values must be 'int' instance.")
         self.assertEqual(self.image_service.size, initial_size, f"Size must be '{initial_size}'.")
 
     # =========================================================================================

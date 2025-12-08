@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TypeVar
 
-from PIL import Image
+from PIL.Image import Image
 
 from ..utils.enums import ImageType
 from ..utils.exceptions import ImagePersistenceError, InvalidImageFormatError, MusicManagerError
@@ -20,11 +20,11 @@ ImgProcessor = TypeVar("ImgProcessor", bound='ImageProcessor')
 # ---- Image service ---- #
 class ImageProcessor(ABC):
 
-    def __init__(self, image: Image.Image) -> None:
+    def __init__(self, image: Image) -> None:
         self._image = image
 
     @property
-    def image(self) -> Image.Image:
+    def image(self) -> Image:
         return self._image
 
     @property
