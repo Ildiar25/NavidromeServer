@@ -12,16 +12,16 @@ _logger = logging.getLogger(__name__)
 class FolderManager:
 
     def __init__(self, root_dir: Path, file_extension: FileType) -> None:
-        self.__root_dir = root_dir
-        self.__file_extension = file_extension
+        self._root_dir = root_dir
+        self._file_extension = file_extension
 
     @property
     def root_dir(self) -> str:
-        return self.__root_dir.as_posix()
+        return str(self._root_dir)
 
     @property
     def file_extension(self) -> str:
-        return self.__file_extension.value
+        return self._file_extension.value
 
     def create_folders(self, file_path: Path) -> 'FolderManager':
         if not file_path.parent.exists():
@@ -30,10 +30,11 @@ class FolderManager:
         return self
 
     def set_path(self, artist: str, album: str, track: str, title: str) -> Path:
-        return self.__root_dir / artist / album / f"{track}_{title}.{self.__file_extension.value}"
+        new_path = self._root_dir / artist / album / f'{track}_{title}'
+        return new_path.with_suffix(f'.{self._file_extension.value}')
 
     def _clean_empty_dirs(self, path: Path) -> None:
-        if path == self.__root_dir:
+        if path == self._root_dir:
             return
 
         try:

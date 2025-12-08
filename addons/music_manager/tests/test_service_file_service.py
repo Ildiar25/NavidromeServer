@@ -22,13 +22,29 @@ class TestFileService(TransactionCase):
     # Testing for '__init__'
     # =========================================================================================
 
+    def test_init_root_dir_instance(self) -> None:
+        self.assertIsNotNone(self.manager._root_dir, msg="Root dir is mandatory before instantiate the manager.")
+        self.assertIsInstance(
+            self.manager._root_dir,
+            Path,
+            msg=f"Root dir must be 'Path' instance, got '{type(self.manager._root_dir)}' instead."
+        )
+
+    def test_init_extension_instance(self) -> None:
+        self.assertIsNotNone(self.manager._file_extension, msg="File extension is mandatory before instantiate manager.")
+        self.assertIsInstance(
+            self.manager._file_extension,
+            FileType,
+            msg=f"File extension must be 'FileType' instance, got '{type(self.manager._file_extension)}' instead."
+        )
+
     def test_init_with_initial_root(self) -> None:
-        self.assertIsInstance(self.manager.root_dir, str, "Root path must be returned as a 'str' instance.")
-        self.assertEqual(self.manager.root_dir, ROOT_DIR, f"Root path must be '{ROOT_DIR}'.")
+        self.assertIsInstance(self.manager.root_dir, str, msg="Root path must be returned as 'str' instance.")
+        self.assertEqual(self.manager.root_dir, ROOT_DIR, msg=f"Root path must be '{ROOT_DIR}'.")
 
     def test_init_with_initial_extension(self) -> None:
-        self.assertIsInstance(self.manager.file_extension, str, "Extension must be an 'str' instance.")
-        self.assertEqual(self.manager.file_extension, TRACK_EXTENSION, f"Extension must be '{TRACK_EXTENSION}'.")
+        self.assertIsInstance(self.manager.file_extension, str, msg="Extension must be returned as 'str' instance.")
+        self.assertEqual(self.manager.file_extension, TRACK_EXTENSION, msg=f"Extension must be '{TRACK_EXTENSION}'.")
 
     # =========================================================================================
     # Testing for 'create_folders'
@@ -63,8 +79,8 @@ class TestFileService(TransactionCase):
         expected_path = f"{ROOT_DIR}/artist/album/01_title.{TRACK_EXTENSION}"
         result_path = self.manager.set_path(artist, album, track, title)
 
-        self.assertIsInstance(result_path, Path, "Path must be a 'Path' instance.")
-        self.assertEqual(result_path.as_posix(), expected_path, f"Path must be equal to '{expected_path}'.")
+        self.assertIsInstance(result_path, Path, msg="Path must be a 'Path' instance.")
+        self.assertEqual(str(result_path), expected_path, msg=f"Path must be equal to '{expected_path}'.")
 
     def test_set_path_fail(self) -> None:
         artist = "artist"
@@ -75,9 +91,9 @@ class TestFileService(TransactionCase):
         expected_path = "/root/artist/album/01_title.flac"
         result_path = self.manager.set_path(artist, album, track, title)
 
-        self.assertIsInstance(result_path, Path, "Path must be a 'Path' instance.")
+        self.assertIsInstance(result_path, Path, msg="Path must be a 'Path' instance.")
         self.assertNotEqual(
-            result_path.as_posix(), expected_path, f"Path must be other extension and root folder: '{expected_path}'."
+            str(result_path), expected_path, msg=f"Path must be other extension and root folder: '{expected_path}'."
         )
 
     # =========================================================================================

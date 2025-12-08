@@ -4,6 +4,7 @@
 
  - [x] Añadir automatización al crear las carpetas principales en Linux (y permisos).
  - [x] Actualizar 'makefile' y el módulo 'Utils.psm1' con el archivo 'permissions.sh'.
+ - [ ] **Añadir la lectura y automatización de la carpeta principal de música para generar los registros automáticamente desde el Administrador.**
 
 ### Modelos
 
@@ -13,7 +14,7 @@
  - [x] Informar correctamente al usuario mediante notificaciones.
 
 ### Adaptadores
- - [ ] **Crear Numeradores para tipo de archivo (PNG, JPEG, ... ), tipo de descargador (PyTube, ...), tipo de metadatos (MP3, FLAC, ...).**
+ - [x] Crear Numeradores para tipo de archivo (*PNG*, *JPEG*, ... ), tipo de descargador (*PyTube*, ...), tipo de metadatos (*MP3*, *FLAC*, ...).
 
 
 ### Servicios
@@ -53,5 +54,9 @@
  - [x] Revisar textos en inglés.
  - [x] Revisar excepciones dadas.
  - [ ] **Conseguir que los formularios se muestren de modo *'solo lectura'* cuando el usuario no es propietario (*'artist'*, *'genre'*).**
- - [ ] **El administrador no puede ver los resultados obtenidos agrupados por usuario en *'artist'* y *'genre'* en las pestañas álbum o canciones.**
- - [ ] **Incluir en *'file_service'* la lectura de archivo (*'read_bytes'*) y pasar dichos datos a *'metadata_service'*.**
+ - [x] El administrador no puede ver los resultados obtenidos agrupados por usuario en *'artist'* y *'genre'* en las pestañas álbum o canciones.
+ - [ ] ~~Incluir en *'file_service'* la lectura de archivo (*'read_bytes'*) y pasar dichos datos a *'metadata_service'*.~~
+
+### Marco legal
+
+ - [ ] **Incluir ID de Transacción único por cada usuario al subir su archivo.**

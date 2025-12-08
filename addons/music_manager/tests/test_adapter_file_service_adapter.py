@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from odoo.tests.common import TransactionCase
 
-from ..adapters.file_service_adapter import FileServiceAdapter
+from ..adapters.file_service_adapter import FileServiceAdapter, FolderManager
 from ..utils.constants import ROOT_DIR, TRACK_EXTENSION, PATH_PATTERN
 from ..utils.enums import FileType
 from ..utils.exceptions import InvalidPathError
@@ -21,16 +21,41 @@ class TestAdapterFileService(TransactionCase):
     # Testing for '__init__'
     # =========================================================================================
 
-    def test_init_with_default_str_root_dir_value(self) -> None:
-        self.assertIsInstance(self.adapter.root_dir, Path, f"Root dir value must be a 'Path' instance.")
-        self.assertEqual(ROOT_DIR, self.adapter.root_dir.as_posix(), f"Root dir default value must be '{ROOT_DIR}'.")
+    def test_init_root_dir_instance(self) -> None:
+        self.assertIsNotNone(self.adapter.root_dir, msg="Root dir is mandatory before instantiate the adapter.")
+        self.assertIsInstance(
+            self.adapter.root_dir,
+            Path,
+            msg=f"Root dir must be a 'Path' instance, got '{type(self.adapter.root_dir)}' instead."
+        )
+        self.assertEqual(
+            ROOT_DIR,
+            str(self.adapter.root_dir),
+            msg=f"Root dir default value must be '{ROOT_DIR}', got '{self.adapter.root_dir}' instead."
+        )
+
+    def test_init_adapter_instance(self) -> None:
+        self.assertIsNotNone(
+            self.adapter._folder_manager, msg="Folder manager is mandatory before instantiate the adapter."
+        )
+        self.assertIsInstance(
+            self.adapter._folder_manager,
+            FolderManager,
+            msg=f"Folder manager must be 'FolderManager' instance, got {type(self.adapter._folder_manager)} instead."
+        )
 
     def test_init_with_default_str_file_extension_value(self) -> None:
         self.assertIsInstance(
-            self.adapter._folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
+            self.adapter._folder_manager.file_extension,
+            str,
+            msg=(f"File extension value must be returned as a "
+                 f"'str' instance, got '{type(self.adapter._folder_manager.file_extension)}' instead.")
         )
         self.assertEqual(
-            TRACK_EXTENSION, self.adapter._folder_manager.file_extension, f"File extension default value must be '{TRACK_EXTENSION}'."
+            TRACK_EXTENSION,
+            self.adapter._folder_manager.file_extension,
+            msg=(f"File extension default value must be "
+                 f"'{TRACK_EXTENSION}', got {self.adapter._folder_manager.file_extension} instead.")
         )
 
     def test_init_with_other_str_root_dir_value(self) -> None:
