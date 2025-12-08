@@ -1,4 +1,4 @@
-from typing import Final, Dict
+from typing import Final, Dict, Set
 
 
 # Root music directory
@@ -14,8 +14,13 @@ PNG_ENCODED_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP
 
 
 # Admitted files:
-ALLOWED_MUSIC_FORMAT: Final[set[str]] = {"audio/mpeg", "audio/mpg", "audio/x-mpeg"}
-ALLOWED_IMAGE_FORMAT: Final[set[str]] = {"image/jpeg", "image/png"}
+ALLOWED_MUSIC_FORMAT: Final[Set[str]] = {"audio/mpeg", "audio/mpg", "audio/x-mpeg"}
+ALLOWED_IMAGE_FORMAT: Final[Set[str]] = {"image/jpeg", "image/png"}
+
+# Option structure:
+OPTIONS_STRUCTURE: Final[Set[str]] = {
+    'format', 'quiet', 'keepvideo', 'noplaylist', 'no_warnings', 'prefer_ffmpeg', 'postprocessors', 'outtmpl'
+}
 
 
 # File persistence pattern
