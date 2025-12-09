@@ -7,7 +7,7 @@ from unidecode import unidecode
 from ..services.file_service import FolderManager
 from ..utils.constants import SYMBOL_MAP
 from ..utils.enums import FileType
-from ..utils.exceptions import InvalidPathError
+from ..utils.exceptions import InvalidFileFormatError, InvalidPathError
 
 
 _logger = logging.getLogger(__name__)
@@ -15,9 +15,10 @@ _logger = logging.getLogger(__name__)
 
 class FileServiceAdapter:
 
-    def __init__(self, str_root_dir: str = "/music", file_extension: FileType = FileType.MP3) -> None:
-        self.root_dir = Path(str_root_dir)
-        self._folder_manager = FolderManager(self.root_dir, file_extension)
+    def __init__(self, str_root_dir: str = "/music", file_extension: str = 'mp3') -> None:
+        self.root_dir = self._check_root_dir(str_root_dir)
+        self.file_extension = self._check_file_extension(file_extension)
+        self._folder_manager = FolderManager(self.root_dir, self.file_extension)
 
     def save_file(self, str_file_path: str, data: bytes) -> None:
         if not isinstance(str_file_path, str):
@@ -95,6 +96,14 @@ class FileServiceAdapter:
 
         return bool(re.fullmatch(pattern, path))
 
+    def set_new_extension(self, new_extension: str) -> None:
+        self.file_extension = self._check_file_extension(new_extension)
+        self._folder_manager = FolderManager(self.root_dir, self.file_extension)
+
+    def set_new_root_dir(self, new_root_dir: str) -> None:
+        self.root_dir = self._check_root_dir(new_root_dir)
+        self._folder_manager = FolderManager(self.root_dir, self.file_extension)
+
     def __clean_path_name(self, name: str) -> str:
         normalized_name = self.__normalize_characters(name)
         mapped_characters = self.__map_special_characters(normalized_name)
@@ -102,10 +111,32 @@ class FileServiceAdapter:
         return re.sub(pattern=r'_+', repl='_', string=new_name).strip('_')
 
     @staticmethod
-    def __normalize_characters(string: str) -> str:
-        return unidecode(string).lower()
+    def _check_file_extension(extension: str) -> FileType | None:
+        if extension not in (file.value for file in FileType):
+            _logger.error(f"Cannot find the file extension: '{extension}'.")
+            raise InvalidFileFormatError(f"The file extension '{extension}' is not valid.")
+
+        return FileType(extension)
+
+    @staticmethod
+    def _check_root_dir(root_dir: str) -> Path | None:
+        if not isinstance(root_dir, str):
+            _logger.error(f"Root dir is not a valid path: '{root_dir}'.")
+            raise InvalidPathError(f"Root dir is not a valid path: '{root_dir}'.")
+
+        root_dir = Path(root_dir)
+
+        if not root_dir.is_dir():
+            _logger.error(f"Root dir is not a valid directory: '{root_dir}'.")
+            raise InvalidPathError(f"Root dir must exist as a valid directory: '{root_dir}'.")
+
+        return root_dir
 
     @staticmethod
     def __map_special_characters(string: str) -> str:
         pattern = re.compile("|".join(re.escape(symbol_key) for symbol_key in SYMBOL_MAP.keys()))
         return pattern.sub(lambda match_pattern: SYMBOL_MAP[match_pattern.group(0)], string)
+
+    @staticmethod
+    def __normalize_characters(string: str) -> str:
+        return unidecode(string).lower()
