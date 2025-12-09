@@ -36,7 +36,8 @@ class ProcessImageMixin(AbstractModel):
                     'warning': {
                         'title': _("Not today! ❌️"),
                         'message': _(
-                            "\nI'm sooo sorry but, actually PNG or JPEG image format is allowed: \n%s. 🤷", invalid_file
+                            "\nI'm sooo sorry but, actually PNG or JPEG image format is allowed: \n%s. 🤷",
+                            invalid_file
                         )
                     }
                 }

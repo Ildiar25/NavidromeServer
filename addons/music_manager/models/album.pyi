@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from collections.abc import Callable
-from typing import Final, Iterable, Optional, Self, Sequence, Literal
+from collections.abc import Callable, Iterable, Sequence
+from typing import Final, Literal, Optional, Self
 
 from odoo.addons.base.models.res_users import Users
 

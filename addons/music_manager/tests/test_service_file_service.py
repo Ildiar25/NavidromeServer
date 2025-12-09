@@ -29,6 +29,11 @@ class TestFileService(TransactionCase):
             Path,
             msg=f"Root dir must be 'Path' instance, got '{type(self.manager._root_dir)}' instead."
         )
+        self.assertEqual(
+            ROOT_DIR,
+            str(self.manager._root_dir),
+            msg=f"Root dir default value must be '{ROOT_DIR}', got '{self.manager._root_dir}' instead."
+        )
 
     def test_init_extension_instance(self) -> None:
         self.assertIsNotNone(self.manager._file_extension, msg="File extension is mandatory before instantiate manager.")

@@ -6,13 +6,13 @@ from odoo.tests.common import TransactionCase
 from ..adapters.file_service_adapter import FileServiceAdapter, FolderManager
 from ..utils.constants import ROOT_DIR, TRACK_EXTENSION, PATH_PATTERN
 from ..utils.enums import FileType
-from ..utils.exceptions import InvalidPathError
+from ..utils.exceptions import InvalidPathError, InvalidFileFormatError
 
 
 class TestAdapterFileService(TransactionCase):
 
     def setUp(self) -> None:
-        self.adapter = FileServiceAdapter(str_root_dir=ROOT_DIR, file_extension=FileType(TRACK_EXTENSION))
+        self.adapter = FileServiceAdapter()
 
     def tearDown(self) -> None:
         pass
@@ -28,10 +28,13 @@ class TestAdapterFileService(TransactionCase):
             Path,
             msg=f"Root dir must be a 'Path' instance, got '{type(self.adapter.root_dir)}' instead."
         )
-        self.assertEqual(
-            ROOT_DIR,
-            str(self.adapter.root_dir),
-            msg=f"Root dir default value must be '{ROOT_DIR}', got '{self.adapter.root_dir}' instead."
+
+    def test_init_file_extension_instance(self) -> None:
+        self.assertIsNotNone(self.adapter.file_extension, msg="Root dir is mandatory before instantiate the adapter.")
+        self.assertIsInstance(
+            self.adapter.file_extension,
+            FileType,
+            msg=f"File extension must be a 'FileType' instance, got '{type(self.adapter.root_dir)}' instead."
         )
 
     def test_init_adapter_instance(self) -> None:
@@ -58,28 +61,88 @@ class TestAdapterFileService(TransactionCase):
                  f"'{TRACK_EXTENSION}', got {self.adapter._folder_manager.file_extension} instead.")
         )
 
-    def test_init_with_other_str_root_dir_value(self) -> None:
-        new_extension = MagicMock(spec=FileType)
-        new_extension.value = 'flac'
-        new_adapter = FileServiceAdapter(str_root_dir="/mogambo", file_extension=new_extension)
+    def test_init_update_root_dir_success(self) -> None:
+        new_adapter = FileServiceAdapter()
 
-        self.assertIsInstance(new_adapter.root_dir, Path, f"Root dir value must be a 'Path' instance.")
-        self.assertNotEqual(
-            ROOT_DIR, new_adapter.root_dir.as_posix(), f"Root dir default value must be different to '{ROOT_DIR}'."
+        with patch('odoo.addons.music_manager.adapters.file_service_adapter.Path.is_dir', return_value=True):
+            new_adapter.set_new_root_dir("/mogambo")
+
+        self.assertEqual(
+            new_adapter.root_dir,
+            Path("/mogambo"),
+            msg=f"New path must be '/mogambo', got '{new_adapter.root_dir}' instead."
         )
-
-    def test_init_with_other_str_file_extension_value(self) -> None:
-        new_extension = MagicMock(spec=FileType)
-        new_extension.value = 'flac'
-        new_adapter = FileServiceAdapter(str_root_dir="/mogambo", file_extension=new_extension)
-
         self.assertIsInstance(
-            new_adapter._folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
+            new_adapter.root_dir,
+            Path,
+            msg=f"Root dir must be a 'Path' instance, got '{type(self.adapter.root_dir)}' instead."
         )
-        self.assertNotEqual(
-            TRACK_EXTENSION, new_adapter._folder_manager.file_extension,
-            f"File extension default value must be different to '{TRACK_EXTENSION}'."
+
+    def test_init_update_root_dir_with_invalid_path_error(self) -> None:
+        new_adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidPathError) as caught_error:
+            new_adapter.set_new_root_dir('/mogambo')
+
+        self.assertIsInstance(caught_error.exception, InvalidPathError)
+        self.assertEqual(
+            new_adapter.root_dir,
+            Path('/music'),
+            msg=f"Root dir must be '/music', got '{new_adapter.root_dir}' instead."
         )
+
+    def test_init_update_file_extension_success(self) -> None:
+        new_adapter = FileServiceAdapter()
+
+        new_adapter.set_new_extension('flac')
+
+        self.assertEqual(
+            new_adapter.file_extension,
+            FileType.FLAC,
+            msg=f"New extension must be 'flac', got '{new_adapter.file_extension.value}' instead."
+        )
+        self.assertIsInstance(
+            new_adapter.file_extension,
+            FileType,
+            msg=f"File extension must be a 'FileType' instance, got '{type(self.adapter.root_dir)}' instead."
+        )
+
+    def test_init_update_file_extension_with_invalid_file_format_error(self) -> None:
+        new_adapter = FileServiceAdapter()
+
+        with self.assertRaises(InvalidFileFormatError) as caught_error:
+            new_adapter.set_new_extension('wav')
+
+        self.assertIsInstance(caught_error.exception, InvalidFileFormatError)
+        self.assertEqual(
+            new_adapter.file_extension,
+            FileType.MP3,
+            msg=f"File extension must be 'mp3', got '{new_adapter.file_extension.value}' instead."
+        )
+
+
+    # def test_init_with_other_str_root_dir_value(self) -> None:
+    #     new_adapter = FileServiceAdapter(str_root_dir="/mogambo")
+    #
+    #     self.assertIsInstance(new_adapter.root_dir, Path, f"Root dir value must be a 'Path' instance.")
+    #     self.assertNotEqual(
+    #         ROOT_DIR,
+    #         str(new_adapter.root_dir),
+    #         msg=f"Root dir default value must be different to '{ROOT_DIR}'."
+    #     )
+    #
+    # def test_init_with_other_str_file_extension_value(self) -> None:
+    #     new_extension = MagicMock(spec=FileType)
+    #     new_extension.value = 'flac'
+    #     new_adapter = FileServiceAdapter(str_root_dir="/mogambo", file_extension=new_extension)
+    #
+    #     self.assertIsInstance(
+    #         new_adapter._folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
+    #     )
+    #     self.assertNotEqual(
+    #         TRACK_EXTENSION, new_adapter._folder_manager.file_extension,
+    #         f"File extension default value must be different to '{TRACK_EXTENSION}'."
+    #     )
 
     # =========================================================================================
     # Testing for 'save_file'
@@ -357,21 +420,21 @@ class TestAdapterFileService(TransactionCase):
 
         self.assertFalse(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}")
 
-    def test_is_valid_path_fail_with_extension(self) -> None:
-        artist = "Test Band"
-        album = "Epic Album Vol.II (Mega Mix Edition)"
-        track = "3"
-        title = "The lowest song (ft. Someone Important)"
-
-        bad_extension = MagicMock(spec=FileType)
-        bad_extension.value = 'mogambo'
-
-        manager_with_bad_extension = FileServiceAdapter(file_extension=bad_extension)
-        result_path = manager_with_bad_extension.set_new_path(artist, album, track, title)
-
-        self.assertFalse(
-            manager_with_bad_extension.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}"
-        )
+    # def test_is_valid_path_fail_with_extension(self) -> None:
+    #     artist = "Test Band"
+    #     album = "Epic Album Vol.II (Mega Mix Edition)"
+    #     track = "3"
+    #     title = "The lowest song (ft. Someone Important)"
+    #
+    #     bad_extension = MagicMock(spec=FileType)
+    #     bad_extension.value = 'mogambo'
+    #
+    #     manager_with_bad_extension = FileServiceAdapter(file_extension=bad_extension)
+    #     result_path = manager_with_bad_extension.set_new_path(artist, album, track, title)
+    #
+    #     self.assertFalse(
+    #         manager_with_bad_extension.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}"
+    #     )
 
     # =========================================================================================
     # Testing for '__clean_path_name'

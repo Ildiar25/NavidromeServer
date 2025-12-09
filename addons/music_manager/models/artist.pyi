@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Sequence
 from datetime import date
-from typing import Final, Iterable, Literal, Self, Sequence
+from typing import Final, Literal, Self
 
 from odoo.addons.base.models.res_users import Users
 from odoo.api import Environment
