@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict
 
-# noinspection PyPackageRequirements
 import magic
 import mutagen.id3 as tag_type
 import mutagen.mp3 as exception

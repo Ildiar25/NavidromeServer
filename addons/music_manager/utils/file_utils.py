@@ -1,9 +1,7 @@
 import base64
 
-# noinspection PyPackageRequirements
 import magic
 
-# noinspection PyProtectedMember
 from ..utils.exceptions import InvalidFileFormatError
 
 
