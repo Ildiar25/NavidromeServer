@@ -120,30 +120,6 @@ class TestAdapterFileService(TransactionCase):
             msg=f"File extension must be 'mp3', got '{new_adapter.file_extension.value}' instead."
         )
 
-
-    # def test_init_with_other_str_root_dir_value(self) -> None:
-    #     new_adapter = FileServiceAdapter(str_root_dir="/mogambo")
-    #
-    #     self.assertIsInstance(new_adapter.root_dir, Path, f"Root dir value must be a 'Path' instance.")
-    #     self.assertNotEqual(
-    #         ROOT_DIR,
-    #         str(new_adapter.root_dir),
-    #         msg=f"Root dir default value must be different to '{ROOT_DIR}'."
-    #     )
-    #
-    # def test_init_with_other_str_file_extension_value(self) -> None:
-    #     new_extension = MagicMock(spec=FileType)
-    #     new_extension.value = 'flac'
-    #     new_adapter = FileServiceAdapter(str_root_dir="/mogambo", file_extension=new_extension)
-    #
-    #     self.assertIsInstance(
-    #         new_adapter._folder_manager.file_extension, str, f"File extension value must be a 'str' instance."
-    #     )
-    #     self.assertNotEqual(
-    #         TRACK_EXTENSION, new_adapter._folder_manager.file_extension,
-    #         f"File extension default value must be different to '{TRACK_EXTENSION}'."
-    #     )
-
     # =========================================================================================
     # Testing for 'save_file'
     # =========================================================================================
@@ -419,22 +395,6 @@ class TestAdapterFileService(TransactionCase):
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
         self.assertFalse(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}")
-
-    # def test_is_valid_path_fail_with_extension(self) -> None:
-    #     artist = "Test Band"
-    #     album = "Epic Album Vol.II (Mega Mix Edition)"
-    #     track = "3"
-    #     title = "The lowest song (ft. Someone Important)"
-    #
-    #     bad_extension = MagicMock(spec=FileType)
-    #     bad_extension.value = 'mogambo'
-    #
-    #     manager_with_bad_extension = FileServiceAdapter(file_extension=bad_extension)
-    #     result_path = manager_with_bad_extension.set_new_path(artist, album, track, title)
-    #
-    #     self.assertFalse(
-    #         manager_with_bad_extension.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}"
-    #     )
 
     # =========================================================================================
     # Testing for '__clean_path_name'
