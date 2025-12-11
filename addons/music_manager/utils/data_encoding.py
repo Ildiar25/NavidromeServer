@@ -46,4 +46,7 @@ def base64_decode(encoded_data: bytes | str) -> bytes:
     if not _is_base64_encoded(encoded_data):
         raise InvalidFileFormatError("Invalid base64-encoded file")
 
+    if isinstance(encoded_data, str):
+        encoded_data = encoded_data.encode()
+
     return base64.b64decode(encoded_data)
