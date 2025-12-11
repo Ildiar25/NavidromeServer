@@ -54,11 +54,11 @@ class Track(Model, ProcessImageMixin):
 
     # Temporal fields
     file = Binary(string=_("File"))
-    tmp_album = Char(string=_("Album"))
-    tmp_album_artist = Char(string=_("Album artist"))
-    tmp_artists = Char(string=_("Track artist(s)"))
-    tmp_genre = Char(string=_("Genre"))
-    tmp_original_artist = Char(string=_("Original artist"))
+    tmp_album = Char(string=_("Album founded"))
+    tmp_album_artist = Char(string=_("Album artist founded"))
+    tmp_artists = Char(string=_("Track artist(s) founded"))
+    tmp_genre = Char(string=_("Genre founded"))
+    tmp_original_artist = Char(string=_("Original artist founded"))
     url = Char(string=_("Youtube URL"))
 
     # Computed fields
