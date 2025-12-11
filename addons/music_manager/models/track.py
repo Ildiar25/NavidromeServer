@@ -263,7 +263,7 @@ class Track(Model, ProcessImageMixin):
             if not (track.file_path and isinstance(track.file_path, str)):
                 continue
 
-            track.has_valid_path = FileServiceAdapter().is_valid_path(track.file_path)
+            track.has_valid_path = FileServiceAdapter().is_valid(track.file_path)
 
     @api.onchange('file')
     def _validate_file_type(self) -> CustomWarningMessage | None:
