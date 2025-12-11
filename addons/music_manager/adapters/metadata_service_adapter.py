@@ -24,18 +24,18 @@ _logger = logging.getLogger(__name__)
 class MetadataServiceAdapter:
 
     METADATA_SERVICES = {
-        FileType.MP3, MP3File,
+        FileType.MP3: MP3File,
     }
 
     def __init__(self, file_type: str = 'mp3') -> None:
         self.file_type = self._check_file_extension(file_type)
 
-        # TODO: Crear un mapeo de servicio en este método
-        self._service = self._get_metadata_service()
+        self._service = None
 
     def read_metadata(self, track: bytes) -> dict[str, str | int | None]:
         try:
-            metadata = self._service.get_metadata(track)
+            service = self._get_metadata_service()
+            metadata = service.get_metadata(track)
 
             return {
                 'name': metadata.TIT2,
@@ -95,7 +95,8 @@ class MetadataServiceAdapter:
         }
 
         try:
-            self._service.set_metadata(output_path, metadata)
+            service = self._get_metadata_service()
+            service.set_metadata(output_path, metadata)
 
         except ReadingFileError as invalid_metadata:
             _logger.error(f"Failed to process file metadata: {invalid_metadata}")
@@ -119,15 +120,19 @@ class MetadataServiceAdapter:
                 _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
             )
 
+    def _get_file_type_service(self) -> FileMetadata:
+        metadata_service = self.METADATA_SERVICES.get(self.file_type)
+
+        if not metadata_service:
+            raise MetadataServiceError("Unsupported metadata file type")
+
+        return metadata_service()
+
     def _get_metadata_service(self) -> FileMetadata:
+        if not self._service:
+            self._service = self._get_file_type_service()
 
-        # NOTE: No utilizar match, utilizar un mapeo para facilitar la búsqueda de servicios a futuro.
-        match self.file_type:
-            case FileType.MP3:
-                return MP3File()
-
-            case _:
-                raise MetadataServiceError("Unsupported metadata file type")
+        return self._service
 
     @staticmethod
     def _check_file_extension(extension: str) -> FileType:

@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
-import re
 from pathlib import Path
-from unidecode import unidecode
 
 from ..services.file_service import FolderManager
-from ..utils.constants import SYMBOL_MAP
+from ..utils.file_utils import clean_path_section, is_valid_path
 from ..utils.enums import FileType
 from ..utils.exceptions import InvalidFileFormatError, InvalidPathError
 
@@ -40,6 +38,10 @@ class FileServiceAdapter:
 
         file_path = Path(str_file_path)
 
+        if not file_path.is_file():
+            _logger.error(f"Cannot read the file. File not found or it is not a file: '{file_path}'.")
+            raise InvalidPathError(f"Unavailable to read the file: not found or it is not a file. Try another one.")
+
         return self._folder_manager.read_file(file_path)
 
     def update_file_path(self, old_str_path: str | None, new_str_path: str | None) -> None:
@@ -72,43 +74,29 @@ class FileServiceAdapter:
         file_path = Path(str_file_path)
 
         if not file_path.is_file():
-            _logger.error(f"File not found or it is not a file: '{file_path}'.")
-            raise InvalidPathError(f"File not found or it is not a file. Try another one.")
+            _logger.error(f"Cannot delete the file. File not found or it is not a file: '{file_path}'.")
+            raise InvalidPathError(f"Unavailable to delete the file: not found or it is not a file. Try another one.")
 
         self._folder_manager.delete_file(file_path)
-
-    def set_new_path(self, artist: str, album: str, track: str, title: str) -> str:
-        new_artist = self.__clean_path_name(artist)
-        new_album = self.__clean_path_name(album)
-        new_track = self.__clean_path_name(track).zfill(2)
-        new_title = self.__clean_path_name(title)
-
-        return self._folder_manager.set_path(new_artist, new_album, new_track, new_title).as_posix()
-
-    def is_valid_path(self, path: str) -> bool:
-        artist = r'\w+'
-        album = r'\w+'
-        track_no = r'[0-9]{2}'
-        title = r'\w+'
-        extension = r'[a-zA-Z0-9]{3,4}'
-
-        pattern = fr'{re.escape(self.root_dir.as_posix())}\/{artist}\/{album}\/{track_no}_{title}\.{extension}'
-
-        return bool(re.fullmatch(pattern, path))
 
     def set_new_extension(self, new_extension: str) -> None:
         self.file_extension = self._check_file_extension(new_extension)
         self._folder_manager = FolderManager(self.root_dir, self.file_extension)
 
+    def set_new_path(self, artist: str, album: str, track: str, title: str) -> str:
+        cln_artist = clean_path_section(artist)
+        cln_album = clean_path_section(album)
+        cln_track = clean_path_section(track).zfill(2)
+        cln_title = clean_path_section(title)
+
+        return str(self._folder_manager.set_path(cln_artist, cln_album, cln_track, cln_title))
+
     def set_new_root_dir(self, new_root_dir: str) -> None:
         self.root_dir = self._check_root_dir(new_root_dir)
         self._folder_manager = FolderManager(self.root_dir, self.file_extension)
 
-    def __clean_path_name(self, name: str) -> str:
-        normalized_name = self.__normalize_characters(name)
-        mapped_characters = self.__map_special_characters(normalized_name)
-        new_name = re.sub(pattern=r'[^a-z0-9]', repl='_', string=mapped_characters)
-        return re.sub(pattern=r'_+', repl='_', string=new_name).strip('_')
+    def is_valid(self, path: str) -> bool:
+        return is_valid_path(path, str(self.root_dir))
 
     @staticmethod
     def _check_file_extension(extension: str) -> FileType | None:
@@ -131,12 +119,3 @@ class FileServiceAdapter:
             raise InvalidPathError(f"Root dir must exist as a valid directory: '{root_dir}'.")
 
         return root_dir
-
-    @staticmethod
-    def __map_special_characters(string: str) -> str:
-        pattern = re.compile("|".join(re.escape(symbol_key) for symbol_key in SYMBOL_MAP.keys()))
-        return pattern.sub(lambda match_pattern: SYMBOL_MAP[match_pattern.group(0)], string)
-
-    @staticmethod
-    def __normalize_characters(string: str) -> str:
-        return unidecode(string).lower()

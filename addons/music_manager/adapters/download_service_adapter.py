@@ -12,9 +12,15 @@ _logger = logging.getLogger(__name__)
 
 class DownloadServiceAdapter:
 
-    def __init__(self, video_url: str, adaper_type: AdapterType = AdapterType.YTDLP) -> None:
+    DOWNLOAD_ADAPTER_TYPE = {
+        AdapterType.PYTUBE: PyTubeAdapter,
+        AdapterType.YTDLP: YTDLPAdapter,
+    }
+
+    def __init__(self, video_url: str, adapter_type: str = 'ytdlp') -> None:
         self.video_url = video_url
-        self.adapter_type = adaper_type
+        self.adapter_type = self._check_adapter_type(adapter_type)
+
         self._downloader = YoutubeDownload()
 
     def to_buffer(self) -> bytes:
@@ -33,12 +39,17 @@ class DownloadServiceAdapter:
         self._downloader.set_stream_to_file(adapter, file_path)
 
     def _get_download_adapter(self) -> StreamProtocol:
-        match self.adapter_type:
-            case AdapterType.PYTUBE:
-                return PyTubeAdapter(self.video_url)
+        download_adapter = self.DOWNLOAD_ADAPTER_TYPE.get(self.adapter_type)
 
-            case AdapterType.YTDLP:
-                return YTDLPAdapter(self.video_url)
+        if not download_adapter:
+            raise DownloadServiceError("Unsupported download adapter type")
 
-            case _:
-                raise DownloadServiceError("Unsupported download adapter type")
+        return download_adapter(self.video_url)
+
+    @staticmethod
+    def _check_adapter_type(adapter_type: str) -> AdapterType:
+        if adapter_type not in (adapter.value for adapter in AdapterType):
+            _logger.error(f"Cannot find the adapter type: '{adapter_type}'.")
+            raise  DownloadServiceError(f"The adapter type '{adapter_type}' is not valid.")
+
+        return AdapterType(adapter_type)
