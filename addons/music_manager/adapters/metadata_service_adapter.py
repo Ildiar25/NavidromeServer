@@ -5,8 +5,8 @@ from pathlib import Path
 from odoo import _
 from odoo.exceptions import ValidationError
 
-from .image_service_adapter import ImageServiceAdapter
 from ..services.metadata_service import FileMetadata, MP3File
+from ..utils.data_encoding import base64_decode, base64_encode
 from ..utils.enums import FileType
 from ..utils.exceptions import (
     InvalidFileFormatError,
@@ -23,13 +23,19 @@ _logger = logging.getLogger(__name__)
 
 class MetadataServiceAdapter:
 
-    def __init__(self, file_type: FileType = FileType.MP3) -> None:
-        self.file_type = file_type
+    METADATA_SERVICES = {
+        FileType.MP3, MP3File,
+    }
+
+    def __init__(self, file_type: str = 'mp3') -> None:
+        self.file_type = self._check_file_extension(file_type)
+
+        # TODO: Crear un mapeo de servicio en este método
+        self._service = self._get_metadata_service()
 
     def read_metadata(self, track: bytes) -> dict[str, str | int | None]:
         try:
-            service = self._get_metadata_service()
-            metadata = service.get_metadata(track)
+            metadata = self._service.get_metadata(track)
 
             return {
                 'name': metadata.TIT2,
@@ -46,7 +52,7 @@ class MetadataServiceAdapter:
                 'total_disk': metadata.TPOS[1],
                 'file_type': metadata.MIME,
                 'collection': metadata.TCMP,
-                'picture': ImageServiceAdapter.encode_data(metadata.APIC) if metadata.APIC else None,
+                'picture': base64_encode(metadata.APIC) if metadata.APIC else None,
             }
 
         except InvalidFileFormatError as corrupt_file:
@@ -85,12 +91,11 @@ class MetadataServiceAdapter:
             'TPOS': track['TPOS'],
             'TDRC': track['TDRC'],
             'TCON': track['TCON'],
-            'APIC': ImageServiceAdapter.decode_data(track['APIC']) if track['APIC'] else None,
+            'APIC': base64_decode(track['APIC']) if track['APIC'] else None,
         }
 
         try:
-            service = self._get_metadata_service()
-            service.set_metadata(output_path, metadata)
+            self._service.set_metadata(output_path, metadata)
 
         except ReadingFileError as invalid_metadata:
             _logger.error(f"Failed to process file metadata: {invalid_metadata}")
@@ -115,12 +120,22 @@ class MetadataServiceAdapter:
             )
 
     def _get_metadata_service(self) -> FileMetadata:
+
+        # NOTE: No utilizar match, utilizar un mapeo para facilitar la búsqueda de servicios a futuro.
         match self.file_type:
             case FileType.MP3:
                 return MP3File()
 
             case _:
                 raise MetadataServiceError("Unsupported metadata file type")
+
+    @staticmethod
+    def _check_file_extension(extension: str) -> FileType:
+        if extension not in (file.value for file in FileType):
+            _logger.error(f"Cannot find the file extension: '{extension}'.")
+            raise InvalidFileFormatError(f"The file extension '{extension}' is not valid.")
+
+        return FileType(extension)
 
     @staticmethod
     def _format_track_duration(duration: int):

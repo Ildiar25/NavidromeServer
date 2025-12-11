@@ -8,6 +8,7 @@ import magic
 from PIL import Image, UnidentifiedImageError
 
 from ..services.image_service import ImageProcessor, ImageToPNG
+from ..utils.data_encoding import base64_decode, base64_encode
 from ..utils.enums import ImageType
 from ..utils.exceptions import ImageServiceError, InvalidImageFormatError, InvalidPathError, MusicManagerError
 
@@ -16,16 +17,21 @@ _logger = logging.getLogger(__name__)
 
 class ImageServiceAdapter:
 
+    IMAGE_FORMATS = {
+        ImageType.PNG: ImageToPNG,
+    }
+
     def __init__(self, str_bytes_image: str, image_type: ImageType = ImageType.PNG) -> None:
         self.raw_image = str_bytes_image
-        self.image_type = image_type
 
+        # TODO: Utilizar un mapeo de servicio para poder cambiar de tipo de imagen.
+        self.image_type = image_type
         self._pil_image = None
 
     def save_to_bytes(self, width: int, height: int) -> str:
         processor = self._get_image_processor(self._get_pil_image())
         image_to_encode = processor.center_image().with_size(width, height).to_bytes()
-        return self.encode_data(image_to_encode)
+        return base64_encode(image_to_encode)
 
     def save_to_file(self, width: int, height: int, str_file_path: str) -> None:
         if not isinstance(str_file_path, str):
@@ -38,6 +44,8 @@ class ImageServiceAdapter:
         processor.center_image().with_size(width, height).to_file(output_path)
 
     def _get_image_processor(self, image: Image.Image) -> ImageProcessor:
+
+        # NOTE: No utilizar match, utilizar un mapeo para facilitar la búsqueda de servicios a futuro.
         match self.image_type:
             case ImageType.PNG:
                 return ImageToPNG(image)
@@ -47,7 +55,7 @@ class ImageServiceAdapter:
 
     def _get_pil_image(self) -> Image.Image:
         if not self._pil_image:
-            decoded_image = self.decode_data(self.raw_image)
+            decoded_image = base64_decode(self.raw_image)
             self.mime_type = magic.from_buffer(decoded_image, mime=True)
 
             if not self.mime_type.startswith('image/'):
@@ -56,14 +64,6 @@ class ImageServiceAdapter:
             self._pil_image = self._load_image(io.BytesIO(decoded_image))
 
         return self._pil_image
-
-    @staticmethod
-    def encode_data(bytes_image: bytes) -> str:
-        return base64.b64encode(bytes_image).decode()
-
-    @staticmethod
-    def decode_data(str_bytes_image: str) -> bytes:
-        return base64.b64decode(str_bytes_image)
 
     @staticmethod
     def _load_image(image_stream: io.BytesIO) -> Image.Image | None:

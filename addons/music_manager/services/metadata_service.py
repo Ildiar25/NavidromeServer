@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import base64
 import io
 import logging
 from abc import ABC, abstractmethod
@@ -12,6 +11,7 @@ import mutagen.mp3 as exception
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
 
+from ..utils.data_encoding import base64_decode
 from ..utils.exceptions import InvalidFileFormatError, MetadataPersistenceError, MusicManagerError, ReadingFileError
 from ..utils.metadata_schema import TrackMetadata
 
@@ -21,27 +21,9 @@ _logger = logging.getLogger(__name__)
 
 class FileMetadata(ABC):
 
-    tag_mapping = {
-        'TIT2': tag_type.TIT2,
-        'TPE1': tag_type.TPE1,
-        'TPE2': tag_type.TPE2,
-        'TOPE': tag_type.TOPE,
-        'TALB': tag_type.TALB,
-        'TCMP': tag_type.TCMP,
-        'TRCK': tag_type.TRCK,
-        'TPOS': tag_type.TPOS,
-        'TDRC': tag_type.TDRC,
-        'TCON': tag_type.TCON,
-        'APIC': tag_type.APIC,
-    }
-
     @staticmethod
     def decode_bytes(encoded_bytes_file: bytes) -> io.BytesIO:
-        if not isinstance(encoded_bytes_file, bytes):
-            raise ReadingFileError(f"Invalid file type: {type(encoded_bytes_file)}")
-
-        decoded_bytes = base64.b64decode(encoded_bytes_file)
-        buffer = io.BytesIO(decoded_bytes)
+        buffer = io.BytesIO(base64_decode(encoded_bytes_file))
         buffer.seek(0)
         return buffer
 
@@ -55,6 +37,20 @@ class FileMetadata(ABC):
 
 
 class MP3File(FileMetadata):
+
+    ID3_TAG_MAPPING = {
+        'TIT2': tag_type.TIT2,
+        'TPE1': tag_type.TPE1,
+        'TPE2': tag_type.TPE2,
+        'TOPE': tag_type.TOPE,
+        'TALB': tag_type.TALB,
+        'TCMP': tag_type.TCMP,
+        'TRCK': tag_type.TRCK,
+        'TPOS': tag_type.TPOS,
+        'TDRC': tag_type.TDRC,
+        'TCON': tag_type.TCON,
+        'APIC': tag_type.APIC,
+    }
 
     def get_metadata(self, encoded_bytes_file: bytes) -> TrackMetadata:
         buffered_file = self.decode_bytes(encoded_bytes_file)
@@ -109,7 +105,7 @@ class MP3File(FileMetadata):
 
         new_data = TrackMetadata(**new_metadata)
 
-        for name, tag in self.tag_mapping.items():
+        for name, tag in self.ID3_TAG_MAPPING.items():
             value = getattr(new_data, name)
 
             if name == 'TRCK' or name == 'TPOS':

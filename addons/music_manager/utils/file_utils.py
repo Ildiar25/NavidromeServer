@@ -1,22 +1,12 @@
-import base64
-
 import magic
 
+from ..utils.data_encoding import base64_decode
 from ..utils.exceptions import InvalidFileFormatError
 
 
 def get_mime_file(file_encoded: bytes) -> str:
-    if not file_encoded:
-        raise InvalidFileFormatError("No file data provided")
-
-    if isinstance(file_encoded, bytes):
-        try:
-            file_encoded = base64.b64decode(file_encoded)
-
-        except Exception:
-            raise InvalidFileFormatError("Invalid base64-encoded file")
-
-    mime_type = magic.from_buffer(file_encoded, mime=True)
+    data_encoded = base64_decode(file_encoded)
+    mime_type = magic.from_buffer(data_encoded, mime=True)
 
     if not mime_type:
         raise InvalidFileFormatError("Unable to read file type")
