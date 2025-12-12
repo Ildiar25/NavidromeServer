@@ -50,6 +50,7 @@ class ImageServiceAdapter:
             self.mime_type = magic.from_buffer(decoded_image, mime=True)
 
             if not self.mime_type.startswith('image/'):
+                self.mime_type = None
                 raise InvalidImageFormatError(f"Invalid MIME type: '{self.mime_type}'.")
 
             self._pil_image = self._load_pil_image(io.BytesIO(decoded_image))
