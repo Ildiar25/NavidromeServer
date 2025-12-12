@@ -51,14 +51,14 @@ class TestAdapterFileService(TransactionCase):
         self.assertIsInstance(
             self.adapter._folder_manager.file_extension,
             str,
-            msg=(f"File extension value must be returned as a "
-                 f"'str' instance, got '{type(self.adapter._folder_manager.file_extension)}' instead.")
+            msg=(f"File extension value must be returned as a 'str' instance, "
+                 f"got '{type(self.adapter._folder_manager.file_extension)}' instead.")
         )
         self.assertEqual(
             TRACK_EXTENSION,
             self.adapter._folder_manager.file_extension,
-            msg=(f"File extension default value must be "
-                 f"'{TRACK_EXTENSION}', got {self.adapter._folder_manager.file_extension} instead.")
+            msg=(f"File extension default value must be '{TRACK_EXTENSION}', "
+                 f"got {self.adapter._folder_manager.file_extension} instead.")
         )
 
     def test_init_update_root_dir_success(self) -> None:
@@ -187,7 +187,8 @@ class TestAdapterFileService(TransactionCase):
 
         adapter = FileServiceAdapter()
 
-        data_read = adapter.read_file(fake_path)
+        with patch.object(Path, 'is_file', return_value=True):
+            data_read = adapter.read_file(fake_path)
 
         fake_folder_manager.read_file.assert_called_once_with(Path(fake_path))
         self.assertEqual(data_read, fake_data)
@@ -372,6 +373,61 @@ class TestAdapterFileService(TransactionCase):
 
         self.assertEqual(expected_path, result_path, f"Paths must be equals: '{expected_path}' & '{result_path}'.")
 
+    def test_set_new_path_clean_artist_name(self) -> None:
+        artist = "Пустота"
+        album = "B"
+        track = "1"
+        title = "C"
+
+        expected_path = f"{ROOT_DIR}/pustota/b/01_c.{TRACK_EXTENSION}"
+        result_path = self.adapter.set_new_path(artist, album, track, title)
+
+        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
+
+    def test_set_new_path_clean_album_name(self) -> None:
+        artist = "A"
+        album = "<|º_º|>"
+        track = "1"
+        title = "C"
+
+        expected_path = f"{ROOT_DIR}/a/o_o/01_c.{TRACK_EXTENSION}"
+        result_path = self.adapter.set_new_path(artist, album, track, title)
+
+        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
+
+    def test_set_new_path_clean_one_number_track(self) -> None:
+        artist = "A"
+        album = "B"
+        track = "5"
+        title = "C"
+
+        expected_path = f"{ROOT_DIR}/a/b/05_c.{TRACK_EXTENSION}"
+        result_path = self.adapter.set_new_path(artist, album, track, title)
+
+        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
+
+    def test_set_new_path_clean_two_number_track(self) -> None:
+        artist = "A"
+        album = "B"
+        track = "25"
+        title = "C"
+
+        expected_path = f"{ROOT_DIR}/a/b/25_c.{TRACK_EXTENSION}"
+        result_path = self.adapter.set_new_path(artist, album, track, title)
+
+        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
+
+    def test_set_new_path_clean_title_name(self) -> None:
+        artist = "A"
+        album = "B"
+        track = "5"
+        title = "Páth! Súb/tle?"
+
+        expected_path = f"{ROOT_DIR}/a/b/05_path_sub_tle.{TRACK_EXTENSION}"
+        result_path = self.adapter.set_new_path(artist, album, track, title)
+
+        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
+
     # =========================================================================================
     # Testing for 'is_valid_path'
     # =========================================================================================
@@ -384,7 +440,7 @@ class TestAdapterFileService(TransactionCase):
 
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
-        self.assertTrue(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}")
+        self.assertTrue(self.adapter.is_valid(result_path), f"Path must have next pattern: {PATH_PATTERN}")
 
     def test_is_valid_path_fail_with_track_number(self) -> None:
         artist = "Test Band"
@@ -394,63 +450,4 @@ class TestAdapterFileService(TransactionCase):
 
         result_path = self.adapter.set_new_path(artist, album, track, title)
 
-        self.assertFalse(self.adapter.is_valid_path(result_path), f"Path must have next pattern: {PATH_PATTERN}")
-
-    # =========================================================================================
-    # Testing for '__clean_path_name'
-    # =========================================================================================
-
-    def test_clean_artist_name(self) -> None:
-        artist = "Пустота"
-        album = "B"
-        track = "1"
-        title = "C"
-
-        expected_path = f"{ROOT_DIR}/pustota/b/01_c.{TRACK_EXTENSION}"
-        result_path = self.adapter.set_new_path(artist, album, track, title)
-
-        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
-
-    def test_clean_album_name(self) -> None:
-        artist = "A"
-        album = "<|º_º|>"
-        track = "1"
-        title = "C"
-
-        expected_path = f"{ROOT_DIR}/a/o_o/01_c.{TRACK_EXTENSION}"
-        result_path = self.adapter.set_new_path(artist, album, track, title)
-
-        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
-
-    def test_clean_one_number_track(self) -> None:
-        artist = "A"
-        album = "B"
-        track = "5"
-        title = "C"
-
-        expected_path = f"{ROOT_DIR}/a/b/05_c.{TRACK_EXTENSION}"
-        result_path = self.adapter.set_new_path(artist, album, track, title)
-
-        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
-
-    def test_clean_two_number_track(self) -> None:
-        artist = "A"
-        album = "B"
-        track = "25"
-        title = "C"
-
-        expected_path = f"{ROOT_DIR}/a/b/25_c.{TRACK_EXTENSION}"
-        result_path = self.adapter.set_new_path(artist, album, track, title)
-
-        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
-
-    def test_clean_title_name(self) -> None:
-        artist = "A"
-        album = "B"
-        track = "5"
-        title = "Páth! Súb/tle?"
-
-        expected_path = f"{ROOT_DIR}/a/b/05_path_sub_tle.{TRACK_EXTENSION}"
-        result_path = self.adapter.set_new_path(artist, album, track, title)
-
-        self.assertEqual(result_path, expected_path, f"Path must be equal to '{expected_path}'.")
+        self.assertFalse(self.adapter.is_valid(result_path), f"Path must have next pattern: {PATH_PATTERN}")
