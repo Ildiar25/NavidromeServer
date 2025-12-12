@@ -5,12 +5,14 @@ from unittest.mock import MagicMock, patch
 from odoo.tests.common import TransactionCase
 
 from ..adapters.download_service_adapter import DownloadServiceAdapter
-from ..services.download_service import DownloadTrack, StreamProtocol
+from ..services.download_service import DownloadTrack, StreamProtocol, PyTubeAdapter, YTDLPAdapter
 from ..utils.enums import AdapterType
 from ..utils.exceptions import InvalidPathError, DownloadServiceError
 
 
 class TestAdapterImageService(TransactionCase):
+
+    patch_path = 'odoo.addons.music_manager.adapters.download_service_adapter.DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE'
 
     def setUp(self) -> None:
         self.fake_url = "https://www.fake-url.com/"
@@ -22,11 +24,7 @@ class TestAdapterImageService(TransactionCase):
         self.with_ytdlp_adapter = DownloadServiceAdapter(self.fake_url)
 
         # Testing with PyTube adapter
-        self.with_pytbe_adapter = DownloadServiceAdapter(self.fake_url, AdapterType.PYTUBE)
-
-        # Testing without given adapter
-        self.no_adapter = MagicMock(spec=AdapterType)
-        self.with_none_adapter = DownloadServiceAdapter(self.fake_url, self.no_adapter)
+        self.with_pytbe_adapter = DownloadServiceAdapter(self.fake_url, 'pytube')
 
     def tearDown(self) -> None:
         pass
@@ -64,85 +62,102 @@ class TestAdapterImageService(TransactionCase):
                  f"got '{type(self.with_ytdlp_adapter._downloader)}' instead.")
         )
 
+    def test_init_invalid_adapter_type(self) -> None:
+        new_adapter = None
+
+        with self.assertRaises(DownloadServiceError) as caught_error:
+            new_adapter = DownloadServiceAdapter(self.fake_url, 'invalid_adapter')
+
+        self.assertIsInstance(caught_error.exception, DownloadServiceError)
+        self.assertIsNone(new_adapter, msg="New adapter should be None. Adapter not initialized.")
+
     # =========================================================================================
-    # Testing for 'to_file'
+    # Testing for 'to_file' (PYTUBE)
     # =========================================================================================
 
-    @patch('odoo.addons.music_manager.adapters.download_service_adapter.PyTubeAdapter')
-    def test_pytube_to_file_success(self, pytbeadapter_class_mock: MagicMock) -> None:
+    @patch.dict(patch_path, {AdapterType.PYTUBE: MagicMock(spec=PyTubeAdapter)})
+    def test_pytube_to_file_success(self) -> None:
         pytube_adapter_mock = MagicMock(spec=StreamProtocol)
-        pytbeadapter_class_mock.return_value = pytube_adapter_mock
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.PYTUBE].return_value = pytube_adapter_mock
 
         self.with_pytbe_adapter.to_file(self.fake_path)
 
-        pytbeadapter_class_mock.assert_called_once_with(self.fake_url)
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.PYTUBE].assert_called_once_with(self.fake_url)
         pytube_adapter_mock.stream_to_file.assert_called_once_with(Path(self.fake_path))
 
-    @patch('odoo.addons.music_manager.adapters.download_service_adapter.YTDLPAdapter')
-    def test_ytdlp_to_file_success(self, ytdlpadapter_class_mock: MagicMock) -> None:
-        ytdlp_adapter_mock = MagicMock(spec=StreamProtocol)
-        ytdlpadapter_class_mock.return_value = ytdlp_adapter_mock
-
-        self.with_ytdlp_adapter.to_file(self.fake_path)
-
-        ytdlpadapter_class_mock.assert_called_once_with(self.fake_url)
-        ytdlp_adapter_mock.stream_to_file.assert_called_once_with(Path(self.fake_path))
-
-    @patch('odoo.addons.music_manager.adapters.download_service_adapter.PyTubeAdapter')
-    def test_pytube_to_file_with_invalid_path_error(self, pytbeadapter_class_mock: MagicMock) -> None:
+    @patch.dict(patch_path, {AdapterType.PYTUBE: MagicMock(spec=PyTubeAdapter)})
+    def test_pytube_to_file_with_invalid_path_error(self) -> None:
         pytube_adapter_mock = MagicMock(spec=StreamProtocol)
-        pytbeadapter_class_mock.return_value = pytube_adapter_mock
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.PYTUBE].return_value = pytube_adapter_mock
 
         with self.assertRaises(InvalidPathError) as caught_error:
             self.with_pytbe_adapter.to_file(123456789)
 
-        pytbeadapter_class_mock.assert_called_once_with(self.fake_url)
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.PYTUBE].assert_called_once_with(self.fake_url)
         pytube_adapter_mock.stream_to_file.assert_not_called()
         self.assertIsInstance(caught_error.exception, InvalidPathError)
 
-    @patch('odoo.addons.music_manager.adapters.download_service_adapter.YTDLPAdapter')
-    def test_ytdlp_to_file_with_invalid_path_error(self, ytdlpadapter_class_mock: MagicMock) -> None:
+    # =========================================================================================
+    # Testing for 'to_file' (YTDLP)
+    # =========================================================================================
+
+    @patch.dict(patch_path, {AdapterType.YTDLP: MagicMock(spec=YTDLPAdapter)})
+    def test_ytdlp_to_file_success(self) -> None:
         ytdlp_adapter_mock = MagicMock(spec=StreamProtocol)
-        ytdlpadapter_class_mock.return_value = ytdlp_adapter_mock
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.YTDLP].return_value = ytdlp_adapter_mock
+
+        self.with_ytdlp_adapter.to_file(self.fake_path)
+
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.YTDLP].assert_called_once_with(self.fake_url)
+        ytdlp_adapter_mock.stream_to_file.assert_called_once_with(Path(self.fake_path))
+
+    @patch.dict(patch_path, {AdapterType.YTDLP: MagicMock(spec=YTDLPAdapter)})
+    def test_ytdlp_to_file_with_invalid_path_error(self) -> None:
+        ytdlp_adapter_mock = MagicMock(spec=StreamProtocol)
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.YTDLP].return_value = ytdlp_adapter_mock
 
         with self.assertRaises(InvalidPathError) as caught_error:
             self.with_ytdlp_adapter.to_file(123456789)
 
-        ytdlpadapter_class_mock.assert_called_once_with(self.fake_url)
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.YTDLP].assert_called_once_with(self.fake_url)
         ytdlp_adapter_mock.stream_to_file.assert_not_called()
         self.assertIsInstance(caught_error.exception, InvalidPathError)
 
     # =========================================================================================
-    # Testing for 'to_buffer'
+    # Testing for 'to_buffer' (PYTUBE)
     # =========================================================================================
 
-    @patch('odoo.addons.music_manager.adapters.download_service_adapter.PyTubeAdapter')
-    def test_pytube_to_buffer_success(self, pytbeadapter_class_mock: MagicMock) -> None:
+    @patch.dict(patch_path, {AdapterType.PYTUBE: MagicMock(spec=PyTubeAdapter)})
+    def test_pytube_to_buffer_success(self) -> None:
         expected_data = b'Fake mp3'
 
         pytube_adapter_mock = MagicMock(spec=StreamProtocol)
         pytube_adapter_mock.stream_to_buffer.side_effect = self.write_example_bytes
 
-        pytbeadapter_class_mock.return_value = pytube_adapter_mock
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.PYTUBE].return_value = pytube_adapter_mock
 
         result = self.with_pytbe_adapter.to_buffer()
 
-        pytbeadapter_class_mock.assert_called_once_with(self.fake_url)
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.PYTUBE].assert_called_once_with(self.fake_url)
         pytube_adapter_mock.stream_to_buffer.assert_called_once()
         self.assertEqual(result, expected_data)
 
-    @patch('odoo.addons.music_manager.adapters.download_service_adapter.YTDLPAdapter')
-    def test_ytdlp_to_buffer_success(self, ytdlpadapter_class_mock: MagicMock) -> None:
+    # =========================================================================================
+    # Testing for 'to_buffer' (YTDLP)
+    # =========================================================================================
+
+    @patch.dict(patch_path, {AdapterType.YTDLP: MagicMock(spec=YTDLPAdapter)})
+    def test_ytdlp_to_buffer_success(self) -> None:
         expected_data = b'Fake mp3'
 
         ytdlp_adapter_mock = MagicMock(spec=StreamProtocol)
         ytdlp_adapter_mock.stream_to_buffer.side_effect = self.write_example_bytes
 
-        ytdlpadapter_class_mock.return_value = ytdlp_adapter_mock
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.YTDLP].return_value = ytdlp_adapter_mock
 
         result = self.with_ytdlp_adapter.to_buffer()
 
-        ytdlpadapter_class_mock.assert_called_once_with(self.fake_url)
+        DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE[AdapterType.YTDLP].assert_called_once_with(self.fake_url)
         ytdlp_adapter_mock.stream_to_buffer.assert_called_once()
         self.assertEqual(result, expected_data)
 
@@ -150,19 +165,18 @@ class TestAdapterImageService(TransactionCase):
     # Testing for NO ADAPTER
     # =========================================================================================
 
-    def test_without_given_adapter(self) -> None:
-        with (
-            patch.object(
-                DownloadServiceAdapter, '_get_download_adapter', wraps=self.with_none_adapter._get_download_adapter
-            )
-        ) as mocked_method:
+    @patch.dict(patch_path, {AdapterType.YTDLP: None})
+    def test_with_no_adapter(self) -> None:
+        new_adapter = DownloadServiceAdapter(self.fake_url)
 
-            with self.assertRaises(DownloadServiceError) as caught_error:
-                self.with_none_adapter.to_file(self.fake_path)
+        with self.assertRaises(DownloadServiceError) as caught_to_file_error:
+            new_adapter.to_file(self.fake_path)
 
-            self.assertIsInstance(caught_error.exception, DownloadServiceError)
+        with self.assertRaises(DownloadServiceError) as caught_to_buffer_error:
+            new_adapter.to_buffer()
 
-        mocked_method.assert_called_once()
+        self.assertIsInstance(caught_to_file_error.exception, DownloadServiceError)
+        self.assertIsInstance(caught_to_buffer_error.exception, DownloadServiceError)
 
     def write_example_bytes(self, buffer: io.BytesIO):
         buffer.write(self.given_data)
