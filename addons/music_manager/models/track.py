@@ -38,7 +38,7 @@ class Track(Model, ProcessImageMixin):
     picture = Binary(string=_("Picture"), attachment=True)
     disk_no = Integer(string=_("Disk no"))
     duration = Char(string=_("Duration (min)"), readonly=True)
-    file_type = Char(string=_("Type"), readonly=True)
+    mime_type = Char(string=_("MIME"), readonly=True)
     name = Char(string=_("Title"))
     total_disk = Integer(string=_("Total disk no"))
     total_track = Integer(string=_("Total track no"))
@@ -635,6 +635,7 @@ class Track(Model, ProcessImageMixin):
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,
                 'APIC': track.picture,
+                'MIME': track.mime_type,
             }
 
             MetadataServiceAdapter().write_metadata(track.file_path, metadata)

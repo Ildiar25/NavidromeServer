@@ -50,7 +50,7 @@ class MetadataServiceAdapter:
                 'total_track': metadata.TRCK[1],
                 'disk_no': metadata.TPOS[0],
                 'total_disk': metadata.TPOS[1],
-                'file_type': metadata.MIME,
+                'mime_type': metadata.MIME,
                 'collection': metadata.TCMP,
                 'picture': base64_encode(metadata.APIC) if metadata.APIC else None,
             }

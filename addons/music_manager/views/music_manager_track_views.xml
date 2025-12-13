@@ -330,6 +330,7 @@
                                                             <field name="album_artist_id" string="Album artist" edit="collection"/>
                                                             <field name="original_artist_id" string="Original artist"/>
                                                             <field name="year" string="Year"/>
+
                                                         </group>
                                                         <div class="d-flex flex-row">
                                                             <group>
@@ -341,6 +342,9 @@
                                                                 <field name="total_disk" string="Total disk"/>
                                                             </group>
                                                         </div>
+                                                        <group>
+                                                            <field name="mime_type" string="MIME"/>
+                                                        </group>
                                                     </div>
                                                 </div>
                                             </div>

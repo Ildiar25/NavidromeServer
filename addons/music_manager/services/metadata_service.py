@@ -22,10 +22,8 @@ _logger = logging.getLogger(__name__)
 class FileMetadata(ABC):
 
     @staticmethod
-    def decode_bytes(encoded_bytes_file: bytes) -> io.BytesIO:
-        buffer = io.BytesIO(base64_decode(encoded_bytes_file))
-        buffer.seek(0)
-        return buffer
+    def load_decoded_stream(encoded_bytes_file: bytes) -> io.BytesIO:
+        return io.BytesIO(base64_decode(encoded_bytes_file))
 
     @abstractmethod
     def get_metadata(self, encoded_bytes_file: bytes) -> TrackMetadata:
@@ -53,8 +51,8 @@ class MP3File(FileMetadata):
     }
 
     def get_metadata(self, encoded_bytes_file: bytes) -> TrackMetadata:
-        buffered_file = self.decode_bytes(encoded_bytes_file)
-        track = self.__load_metadata_tags(buffered_file)
+        buffered_file = self.load_decoded_stream(encoded_bytes_file)
+        track = self._load_metadata_tags(buffered_file)
 
         if not track.tags:
             return TrackMetadata()
@@ -70,14 +68,14 @@ class MP3File(FileMetadata):
             elif key in metadata_fields and hasattr(value, 'text'):
                 if key == 'TRCK':
                     if '/' in value.text[0]:
-                        trck_no, total = self.__parse_track_string(value.text[0])
+                        trck_no, total = self._parse_track_string(value.text[0])
                         metadata['TRCK'] = trck_no, total
                     else:
                         metadata['TRCK'] = int(value.text[0]) if value.text[0].isdigit() else 1, 1
 
                 elif key == 'TPOS':
                     if '/' in value.text[0]:
-                        dsk_no, total = self.__parse_track_string(value.text[0])
+                        dsk_no, total = self._parse_track_string(value.text[0])
                         metadata['TPOS'] = dsk_no, total
                     else:
                         metadata['TPOS'] = int(value.text[0]) if value.text[0].isdigit() else 1, 1
@@ -100,8 +98,8 @@ class MP3File(FileMetadata):
         return track_data
 
     def set_metadata(self, output_path: Path, new_metadata: Dict[str, str | int | None]) -> None:
-        track = self.__load_metadata_tags(output_path)
-        self.__reset_metadata(track)
+        track = self._load_metadata_tags(output_path)
+        self._reset_metadata(track)
 
         new_data = TrackMetadata(**new_metadata)
 
@@ -109,7 +107,7 @@ class MP3File(FileMetadata):
             value = getattr(new_data, name)
 
             if name == 'TRCK' or name == 'TPOS':
-                track.tags.add(tag(encoding=3, text=self.__format_track_tuple(value)))
+                track.tags.add(tag(encoding=3, text=self._format_track_tuple(value)))
 
             if name == 'TCMP':
                 if value is True:
@@ -121,7 +119,7 @@ class MP3File(FileMetadata):
                 track.tags.add(
                     tag(
                         encoding=3,
-                        mime='image/png',
+                        mime=new_data.MIME,
                         type=3,
                         data=value
                     )
@@ -142,7 +140,7 @@ class MP3File(FileMetadata):
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __reset_metadata(track: MP3) -> None:
+    def _reset_metadata(track: MP3) -> None:
         if track.tags:
             track.tags.clear()
 
@@ -161,7 +159,7 @@ class MP3File(FileMetadata):
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __load_metadata_tags(track_file: Path | io.BytesIO) -> MP3:
+    def _load_metadata_tags(track_file: Path | io.BytesIO) -> MP3:
         try:
             return MP3(track_file, ID3=ID3)
 
@@ -178,12 +176,12 @@ class MP3File(FileMetadata):
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __parse_track_string(data: str) -> tuple[int, int]:
+    def _parse_track_string(data: str) -> tuple[int, int]:
         track, total_track = data.split("/")
         return int(track), int(total_track)
 
     @staticmethod
-    def __format_track_tuple(track_tuple: tuple[int, int]) -> str:
+    def _format_track_tuple(track_tuple: tuple[int, int]) -> str:
         str_tuple = map(str, track_tuple)
         data = "/".join(str_tuple)
         return data
