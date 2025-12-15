@@ -1,3 +1,4 @@
+import io
 import logging
 from pathlib import Path
 
@@ -5,7 +6,8 @@ from pathlib import Path
 from odoo import _
 from odoo.exceptions import ValidationError
 
-from ..services.metadata_service import FileMetadata, MP3File
+from ..services.metadata_service import FileMetadataService, MP3MetadataService
+from ..services.audio_info_service import AudioInfoService, MP3AudioInfoService
 from ..utils.data_encoding import base64_decode, base64_encode
 from ..utils.enums import FileType
 from ..utils.exceptions import (
@@ -21,27 +23,31 @@ from ..utils.exceptions import (
 _logger = logging.getLogger(__name__)
 
 
-class MetadataServiceAdapter:
+class TrackServiceAdapter:
 
     METADATA_SERVICES = {
-        FileType.MP3: MP3File,
+        FileType.MP3: MP3MetadataService,
+    }
+
+    INFO_SERVICES = {
+        FileType.MP3: MP3AudioInfoService,
     }
 
     def __init__(self, file_type: str = 'mp3') -> None:
         self.file_type = self._check_file_extension(file_type)
 
-        self._service = None
+        self._metadata_service = None
 
     def read_metadata(self, track: bytes) -> dict[str, str | int | None]:
         try:
             service = self._get_metadata_service()
-            metadata = service.get_metadata(track)
+            metadata = service.get_metadata(self._load_decoded_stream(track))
 
             return {
                 'name': metadata.TIT2,
                 'tmp_artists': metadata.TPE1,
                 'tmp_album': metadata.TALB,
-                'duration': self._format_track_duration(metadata.DUR),
+                'duration': 0,  # NOTE: Valor por defecto de momento
                 'tmp_genre': metadata.TCON,
                 'tmp_album_artist': metadata.TPE2,
                 'tmp_original_artist': metadata.TOPE,
@@ -50,7 +56,8 @@ class MetadataServiceAdapter:
                 'total_track': metadata.TRCK[1],
                 'disk_no': metadata.TPOS[0],
                 'total_disk': metadata.TPOS[1],
-                'mime_type': metadata.MIME,
+                # FIXME: NO devolver ni duración ni MIME
+                'mime_type': "NO MIMETYPE",   # NOTE: Valor por defecto de momento
                 'collection': metadata.TCMP,
                 'picture': base64_encode(metadata.APIC) if metadata.APIC else None,
             }
@@ -73,7 +80,7 @@ class MetadataServiceAdapter:
                 _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
             )
 
-    def write_metadata(self, str_file_path: str | None, track: dict[str, str | int | None]) -> None:
+    def write_metadata(self, str_file_path: str | None, new_metadata: dict[str, str | int | None]) -> None:
         if not isinstance(str_file_path, str):
             _logger.error(f"Cannot save metadata. The path is not valid: '{str_file_path}'.")
             raise InvalidPathError("File path does not exist. A valid path must be set before saving.")
@@ -81,17 +88,17 @@ class MetadataServiceAdapter:
         output_path = Path(str_file_path).with_suffix(f'.{self.file_type.value}')
 
         metadata = {
-            'TIT2': track['TIT2'],
-            'TPE1': track['TPE1'],
-            'TPE2': track['TPE2'],
-            'TOPE': track['TOPE'],
-            'TALB': track['TALB'],
-            'TCMP': track['TCMP'],
-            'TRCK': track['TRCK'],
-            'TPOS': track['TPOS'],
-            'TDRC': track['TDRC'],
-            'TCON': track['TCON'],
-            'APIC': base64_decode(track['APIC']) if track['APIC'] else None,
+            'TIT2': new_metadata['TIT2'],
+            'TPE1': new_metadata['TPE1'],
+            'TPE2': new_metadata['TPE2'],
+            'TOPE': new_metadata['TOPE'],
+            'TALB': new_metadata['TALB'],
+            'TCMP': new_metadata['TCMP'],
+            'TRCK': new_metadata['TRCK'],
+            'TPOS': new_metadata['TPOS'],
+            'TDRC': new_metadata['TDRC'],
+            'TCON': new_metadata['TCON'],
+            'APIC': base64_decode(new_metadata['APIC']) if new_metadata['APIC'] else None,
         }
 
         try:
@@ -120,7 +127,7 @@ class MetadataServiceAdapter:
                 _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
             )
 
-    def _get_file_type_service(self) -> FileMetadata:
+    def _get_file_type_service(self) -> FileMetadataService:
         metadata_service = self.METADATA_SERVICES.get(self.file_type)
 
         if not metadata_service:
@@ -128,11 +135,11 @@ class MetadataServiceAdapter:
 
         return metadata_service()
 
-    def _get_metadata_service(self) -> FileMetadata:
-        if not self._service:
-            self._service = self._get_file_type_service()
+    def _get_metadata_service(self) -> FileMetadataService:
+        if not self._metadata_service:
+            self._metadata_service = self._get_file_type_service()
 
-        return self._service
+        return self._metadata_service
 
     @staticmethod
     def _check_file_extension(extension: str) -> FileType:
@@ -141,6 +148,10 @@ class MetadataServiceAdapter:
             raise InvalidFileFormatError(f"The file extension '{extension}' is not valid.")
 
         return FileType(extension)
+
+    @staticmethod
+    def _load_decoded_stream(encoded_bytes_file: bytes) -> io.BytesIO:
+        return io.BytesIO(base64_decode(encoded_bytes_file))
 
     @staticmethod
     def _format_track_duration(duration: int):
