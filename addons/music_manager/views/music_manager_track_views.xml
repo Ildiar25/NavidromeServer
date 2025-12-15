@@ -82,14 +82,14 @@
                                         <div class="d-flex flex-row justify-content-around">
                                             <div class="d-flex flex-column align-items-center mx-3">
                                                 <div class="mb-3">
-                                                    <img src="music_manager/static/src/img/update-img.png" width="300" height="300"/>
+                                                    <img src="music_manager/static/src/img/update-img.png" width="300" height="300" alt="Cloud image"/>
                                                 </div>
                                                 <p class="mx-auto"><b>MP3 file</b></p>
                                                 <field name="file" string="MP3 file"/>
                                             </div>
                                             <div class="d-flex flex-column justify-content-center">
                                                 <div class="mb-3">
-                                                    <img src="music_manager/static/src/img/youtube-img.png" width="300" height="300"/>
+                                                    <img src="music_manager/static/src/img/youtube-img.png" width="300" height="300" alt="YouTubeimage"/>
                                                 </div>
                                                 <p class="mx-auto"><b>YouTube URL</b></p>
                                                 <field name="url" placeholder="https://"/>
@@ -330,6 +330,7 @@
                                                             <field name="album_artist_id" string="Album artist" edit="collection"/>
                                                             <field name="original_artist_id" string="Original artist"/>
                                                             <field name="year" string="Year"/>
+
                                                         </group>
                                                         <div class="d-flex flex-row">
                                                             <group>
@@ -341,6 +342,9 @@
                                                                 <field name="total_disk" string="Total disk"/>
                                                             </group>
                                                         </div>
+                                                        <group>
+                                                            <field name="mime_type" string="MIME"/>
+                                                        </group>
                                                     </div>
                                                 </div>
                                             </div>

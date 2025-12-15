@@ -71,11 +71,6 @@ class InvalidImageFormatError(ImageServiceError):
 
 # ---- Specific METADATA SERVICE exceptions ---- #
 
-class InvalidFileFormatmError(MetadataServiceError):
-    """Raised when file has no header or is a corrupt file."""
-    ...
-
-
 class MetadataPersistenceError(MetadataServiceError):
     """Raised when metadata cannot be saved."""
     ...

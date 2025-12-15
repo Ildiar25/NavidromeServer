@@ -1,27 +1,35 @@
 # -*- coding: utf-8 -*-
-import base64
 import io
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 
-import magic
 import mutagen.id3 as tag_type
 import mutagen.mp3 as exception
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
 
 from ..utils.exceptions import InvalidFileFormatError, MetadataPersistenceError, MusicManagerError, ReadingFileError
-from ..utils.metadata_schema import TrackMetadata
+from ..utils.track_data import TrackMetadata
 
 
 _logger = logging.getLogger(__name__)
 
 
-class FileMetadata(ABC):
+class FileMetadataService(ABC):
 
-    tag_mapping = {
+    @abstractmethod
+    def get_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
+        ...
+
+    @abstractmethod
+    def set_metadata(self, output_path: Path, new_data: Dict[str, str | int | None]) -> None:
+        ...
+
+
+class MP3MetadataService(FileMetadataService):
+    ID3_TAG_MAPPING = {
         'TIT2': tag_type.TIT2,
         'TPE1': tag_type.TPE1,
         'TPE2': tag_type.TPE2,
@@ -35,137 +43,110 @@ class FileMetadata(ABC):
         'APIC': tag_type.APIC,
     }
 
-    @staticmethod
-    def decode_bytes(encoded_bytes_file: bytes) -> io.BytesIO:
-        if not isinstance(encoded_bytes_file, bytes):
-            raise ReadingFileError(f"Invalid file type: {type(encoded_bytes_file)}")
+    def get_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
+        tag_parsers = {
+            'APIC': self._parse_apic_image,
+            'TRCK': self._parse_numeric_pair,
+            'TPOS': self._parse_numeric_pair,
+            'TCMP': self._parse_is_compilation,
+        }
 
-        decoded_bytes = base64.b64decode(encoded_bytes_file)
-        buffer = io.BytesIO(decoded_bytes)
-        buffer.seek(0)
-        return buffer
-
-    @abstractmethod
-    def get_metadata(self, encoded_bytes_file: bytes) -> TrackMetadata:
-        ...
-
-    @abstractmethod
-    def set_metadata(self, output_path: Path, new_data: Dict[str, str | int | None]) -> None:
-        ...
-
-
-class MP3File(FileMetadata):
-
-    def get_metadata(self, encoded_bytes_file: bytes) -> TrackMetadata:
-        buffered_file = self.decode_bytes(encoded_bytes_file)
-        track = self.__load_metadata_tags(buffered_file)
+        track = self._open_mp3_file(buffered_file)
 
         if not track.tags:
             return TrackMetadata()
 
         metadata = {}
-        metadata_fields = TrackMetadata().__dict__.keys()
 
         for key, value in track.tags.items():
-            if key.startswith('APIC'):
-                if value.type == 3:
-                    metadata['APIC'] = value.data
+            base_key = key[:4]
 
-            elif key in metadata_fields and hasattr(value, 'text'):
-                if key == 'TRCK':
-                    if '/' in value.text[0]:
-                        trck_no, total = self.__parse_track_string(value.text[0])
-                        metadata['TRCK'] = trck_no, total
-                    else:
-                        metadata['TRCK'] = int(value.text[0]) if value.text[0].isdigit() else 1, 1
+            if base_key not in TrackMetadata.__annotations__:
+                continue
 
-                elif key == 'TPOS':
-                    if '/' in value.text[0]:
-                        dsk_no, total = self.__parse_track_string(value.text[0])
-                        metadata['TPOS'] = dsk_no, total
-                    else:
-                        metadata['TPOS'] = int(value.text[0]) if value.text[0].isdigit() else 1, 1
+            parser = tag_parsers.get(base_key, self._parse_text)
+            parsed_value = parser(value)
 
-                elif key == 'TCMP':
-                    metadata['TCMP'] = value.text[0] == '1'
+            if parsed_value:
+                metadata[base_key] = parsed_value
 
-                else:
-                    metadata[key] = value.text[0]
+        return TrackMetadata(**metadata)
 
-        track_data = TrackMetadata(**metadata)
 
-        try:
-            track_data.DUR = round(track.info.length)
-            track_data.MIME = magic.from_buffer(buffered_file.getvalue(), mime=True)
+    def set_metadata(
+            self, output_path: Path, new_metadata: Dict[str, str | int | None], preserve_unknown_tags: bool = False
+    ) -> None:
+        tag_writers = {
+            'APIC': self._write_apic_image,
+            'TRCK': self._write_numeric_pair,
+            'TPOS': self._write_numeric_pair,
+            'TCMP': self._write_is_compilation,
+        }
 
-        except Exception as unknown_error:
-            _logger.warning(f"There was an issue while trying to read MIME type or track duration: {unknown_error}")
+        track = self._open_mp3_file(output_path)
 
-        return track_data
-
-    def set_metadata(self, output_path: Path, new_metadata: Dict[str, str | int | None]) -> None:
-        track = self.__load_metadata_tags(output_path)
-        self.__reset_metadata(track)
+        if not preserve_unknown_tags:  # If in a future we want to save unknown metadata
+            self._normalize_metadata(track)
 
         new_data = TrackMetadata(**new_metadata)
 
-        for name, tag in self.tag_mapping.items():
+        for name, tag in self.ID3_TAG_MAPPING.items():
             value = getattr(new_data, name)
 
-            if name == 'TRCK' or name == 'TPOS':
-                track.tags.add(tag(encoding=3, text=self.__format_track_tuple(value)))
+            if value is None:
+                continue
 
-            if name == 'TCMP':
-                if value is True:
-                    track.tags.add(tag(encoding=3, text='1'))
-                else:
-                    track.tags.add(tag(encoding=3, text='0'))
+            writer = tag_writers.get(name, self._write_text)
+            writer(track, tag, value)
 
-            elif name == 'APIC' and value is not None:
-                track.tags.add(
-                    tag(
-                        encoding=3,
-                        mime='image/png',
-                        type=3,
-                        data=value
-                    )
-                )
+        self._save(track)
 
-            elif isinstance(value, str):
-                track.tags.add(tag(encoding=3, text=value))
+    def _parse_numeric_pair(self, value: Any) -> tuple[int, int]:
+        text: str = value.text[0]
+        if "/" in text:
+            return self._parse_track_string(text)
 
-        try:
-            track.save()
+        else:
+            return int(text) if text.isdigit() else 1, 1
 
-        except (PermissionError, OSError) as not_allowed:
-            _logger.error(f"Cannot save metadata to file: {not_allowed}")
-            raise MetadataPersistenceError(not_allowed)
-
-        except Exception as unknown_error:
-            _logger.error(f"Unexpected error during metadata writing: {unknown_error}")
-            raise MusicManagerError(unknown_error)
+    def _write_numeric_pair(self, track: MP3, tag: Any, value: tuple[int, int]) -> None:
+        text = self._format_track_tuple(value)
+        track.tags.add(tag(encoding=3, text=text))
 
     @staticmethod
-    def __reset_metadata(track: MP3) -> None:
+    def _format_track_tuple(track_tuple: tuple[int, int]) -> str:
+        str_tuple = map(str, track_tuple)
+        data = "/".join(str_tuple)
+        return data
+
+    @staticmethod
+    def _parse_apic_image(value: Any) -> bytes | None:
+        return value.data if value.type == 3 else None
+
+    @staticmethod
+    def _parse_is_compilation(value: Any) -> bool:
+        return value.text[0] == "1"
+
+    @staticmethod
+    def _parse_text(value: Any) -> str:
+        return value.text[0] if getattr(value, "text", None) else None
+
+    @staticmethod
+    def _parse_track_string(data: str) -> tuple[int, int]:
+        track, total_track = data.split("/")
+        return int(track), int(total_track)
+
+    def _normalize_metadata(self, track: MP3) -> None:
         if track.tags:
             track.tags.clear()
 
         else:
             track.add_tags()
 
-        try:
-            track.save()
-
-        except (PermissionError, OSError) as not_allowed:
-            _logger.error(f"Cannot save metadata to file: {not_allowed}")
-            raise MetadataPersistenceError(not_allowed)
-
-        except Exception as unknown_error:
-            _logger.error(f"Unexpected error during metadata writing: {unknown_error}")
-            raise MusicManagerError(unknown_error)
+        self._save(track)
 
     @staticmethod
-    def __load_metadata_tags(track_file: Path | io.BytesIO) -> MP3:
+    def _open_mp3_file(track_file: Path | io.BytesIO) -> MP3:
         try:
             return MP3(track_file, ID3=ID3)
 
@@ -182,12 +163,33 @@ class MP3File(FileMetadata):
             raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __parse_track_string(data: str) -> tuple[int, int]:
-        track, total_track = data.split("/")
-        return int(track), int(total_track)
+    def _save(track: MP3) -> None:
+        try:
+            track.save()
+
+        except (PermissionError, OSError) as not_allowed:
+            _logger.error(f"Cannot save metadata to file: {not_allowed}")
+            raise MetadataPersistenceError(not_allowed)
+
+        except Exception as unknown_error:
+            _logger.error(f"Unexpected error during metadata writing: {unknown_error}")
+            raise MusicManagerError(unknown_error)
 
     @staticmethod
-    def __format_track_tuple(track_tuple: tuple[int, int]) -> str:
-        str_tuple = map(str, track_tuple)
-        data = "/".join(str_tuple)
-        return data
+    def _write_apic_image(track: MP3, tag: Any, value: bytes) -> None:
+        track.tags.add(
+            tag(
+                encoding=3,
+                mime='image/png',
+                type=3,
+                data=value
+            )
+        )
+
+    @staticmethod
+    def _write_is_compilation(track: MP3, tag: Any, value: bool) -> None:
+        track.tags.add(tag(encoding=3, text="1" if value else "0"))
+
+    @staticmethod
+    def _write_text(track: MP3, tag: Any, value: str) -> None:
+        track.tags.add(tag(encoding=3, text=value))

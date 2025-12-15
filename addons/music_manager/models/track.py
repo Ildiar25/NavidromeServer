@@ -38,7 +38,7 @@ class Track(Model, ProcessImageMixin):
     picture = Binary(string=_("Picture"), attachment=True)
     disk_no = Integer(string=_("Disk no"))
     duration = Char(string=_("Duration (min)"), readonly=True)
-    file_type = Char(string=_("Type"), readonly=True)
+    mime_type = Char(string=_("MIME"), readonly=True)
     name = Char(string=_("Title"))
     total_disk = Integer(string=_("Total disk no"))
     total_track = Integer(string=_("Total track no"))
@@ -54,11 +54,11 @@ class Track(Model, ProcessImageMixin):
 
     # Temporal fields
     file = Binary(string=_("File"))
-    tmp_album = Char(string=_("Album"))
-    tmp_album_artist = Char(string=_("Album artist"))
-    tmp_artists = Char(string=_("Track artist(s)"))
-    tmp_genre = Char(string=_("Genre"))
-    tmp_original_artist = Char(string=_("Original artist"))
+    tmp_album = Char(string=_("Album founded"))
+    tmp_album_artist = Char(string=_("Album artist founded"))
+    tmp_artists = Char(string=_("Track artist(s) founded"))
+    tmp_genre = Char(string=_("Genre founded"))
+    tmp_original_artist = Char(string=_("Original artist founded"))
     url = Char(string=_("Youtube URL"))
 
     # Computed fields
@@ -263,7 +263,7 @@ class Track(Model, ProcessImageMixin):
             if not (track.file_path and isinstance(track.file_path, str)):
                 continue
 
-            track.has_valid_path = FileServiceAdapter().is_valid_path(track.file_path)
+            track.has_valid_path = FileServiceAdapter().is_valid(track.file_path)
 
     @api.onchange('file')
     def _validate_file_type(self) -> CustomWarningMessage | None:
@@ -635,6 +635,7 @@ class Track(Model, ProcessImageMixin):
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,
                 'APIC': track.picture,
+                'MIME': track.mime_type,
             }
 
             MetadataServiceAdapter().write_metadata(track.file_path, metadata)

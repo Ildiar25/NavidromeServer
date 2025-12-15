@@ -9,10 +9,6 @@ ROOT_DIR: Final[str] = "/music"
 TRACK_EXTENSION: Final[str] = "mp3"
 
 
-# Smallest valid PNG encoded image
-PNG_ENCODED_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
-
-
 # Admitted files:
 ALLOWED_MUSIC_FORMAT: Final[Set[str]] = {"audio/mpeg", "audio/mpg", "audio/x-mpeg"}
 ALLOWED_IMAGE_FORMAT: Final[Set[str]] = {"image/jpeg", "image/png"}
