@@ -41,24 +41,24 @@ class TrackServiceAdapter:
     def read_metadata(self, track: bytes) -> dict[str, str | int | None]:
         try:
             service = self._get_metadata_service()
-            metadata = service.get_metadata(self._load_decoded_stream(track))
+            metadata = service.get_track_metadata(self._load_decoded_stream(track))
 
             return {
-                'name': metadata.TIT2,
-                'tmp_artists': metadata.TPE1,
                 'tmp_album': metadata.TALB,
-                'duration': 0,  # NOTE: Valor por defecto de momento
-                'tmp_genre': metadata.TCON,
                 'tmp_album_artist': metadata.TPE2,
+                'tmp_artists': metadata.TPE1,
+                'tmp_collection': metadata.TCMP,
+                'tmp_disk_no': metadata.TPOS[0],
+                'tmp_genre': metadata.TCON,
+                'tmp_name': metadata.TIT2,
                 'tmp_original_artist': metadata.TOPE,
-                'year': metadata.TDRC,
-                'track_no': metadata.TRCK[0],
-                'total_track': metadata.TRCK[1],
-                'disk_no': metadata.TPOS[0],
-                'total_disk': metadata.TPOS[1],
+                'tmp_track_no': metadata.TRCK[0],
+                'tmp_total_disk': metadata.TPOS[1],
+                'tmp_total_track': metadata.TRCK[1],
+                'tmp_year': metadata.TDRC,
+                # 'duration': 0,  # NOTE: Valor por defecto de momento
                 # FIXME: NO devolver ni duración ni MIME
-                'mime_type': "NO MIMETYPE",   # NOTE: Valor por defecto de momento
-                'collection': metadata.TCMP,
+                # 'mime_type': "NO MIMETYPE",   # NOTE: Valor por defecto de momento
                 'picture': base64_encode(metadata.APIC) if metadata.APIC else None,
             }
 
@@ -103,7 +103,7 @@ class TrackServiceAdapter:
 
         try:
             service = self._get_metadata_service()
-            service.set_metadata(output_path, metadata)
+            service.set_track_metadata(output_path, metadata)
 
         except ReadingFileError as invalid_metadata:
             _logger.error(f"Failed to process file metadata: {invalid_metadata}")

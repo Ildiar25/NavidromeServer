@@ -20,11 +20,11 @@ _logger = logging.getLogger(__name__)
 class FileMetadataService(ABC):
 
     @abstractmethod
-    def get_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
+    def get_track_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
         ...
 
     @abstractmethod
-    def set_metadata(self, output_path: Path, new_data: Dict[str, str | int | None]) -> None:
+    def set_track_metadata(self, output_path: Path, new_data: Dict[str, str | int | None]) -> None:
         ...
 
 
@@ -43,7 +43,7 @@ class MP3MetadataService(FileMetadataService):
         'APIC': tag_type.APIC,
     }
 
-    def get_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
+    def get_track_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
         tag_parsers = {
             'APIC': self._parse_apic_image,
             'TRCK': self._parse_numeric_pair,
@@ -73,7 +73,7 @@ class MP3MetadataService(FileMetadataService):
         return TrackMetadata(**metadata)
 
 
-    def set_metadata(
+    def set_track_metadata(
             self, output_path: Path, new_metadata: Dict[str, str | int | None], preserve_unknown_tags: bool = False
     ) -> None:
         tag_writers = {
