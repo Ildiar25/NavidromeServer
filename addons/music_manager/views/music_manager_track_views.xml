@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record id="music_manager_track_view_action_general" model="ir.actions.act_window">
-            <field name="name">Tracks</field>
+            <field name="name">My tracks</field>
             <field name="res_model">music_manager.track</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
@@ -21,7 +21,7 @@
             <field name="name">music_manager.track.view.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <tree string="Songs" decoration-danger="is_deleted" decoration-warning="not is_saved">
+                <tree string="Songs" decoration-danger="is_deleted" decoration-warning="not is_saved" create="False">
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}" optional="hide"/>
                     <field name="disk_no" string="Disk no" optional="hide"/>
                     <field name="track_no" string="Track no" optional="hide"/>
@@ -48,138 +48,17 @@
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
                 <form string="Track" disable_autofocus="True">
-                    <field name="state" string="" widget="statusbar"/>
+<!--                    <field name="state" string="" widget="statusbar"/>-->
                     <field name="is_deleted" invisible="True"/>
                     <sheet>
                         <div class="d-flex flex-column justify-content-between">
                             <div>
-                                <!-- Upload song -->
-                                <section invisible="state != 'start'">
+                                <section>
                                     <header>
-                                        <h1>Welcome! 🚀 </h1>
+                                        <h1>🎯 Edit song metadata</h1>
                                     </header>
                                     <separator/>
-                                    <div style="height: 620px">
-                                        <div class="d-flex flex-row justify-content-around">
-                                            <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Ready to upload your next hit? 🎧</h3>
-                                                <p>
-                                                    <em>This is your personal music manager!</em>
-                                                    <br/>
-                                                    <br/>
-                                                    Here you can start building your collection by either uploading an
-                                                    <b>MP3 file</b> from your computer or adding a <b>YouTube link</b>
-                                                    to download and convert it automatically.
-                                                    <br/>
-                                                    Once your song is uploaded, you’ll be able to review and edit its
-                                                    metadata to keep everything tidy and organized.
-                                                    <br/>
-                                                    <br/>
-                                                    <em>Let’s get started and bring some music to life!</em>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-row justify-content-around">
-                                            <div class="d-flex flex-column align-items-center mx-3">
-                                                <div class="mb-3">
-                                                    <img src="music_manager/static/src/img/update-img.png" width="300" height="300" alt="Cloud image"/>
-                                                </div>
-                                                <p class="mx-auto"><b>MP3 file</b></p>
-                                                <field name="file" string="MP3 file"/>
-                                            </div>
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <div class="mb-3">
-                                                    <img src="music_manager/static/src/img/youtube-img.png" width="300" height="300" alt="YouTubeimage"/>
-                                                </div>
-                                                <p class="mx-auto"><b>YouTube URL</b></p>
-                                                <field name="url" placeholder="https://"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <!-- Check metadata -->
-                                <section invisible="state != 'uploaded'">
-                                    <header>
-                                        <h1>Checking! 👀 </h1>
-                                    </header>
-                                    <separator/>
-                                    <div style="height: 620px">
-                                        <div class="d-flex flex-row justify-content-around">
-                                            <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Here is the metadata founded! 🏷</h3>
-                                                <p>
-                                                    <b>Metadata</b> is the hidden information embedded inside your
-                                                    music files, such as the title, artist, album, year, genre, and
-                                                    even cover images. These details help music players and libraries
-                                                    like <b>Navidrome</b> to display and organize your songs properly.
-                                                    <br/>
-                                                    <br/>
-                                                    Here we show you what we found in your file!
-                                                    <br/>
-                                                    <br/>
-                                                    <em>Review it carefully before moving forward!</em>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <separator string="Actual file metadata"/>
-                                        <div class="d-flex flex-row justify-content-start">
-                                            <div class="mx-3">
-                                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}" readonly="True"/>
-                                            </div>
-                                            <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                            <div class="d-flex flex-row justify-content-between w-100">
-                                                <div class="flex-grow-1 mx-3">
-                                                    <group>
-                                                        <field name="name" string="Title" readonly="True"/>
-                                                        <field name="tmp_artists" string="Track artist(s)" readonly="True"/>
-                                                        <field name="tmp_album" string="Album" readonly="True"/>
-                                                        <field name="duration" string="Duration"/>
-                                                        <field name="tmp_genre" string="Genre" readonly="True"/>
-                                                    </group>
-                                                </div>
-                                                <div class="flex-grow-1 mx-3">
-                                                    <group>
-                                                        <field name="tmp_album_artist" string="Album artist" readonly="True"/>
-                                                        <field name="tmp_original_artist" string="Original artist" readonly="True"/>
-                                                        <field name="year" string="Year" readonly="True"/>
-                                                        <field name="track_no" string="Track" readonly="True"/>
-                                                        <field name="total_track" string="Total track" readonly="True"/>
-                                                        <field name="disk_no" string="Disk" readonly="True"/>
-                                                        <field name="total_disk" string="Total disk" readonly="True"/>
-                                                    </group>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <!-- Update metadata -->
-                                <section invisible="state != 'metadata'">
-                                    <header>
-                                        <h1>Editing! 📝 </h1>
-                                    </header>
-                                    <separator/>
-                                    <div style="height: 820px">
-                                        <div class="d-flex flex-row justify-content-around">
-                                            <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Polishing your track details! ✨</h3>
-                                                <p>
-                                                    You can update or correct the metadata before saving your track
-                                                    on your <b>library</b>. This includes fixing typos, updating the
-                                                    artist name, adding the correct album, or choosing a better genre.
-                                                    <br/>
-                                                    <br/>
-                                                    Keeping your metadata clean ensures that your music collection
-                                                    stays neat and easy to browse across all your devices,
-                                                    including <b>Substreamer</b> and <b>Navidrome</b>.
-                                                    <br/>
-                                                    <br/>
-                                                    <em>Let's do it!</em>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <separator string="New metadata"/>
+                                    <div>
                                         <div class="d-flex flex-row justify-content-start">
                                             <div class="mx-3">
                                                 <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
@@ -189,19 +68,21 @@
                                                 <div class="flex-grow-1 mx-3">
                                                     <group>
                                                         <field name="name" string="Title"/>
-                                                        <field name="track_artist_ids" string="Track artist(s)">
-                                                            <tree>
-                                                                <field name="name" nolabel="True"/>
-                                                            </tree>
-                                                        </field>
+                                                        <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
                                                         <field name="album_id" string="Album"/>
                                                         <field name="genre_id" string="Genre"/>
+                                                        <field name="collection" string="Part of a collection"/>
+                                                        <field name="file_path" string="Path"/>
+                                                        <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                                        <field name="has_valid_path" invisible="True"/>
                                                     </group>
+                                                </div>
+                                                <div class="flex-grow-1 mx-3">
                                                     <group>
-                                                        <field name="album_artist_id" string="Album artist" />
+                                                        <field name="album_artist_id" string="Album artist" edit="collection"/>
                                                         <field name="original_artist_id" string="Original artist"/>
                                                         <field name="year" string="Year"/>
-                                                        <field name="collection" string="Part of a collection"/>
+
                                                     </group>
                                                     <div class="d-flex flex-row">
                                                         <group>
@@ -213,159 +94,19 @@
                                                             <field name="total_disk" string="Total disk"/>
                                                         </group>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <!-- Save changes & file -->
-                                <section invisible="state != 'done'">
-                                    <header>
-                                        <h1>Confirm! ✅ </h1>
-                                    </header>
-                                    <separator/>
-                                    <div style="height: 670px">
-                                        <div class="d-flex flex-row justify-content-around">
-                                            <div class="w-50 mb-3">
-                                                <h3 class="text-muted">Add the file to Navidrome! 💿</h3>
-                                                <p>
-                                                    When you click on 'Save', the file will be moved to your main
-                                                    music folder used by <b>Navidrome</b>, and the updated metadata
-                                                    will be saved directly inside the audio file.
-                                                    <br/>
-                                                    <br/>
-                                                    This way, your new track will immediately appear in your
-                                                    <b>Navidrome</b> library, ready to be streamed on your PC or
-                                                    mobile app. Once saved, you can still update metadata later from
-                                                    the main form if needed.
-                                                    <br/>
-                                                    <br/>
-                                                    <em>Enjoy it!</em>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <separator string="Last checking"/>
-                                        <div class="d-flex flex-row justify-content-start">
-                                            <div class="mx-3">
-                                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}" readonly="True"/>
-                                            </div>
-                                            <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                            <div class="d-flex flex-row justify-content-between w-100">
-                                                <div class="flex-grow-1 mx-3">
                                                     <group>
-                                                        <field name="name" string="Title" readonly="True"/>
-                                                        <field name="display_artist_names" string="Track artist(s)"/>
-                                                        <field name="album_id" string="Album" readonly="True"/>
-                                                        <field name="genre_id" string="Genre" readonly="True"/>
-                                                        <field name="file_path" string="Path"/>
-                                                        <field name="has_valid_path" invisible="True"/>
-                                                    </group>
-                                                </div>
-                                                <div class="flex-grow-1 mx-3">
-                                                    <group>
-                                                        <field name="album_artist_id" string="Album artist" readonly="True"/>
-                                                        <field name="original_artist_id" string="Original artist" readonly="True"/>
-                                                        <field name="year" string="Year" readonly="True"/>
-                                                        <field name="track_no" string="Track" readonly="True"/>
-                                                        <field name="disk_no" string="Disk" readonly="True"/>
+                                                        <field name="mime_type" string="MIME"/>
                                                     </group>
                                                 </div>
                                             </div>
                                         </div>
                                         <separator/>
-                                        <div class="d-flex flex-row justify-content-around">
-                                            <div class="w-50 mb-3 text-align">
-                                                <div class="justify-content-center" invisible="has_valid_path">
-                                                    <h4>My gosh! 🙄</h4>
-                                                    <p>
-                                                        <em>There are some fields you need to check before save file!</em>
-                                                        <br/>
-                                                        This app needs to have a valid path to add the song into the
-                                                        library folder and we both actually know that condition is not
-                                                        true. Check <b>artist name</b>, <b>album name</b>,
-                                                        <b>track number</b> and <b>track title</b>. All are necessary!
-                                                    </p>
-                                                </div>
-                                                <div class="justify-content-center" invisible="not has_valid_path">
-                                                    <h4>Nice! Your song is ready to be added onto your library! 😍</h4>
-                                                    <p>
-                                                        <em>Now it's time! Just click the 'Save' button!</em>
-                                                    </p>
-                                                </div>
-                                                <button name="save_file" string="Save" class="btn-outline-primary w-100" type="object" invisible="not has_valid_path"/>
-                                            </div>
+                                        <div class="d-flex flex-row justify-content-center">
+                                            <h3 invisible="not is_deleted">😱 MY GOSH! It is impossible to find this song. Add it again!</h3>
+                                            <button name="save_changes" string="Update" class="btn-outline-success w-50" type="object" invisible="is_deleted"/>
                                         </div>
                                     </div>
                                 </section>
-
-                                <!-- Main form -->
-                                <section invisible="state != 'added'">
-                                    <header>
-                                        <h1>🎯 Edit song metadata</h1>
-                                    </header>
-                                    <separator/>
-                                    <div style="height: 360px">
-                                        <div>
-                                            <div class="d-flex flex-row justify-content-start">
-                                                <div class="mx-3">
-                                                    <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
-                                                </div>
-                                                <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                                <div class="d-flex flex-row justify-content-between w-100">
-                                                    <div class="flex-grow-1 mx-3">
-                                                        <group>
-                                                            <field name="name" string="Title"/>
-                                                            <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
-                                                            <field name="album_id" string="Album"/>
-                                                            <field name="genre_id" string="Genre"/>
-                                                            <field name="collection" string="Part of a collection"/>
-                                                            <field name="file_path" string="Path"/>
-                                                            <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
-                                                            <field name="has_valid_path" invisible="True"/>
-                                                        </group>
-                                                    </div>
-                                                    <div class="flex-grow-1 mx-3">
-                                                        <group>
-                                                            <field name="album_artist_id" string="Album artist" edit="collection"/>
-                                                            <field name="original_artist_id" string="Original artist"/>
-                                                            <field name="year" string="Year"/>
-
-                                                        </group>
-                                                        <div class="d-flex flex-row">
-                                                            <group>
-                                                                <field name="track_no" string="Track"/>
-                                                                <field name="disk_no" string="Disk"/>
-                                                            </group>
-                                                            <group>
-                                                                <field name="total_track" string="Total track"/>
-                                                                <field name="total_disk" string="Total disk"/>
-                                                            </group>
-                                                        </div>
-                                                        <group>
-                                                            <field name="mime_type" string="MIME"/>
-                                                        </group>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <separator/>
-                                            <div class="d-flex flex-row justify-content-center">
-                                                <h3 invisible="not is_deleted">😱 MY GOSH! It is impossible to find this song. Add it again!</h3>
-                                                <button name="save_changes" string="Update" class="btn-outline-success w-50" type="object" invisible="is_deleted"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
-
-                            <!-- Footer buttons -->
-                            <div class="d-flex flex-row justify-content-between">
-                                <div class="w-100 d-flex flex-row justify-content-start">
-                                    <button name="action_back" string="Back" class="btn btn-outline-primary" type="object" invisible="state != 'done'"/>
-                                </div>
-                                <div class="w-100 d-flex flex-row justify-content-end">
-                                    <button name="action_next" string="Next" class="btn btn-outline-primary" type="object" invisible="state == 'added' or state == 'done'"/>
-                                </div>
                             </div>
                         </div>
                     </sheet>

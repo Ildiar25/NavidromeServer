@@ -18,7 +18,7 @@ class TrackMetadata:
 
 @dataclass()
 class TrackInfo:
-    duration: float = 0.0               # Duration (in seconds)
+    duration: int = 0                   # Duration (in seconds)
     bitrate: int = 0                    # Bitrate (in seconds)
     sample_rate: int = 0                # Hertz frequency (Hz)
     channels: int = 0                   # Mono (1) or stereo (2)

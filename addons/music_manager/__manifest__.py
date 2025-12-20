@@ -30,8 +30,10 @@
         # Views
         "views/music_manager_album_views.xml",
         "views/music_manager_artist_views.xml",
+        "views/music_manager_audio_settings_view.xml",
         "views/music_manager_genre_views.xml",
         "views/music_manager_track_views.xml",
+        "views/music_manager_track_wizard_view.xml",
 
         # Menus
         "views/music_manager_menus.xml",

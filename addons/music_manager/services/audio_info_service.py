@@ -1,6 +1,6 @@
+import io
 import logging
 from abc import ABC, abstractmethod
-from pathlib import Path
 
 import mutagen.mp3 as exception
 from mutagen.mp3 import MP3
@@ -15,14 +15,14 @@ _logger = logging.getLogger(__name__)
 class AudioInfoService(ABC):
 
     @abstractmethod
-    def get_track_info(self, file_path: Path) -> TrackInfo:
+    def get_track_info(self, buffered_file: io.BytesIO) -> TrackInfo:
         ...
 
 
 class MP3AudioInfoService(AudioInfoService):
 
-    def get_track_info(self, file_path: Path) -> TrackInfo:
-        track = self._load_mp3_audio(file_path)
+    def get_track_info(self, buffered_file: io.BytesIO) -> TrackInfo:
+        track = self._load_mp3_audio(buffered_file)
 
         return TrackInfo(
             duration=round(track.info.length),
@@ -38,7 +38,7 @@ class MP3AudioInfoService(AudioInfoService):
         )
 
     @staticmethod
-    def _load_mp3_audio(track_file: Path) -> MP3:
+    def _load_mp3_audio(track_file: io.BytesIO) -> MP3:
         try:
             return MP3(track_file)
 
