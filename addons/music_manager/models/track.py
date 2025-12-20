@@ -1,35 +1,23 @@
 # -*- coding: utf-8 -*-
-import base64
 import logging
-import os
+from pathlib import Path
 
-from urllib.parse import urlparse
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import UserError, ValidationError
-from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
+from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one
 from odoo.models import Model
 
 from .mixins.process_image_mixin import ProcessImageMixin
-from ..adapters import DownloadServiceAdapter, FileServiceAdapter, MetadataServiceAdapter
-from ..utils.constants import ALLOWED_MUSIC_FORMAT
-from ..utils.custom_types import CustomWarningMessage, TrackVals
-from ..utils.exceptions import (
-    ClientPlatformError,
-    FilePersistenceError,
-    InvalidFileFormatError,
-    MusicManagerError,
-    InvalidPathError,
-    VideoProcessingError
-)
-from ..utils.file_utils import validate_allowed_mimes
+from ..adapters import FileServiceAdapter, TrackServiceAdapter
+from ..utils.custom_types import TrackVals
+from ..utils.exceptions import FilePersistenceError, MusicManagerError, InvalidPathError
 
 
 _logger = logging.getLogger(__name__)
 
 
 class Track(Model, ProcessImageMixin):
-
     _name = 'music_manager.track'
     _description = 'track_table'
     _order = 'album_name, disk_no, track_no'
@@ -37,8 +25,8 @@ class Track(Model, ProcessImageMixin):
     # Basic fields
     picture = Binary(string=_("Picture"), attachment=True)
     disk_no = Integer(string=_("Disk no"))
-    duration = Char(string=_("Duration (min)"), readonly=True)
-    mime_type = Char(string=_("MIME"), readonly=True)
+    duration = Char(string=_("Duration (min)"), readonly=True, default="0:00")
+    mime_type = Char(string=_("MIME"), readonly=True, default="None MIME")
     name = Char(string=_("Title"))
     total_disk = Integer(string=_("Total disk no"))
     total_track = Integer(string=_("Total track no"))
@@ -51,15 +39,6 @@ class Track(Model, ProcessImageMixin):
     genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
     original_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
     track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
-
-    # Temporal fields
-    file = Binary(string=_("File"))
-    tmp_album = Char(string=_("Album founded"))
-    tmp_album_artist = Char(string=_("Album artist founded"))
-    tmp_artists = Char(string=_("Track artist(s) founded"))
-    tmp_genre = Char(string=_("Genre founded"))
-    tmp_original_artist = Char(string=_("Original artist founded"))
-    url = Char(string=_("Youtube URL"))
 
     # Computed fields
     collection = Boolean(
@@ -82,17 +61,6 @@ class Track(Model, ProcessImageMixin):
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
     is_saved = Boolean(string=_("Is saved"), default=False, readonly=True)
     owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
-    state = Selection(
-        selection=[
-            ('start', _("Start")),
-            ('uploaded', _("Uploaded")),
-            ('metadata', _("Metadata Editing")),
-            ('done', _("Done")),
-            ('added', _("Added")),
-        ],
-        string=_("State"),
-        default='start'
-    )
 
     @api.model_create_multi
     def create(self, list_vals: list[TrackVals]):
@@ -177,7 +145,7 @@ class Track(Model, ProcessImageMixin):
     def _compute_file_is_deleted(self) -> None:
         for track in self:
             if track.old_path and isinstance(track.old_path, str):
-                track.is_deleted = not os.path.isfile(track.old_path)
+                track.is_deleted = not track.file_exists(track.old_path)
 
             else:
                 track.is_deleted = False
@@ -216,28 +184,12 @@ class Track(Model, ProcessImageMixin):
     def _search_is_deleted(self, operator, value):
         matching_ids = []
         for track in self.search([('is_saved', operator, True)]):
-            deleted = not os.path.isfile(track.old_path)
+            deleted = not track.file_exists(track.old_path)
 
             if (value and deleted) or (not value and not deleted):
                 matching_ids.append(track.id)
 
         return [("id", "in", matching_ids)]
-
-    @api.constrains('file', 'url', 'file_path')
-    def _check_fields(self) -> None:
-        for track in self:
-            if track.file_path and track.has_valid_path:
-                continue
-
-            if not track.file and not track.url:
-                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                raise ValidationError(_("\nMust add an URL or upload a file to proceed."))
-
-            if track.file and track.url:
-                _logger.info(f"CONSTRAINT CHECK | file: {bool(track.file)} | url: {bool(track.url)}")
-                raise ValidationError(
-                    _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
-                )
 
     @api.constrains('name', 'track_artist_ids', 'owner')
     def _check_track_name(self) -> None:
@@ -265,46 +217,6 @@ class Track(Model, ProcessImageMixin):
 
             track.has_valid_path = FileServiceAdapter().is_valid(track.file_path)
 
-    @api.onchange('file')
-    def _validate_file_type(self) -> CustomWarningMessage | None:
-        for track in self:
-            if not (track.file and isinstance(track.file, bytes)):
-                continue
-
-            try:
-                validate_allowed_mimes(track.file, ALLOWED_MUSIC_FORMAT)
-
-            except InvalidFileFormatError as invalid_file:
-                track.file = False
-                return {
-                    'warning': {
-                        'title': _("Wait a minute! 👮"),
-                        'message': _(
-                            "\nActually only MP3 files are allowed. Don't f*ck the system! \n%s.", invalid_file
-                        )
-                    }
-                }
-
-        return None
-
-    @api.onchange('url')
-    def _validate_url_path(self) -> CustomWarningMessage | None:
-        for track in self:
-            if not (track.url and isinstance(track.url, str)):
-                continue
-
-            parsed_url = urlparse(track.url)
-
-            if not (parsed_url.netloc.endswith('youtube.com') or parsed_url.netloc.endswith('youtu.be')):
-                return {
-                    'warning': {
-                        'title': _("C'mon dude! 🙄"),
-                        'message': _("\nThe web address has to be valid and we both know it is not.")
-                    }
-                }
-
-        return None
-
     @api.onchange('collection')
     def _display_album_artist_changes(self) -> None:
         for track in self:
@@ -317,27 +229,6 @@ class Track(Model, ProcessImageMixin):
                 track.album_artist_id = track._find_or_create_single_artist(
                     track.original_artist_id.name, track.track_artist_ids
                 )
-
-    def action_back(self) -> None:
-        for track in self:  # type:ignore
-            if track.state == 'done':
-                track.state = 'metadata'
-
-    def action_next(self) -> None:
-        for track in self:  # type:ignore
-            match track.state:
-                case 'start':
-                    track.state = 'uploaded'
-                    if track.url:
-                        self._convert_to_mp3()
-
-                    self._update_fields()
-
-                case 'uploaded':
-                    track.state = 'metadata'
-
-                case 'metadata':
-                    track.state = 'done'
 
     def save_changes(self):
         track = self.ensure_one()
@@ -369,131 +260,6 @@ class Track(Model, ProcessImageMixin):
                 'sticky': False,
             }
         }
-
-    def save_file(self) -> None:
-        for track in self:  # type:ignore
-            if not (isinstance(track.file, bytes) and track.has_valid_path):
-                continue
-
-            song = base64.b64decode(track.file)
-
-            try:
-                FileServiceAdapter().save_file(track.file_path, song)
-
-            except InvalidPathError as invalid_path:
-                _logger.error(f"There was an issue with file path: {invalid_path}")
-                raise ValidationError(_("\nActually, the file path of this record is not valid."))
-
-            except FilePersistenceError as not_allowed:
-                _logger.error(f"Cannot write the file: {not_allowed}")
-                raise ValidationError(
-                    _("\nAn internal issue ocurred while trying to save the file."
-                      "\nPlease, try it again with a different one.")
-                )
-
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unespected error while trying to save the file: {unknown_error}")
-                raise ValidationError(
-                    _("\nDamn! Something went wrong while saving the file.\nPlease, contact with your Admin.")
-                )
-
-            self._update_metadata()
-
-            track.old_path = track.file_path
-            track.write(
-                {
-                    'is_saved': True,
-                    'state': 'added',
-                    'file': False,
-                }
-            )
-
-    def _convert_to_mp3(self) -> None:
-        for track in self:
-            if not (track.url and isinstance(track.url, str)):
-                continue
-
-            try:
-                download_service = DownloadServiceAdapter(track.url)
-                bytes_file = download_service.to_buffer()
-
-                track.write(
-                    {
-                        'url': False,
-                        'file': base64.b64encode(bytes_file).decode()
-                    }
-                )
-
-            except ClientPlatformError as download_error:
-                _logger.error(f"Failed to process YouTube URL '{track.url}': {download_error}")
-                raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
-
-            except VideoProcessingError as video_error:
-                _logger.error(f"Failed to process downloaded video: {video_error}")
-                raise ValidationError(
-                    _("\nAn internal issue ocurred while processing the video. Please, try a different URL.")
-                )
-
-            except InvalidPathError as invalid_path:
-                _logger.error(f"There was an issue with file path: {invalid_path}")
-                raise ValidationError(_("\nActually, the final path where to save file is not valid."))
-
-            except MusicManagerError as unknown_error:
-                _logger.error(f"Unexpected error while processing video URL '{track.url}': {unknown_error}")
-                raise ValidationError(
-                    _("\nDamn! Something went wrong while validating URL.\nPlease, contact with your Admin.")
-                )
-
-    def _find_or_create_album(self, album_name: str):
-        albums = self.env['music_manager.album']
-
-        if album_name and album_name.lower() != 'unknown':
-            # noinspection PyNoneFunctionAssignment
-            album = albums.search([('name', 'ilike', album_name)], limit=1)
-
-            if album:
-                return album.id
-
-            else:
-                return albums.create([{'name': album_name}]).id
-
-        return False
-
-    def _find_or_create_artist(self, artist_names: str):
-        artists = self.env['music_manager.artist']
-        artist_ids = []
-
-        if artist_names and artist_names.lower() != 'unknown':
-            names_list = (name.strip() for name in artist_names.split(','))
-
-            for name in names_list:
-                # noinspection PyNoneFunctionAssignment
-                artist = artists.search([('name', 'ilike', name)], limit=1)
-
-                if artist:
-                    artist_ids.append(artist.id)
-
-                else:
-                    # noinspection PyNoneFunctionAssignment
-                    new_artist = artists.create([{'name': name}])
-                    artist_ids.append(new_artist.id)
-
-        return [(6, 0, artist_ids)]
-
-    def _find_or_create_genre(self, genre_name: str):
-        genres = self.env['music_manager.genre']
-
-        if genre_name and genre_name.lower() != 'unknown':
-            # noinspection PyNoneFunctionAssignment
-            genre = genres.search([('name', 'ilike', genre_name)], limit=1)
-
-            if genre:
-                return genre.id
-
-            else:
-                return genres.create([{'name': genre_name}]).id
-
-        return False
 
     def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]):
         artists = self.env['music_manager.artist']
@@ -603,24 +369,6 @@ class Track(Model, ProcessImageMixin):
 
         self.album_id = found_album.id
 
-    def _update_fields(self) -> None:
-        for track in self:  # type:ignore
-
-            metadata = MetadataServiceAdapter().read_metadata(track.file)
-
-            for attr_name, value in metadata.items():
-                setattr(track, attr_name, value)
-
-            track.track_artist_ids = self._find_or_create_artist(metadata['tmp_artists'])
-            track.album_id = self._find_or_create_album(metadata['tmp_album'])
-            track.genre_id = self._find_or_create_genre(metadata['tmp_genre'])
-            track.album_artist_id = self._find_or_create_single_artist(
-                metadata['tmp_album_artist'], track.track_artist_ids.ids
-            )
-            track.original_artist_id = self._find_or_create_single_artist(
-                metadata['tmp_original_artist'], track.track_artist_ids.ids
-            )
-
     def _update_metadata(self) -> None:
         for track in self:
             metadata = {
@@ -635,7 +383,13 @@ class Track(Model, ProcessImageMixin):
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,
                 'APIC': track.picture,
-                'MIME': track.mime_type,
             }
 
-            MetadataServiceAdapter().write_metadata(track.file_path, metadata)
+            TrackServiceAdapter().write_metadata(track.file_path, metadata)
+
+    @staticmethod
+    def file_exists(filepath: str) -> bool:
+        if not isinstance(filepath, str):
+            return False
+
+        return Path(filepath).exists()

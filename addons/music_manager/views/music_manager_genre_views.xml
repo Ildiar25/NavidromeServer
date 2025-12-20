@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record id="music_manager_genre_view_action_general" model="ir.actions.act_window">
-            <field name="name">Genres</field>
+            <field name="name">My genres</field>
             <field name="res_model">music_manager.genre</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
