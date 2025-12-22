@@ -46,8 +46,15 @@ class ProcessImageMixin(AbstractModel):
 
         return None
 
-    @staticmethod
-    def _process_picture_image(values: Dict[str, Any]) -> None:
+    def _get_image_service_adapter(self, image: str):
+        settings = self.env['music_manager.audio_settings'].search([], limit=1)
+
+        image_format = settings.image_format if settings else 'png'
+        image_size = settings.image_size if settings else '400'
+
+        return ImageServiceAdapter(image, image_type=image_format, square_size=image_size)
+
+    def _process_picture_image(self, values: Dict[str, Any]) -> None:
         if not 'picture' in values or not values['picture']:
             return
 
@@ -56,8 +63,8 @@ class ProcessImageMixin(AbstractModel):
             return
 
         try:
-            image = ImageServiceAdapter(values['picture'])
-            values['picture'] = image.save_to_bytes(width=400, height=400)
+            image = self._get_image_service_adapter(values['picture'])
+            values['picture'] = image.save_to_bytes()
 
         except InvalidImageFormatError as format_error:
             _logger.error(f"Image has an invalid format or file is corrupt: {format_error}.")
