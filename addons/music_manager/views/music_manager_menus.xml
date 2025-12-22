@@ -19,6 +19,4 @@
     <menuitem id="music_manager_music_menu_artist_action_admin" name="Artist profiles" parent="music_manager_music_menu" action="music_manager_artist_view_action_admin" groups="music_manager.group_music_manager_user_admin"/>
     <menuitem id="music_manager_music_menu_album_action_admin" name="Album records" parent="music_manager_music_menu" action="music_manager_album_view_action_admin" groups="music_manager.group_music_manager_user_admin"/>
     <menuitem id="music_manager_music_menu_genre_action_admin" name="Music genres" parent="music_manager_music_menu" action="music_manager_genre_view_action_admin" groups="music_manager.group_music_manager_user_admin"/>
-
-
 </odoo>
