@@ -21,20 +21,21 @@ class ImageServiceAdapter:
         ImageType.PNG: ImageToPNG,
     }
 
-    def __init__(self, str_bytes_image: str, image_type: str = 'png') -> None:
+    def __init__(self, str_bytes_image: str, image_type: str, square_size: str) -> None:
         self.raw_image = str_bytes_image
         self.image_type = self._check_image_format(image_type)
+        self.square_size = self._check_image_size(square_size)
         self.mime_type = None
 
         self._pil_image = None
         self._processor = None
 
-    def save_to_bytes(self, width: int, height: int) -> str:
+    def save_to_bytes(self) -> str:
         processor = self._get_processor()
-        image_to_encode = processor.center_image().with_size(width, height).to_bytes()
+        image_to_encode = processor.center_image().with_size(self.square_size, self.square_size).to_bytes()
         return base64_encode(image_to_encode)
 
-    def save_to_file(self, width: int, height: int, str_file_path: str) -> None:
+    def save_to_file(self, str_file_path: str) -> None:
         if not isinstance(str_file_path, str):
             _logger.error(f"Cannot save the file. The path is not valid: '{str_file_path}'.")
             raise InvalidPathError("File path does not exist. A valid path must be set before saving.")
@@ -42,7 +43,7 @@ class ImageServiceAdapter:
         output_path = Path(str_file_path).with_suffix(f'.{self.image_type.value}')
 
         processor = self._get_processor()
-        processor.center_image().with_size(width, height).to_file(output_path)
+        processor.center_image().with_size(self.square_size, self.square_size).to_file(output_path)
 
     def _get_pil_image(self) -> Image.Image:
         if not self._pil_image:
@@ -78,6 +79,19 @@ class ImageServiceAdapter:
             raise InvalidImageFormatError(f"The file extension '{image_type}' is not valid.")
 
         return ImageType(image_type)
+
+    @staticmethod
+    def _check_image_size(size: str) -> int:
+        if not isinstance(size, str):
+            raise InvalidImageFormatError(f"The image size '{size}' is not valid.")
+
+        try:
+            size = int(size)
+            return size
+
+        except ValueError as caught_error:
+            _logger.error(f"The image size is not a valid size: {caught_error}")
+            raise InvalidImageFormatError(f"The image size is not a valid size: {caught_error}")
 
     @staticmethod
     def _load_pil_image(image_stream: io.BytesIO) -> Image.Image:
