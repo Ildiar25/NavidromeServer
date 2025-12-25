@@ -4,9 +4,8 @@ import io
 import logging
 import subprocess
 from abc import ABC, abstractmethod
-from copy import deepcopy
 from pathlib import Path
-from typing import Protocol
+from typing import Dict, List, Protocol
 
 from pytube import YouTube
 from pytube.exceptions import RegexMatchError, VideoPrivate, VideoRegionBlocked, VideoUnavailable
@@ -31,9 +30,10 @@ class StreamProtocol(Protocol):
 
 # ---- Adapters ---- #
 class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not work
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, config: Dict[str, str]) -> None:
         self._url = url
         self._tmp_path = Path('/tmp')
+        self._options = self._get_pytube_options(config)
 
     @property
     def url(self) -> str:
@@ -53,7 +53,7 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
     def stream_to_buffer(self, buffer: io.BytesIO) -> None:
         filename = hashlib.sha256(self._url.encode()).hexdigest()
         download_path = self._download_track(self._tmp_path, filename)
-        final_path = self._tmp_path / f'{filename}.mp3'
+        final_path = self._tmp_path / f"{filename}.{self._options['format']}"
 
         self._subprocess_track_to_mp3(download_path, final_path)
 
@@ -75,7 +75,7 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
     def _download_track(self, tmp_path: Path, filename: str) -> Path:
         try:
             video = YouTube(self._url)
-            stream = video.streams.filter(only_audio=True).first()
+            stream = video.streams.filter(only_audio=True).order_by('abr').desc().first()
             download_path = stream.download(output_path=f'{tmp_path}', filename=filename)
             return Path(download_path)
 
@@ -86,6 +86,34 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
         except Exception as unknown_error:
             _logger.error(f"Unexpected error while processing the download: {unknown_error}")
             raise MusicManagerError(unknown_error)
+
+    def _get_ffmpeg_args(self, download_path: Path, output_path: Path) -> List[str]:
+
+        quality = self._options.get('quality')
+        file_format = self._options.get('format')
+        args = ["ffmpeg", "-i", f"{download_path}", "-vn"]
+
+        if quality and quality != '0':
+            args.extend(["-ab", f"{self._options['quality']}k"])
+
+        elif quality == '0' and file_format == 'mp3':
+            args.extend(["-q:a", "0"])
+
+        args.extend(["-y", f"{output_path}"])
+        return args
+
+    @staticmethod
+    def _get_pytube_options(config: Dict[str, str]) -> OptionDownloadSettings:
+
+        file_format = config.get('format', 'mp3')
+        bitrate = config.get('quality', '192')
+
+        is_lossless = file_format in ('wav', 'flac')
+
+        return {
+            'format': file_format,
+            'quality': '0' if is_lossless else bitrate,
+        }
 
     @staticmethod
     def _clean_temp_file(filepath: Path) -> None:
@@ -100,10 +128,9 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
             _logger.error(f"Something went wrong while deleting path '{filepath}': {unknown_error}")
             raise MusicManagerError(unknown_error)
 
-    @staticmethod
-    def _subprocess_track_to_mp3(download_path: Path, output_path: Path) -> None:
+    def _subprocess_track_to_mp3(self, download_path: Path, output_path: Path) -> None:
         result = subprocess.run(
-            args=['ffmpeg', '-i', f'{download_path}', '-vn', '-ab', '192k', '-ar', '44100', '-y', f'{output_path}'],
+            args=self._get_ffmpeg_args(download_path, output_path),
             capture_output=True,
         )
 
@@ -114,32 +141,10 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
 
 class YTDLPAdapter(StreamProtocol):
 
-    DEFAULT_OPTIONS = {
-        'format': 'bestaudio/best',
-        'quiet': False,
-        'keepvideo': False,
-        'noplaylist': True,
-        'no_warnings': True,
-        'prefer_ffmpeg': True,
-        'postprocessors': [
-            {
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192'
-            },
-            {
-                'key': 'FFmpegMetadata'
-            },
-        ]
-    }
-
-    def __init__(self, url: str, options: OptionDownloadSettings | None = None) -> None:
+    def __init__(self, url: str, config: Dict[str, str]) -> None:
         self._url = url
-        self._options = deepcopy(self.DEFAULT_OPTIONS)
+        self._options = self._get_ytdlp_options(config)
         self._tmp_path = Path('/tmp')
-
-        if options:
-            self._options.update(options)
 
     @property
     def url(self) -> str:
@@ -159,8 +164,10 @@ class YTDLPAdapter(StreamProtocol):
 
     def stream_to_buffer(self, buffer: io.BytesIO) -> None:
         filename = hashlib.sha256(self._url.encode()).hexdigest()
+        file_format = self._options['postprocessors'][0]['preferredcodec']
+
         tmp_path = self._tmp_path / filename
-        final_path = self._tmp_path / f'{filename}.mp3'
+        final_path = self._tmp_path / f"{filename}.{file_format}"
 
         options = self._get_download_options(tmp_path)
         self._download_track(options)
@@ -204,6 +211,32 @@ class YTDLPAdapter(StreamProtocol):
         options = self._options.copy()
         options['outtmpl'] = str(file_path.with_suffix(".%(ext)s"))
         return options
+
+    @staticmethod
+    def _get_ytdlp_options(config: Dict[str, str]) -> OptionDownloadSettings:
+        file_format = config.get('format', 'mp3')
+        bitrate = config.get('quality', '192')
+
+        is_lossless = file_format in ('wav', 'flac')
+
+        return {
+            'format': 'bestaudio/best',
+            'quiet': False,
+            'keepvideo': False,
+            'noplaylist': True,
+            'no_warnings': True,
+            'prefer_ffmpeg': True,
+            'postprocessors': [
+                {
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': file_format,
+                    'preferredquality': '0' if is_lossless else bitrate,
+                },
+                {
+                    'key': 'FFmpegMetadata'
+                },
+            ]
+        }
 
     @staticmethod
     def _clean_temp_file(file_path: Path) -> None:

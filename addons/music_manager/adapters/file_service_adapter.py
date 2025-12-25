@@ -13,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 class FileServiceAdapter:
 
-    def __init__(self, str_root_dir: str = "/music", file_extension: str = 'mp3') -> None:
+    def __init__(self, str_root_dir: str, file_extension: str) -> None:
         self.root_dir = self._check_root_dir(str_root_dir)
         self.file_extension = self._check_file_extension(file_extension)
         self._folder_manager = FolderManager(self.root_dir, self.file_extension)

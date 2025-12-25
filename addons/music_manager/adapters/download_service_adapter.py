@@ -1,6 +1,7 @@
 import io
 import logging
 from pathlib import Path
+from typing import Dict
 
 from ..services.download_service import PyTubeAdapter, StreamProtocol, YoutubeDownload, YTDLPAdapter
 from ..utils.enums import AdapterType
@@ -17,8 +18,9 @@ class DownloadServiceAdapter:
         AdapterType.YTDLP: YTDLPAdapter,
     }
 
-    def __init__(self, video_url: str, adapter_type: str = 'ytdlp') -> None:
+    def __init__(self, video_url: str, adapter_type: str, config: Dict[str, str]) -> None:
         self.video_url = video_url
+        self.config = config
         self.adapter_type = self._check_adapter_type(adapter_type)
 
         self._downloader = YoutubeDownload()
@@ -44,7 +46,7 @@ class DownloadServiceAdapter:
         if not download_adapter:
             raise DownloadServiceError("Unsupported download adapter type")
 
-        return download_adapter(self.video_url)
+        return download_adapter(self.video_url, self.config)
 
     @staticmethod
     def _check_adapter_type(adapter_type: str) -> AdapterType:

@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <record id="music_manager_audio_settings_action" model="ir.actions.act_window">
-        <field name="name">Audio Settings</field>
-        <field name="res_model">music_manager.audio_settings</field>
-        <field name="view_mode">form</field>
-        <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
-    </record>
+    <data>
+        <record id="music_manager_audio_settings_action" model="ir.actions.server">
+            <field name="name">Audio Settings</field>
+            <field name="model_id" ref="model_music_manager_audio_settings"/>
+            <field name="state">code</field>
+            <field name="code">action = model.action_open_settings()</field>
+        </record>
 
+        <record id="music_manager_audio_settings_view_form" model="ir.ui.view">
+            <field name="name">music_manager.audio_settings.view.form</field>
+            <field name="model">music_manager.audio_settings</field>
+            <field name="arch" type="xml">
+                <form string="Audio settings" disable_autofocus="True" create="false" delete="false" edit="true">
+                    <sheet>
+                        <section>
+                            <header>
+                                <h1>Module settings 🛠️</h1>
+                            </header>
+                            <separator/>
+                            <group string="Audio settings">
+                                <field name="sound_format" string="Sound format"/>
+                                <field name="bitrate" string="Quality"/>
+                            </group>
+                            <group string="Download settings">
+                                <field name="root_dir" string="Root directory"/>
+                                <field name="available_adapters" string="Downloaders"/>
+                            </group>
+                            <group string="Image settings">
+                                <field name="image_format" string="Image format"/>
+                                <field name="image_size" string="Image size"/>
+                            </group>
+                        </section>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
 </odoo>
