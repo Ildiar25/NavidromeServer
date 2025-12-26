@@ -6,14 +6,13 @@ from pathlib import Path
 from odoo import _
 from odoo.exceptions import ValidationError
 
-from ..services.metadata_service import FileMetadataService, MP3MetadataService
-from ..services.audio_info_service import AudioInfoService, MP3AudioInfoService
+from ..services.audio_file_service import MP3AudioFileService, AudioFileService
 from ..utils.data_encoding import base64_decode, base64_encode
 from ..utils.enums import FileType
 from ..utils.exceptions import (
     InvalidFileFormatError,
     InvalidPathError,
-    MetadataServiceError,
+    AudioInfoServiceError,
     MetadataPersistenceError,
     MusicManagerError,
     ReadingFileError
@@ -25,25 +24,25 @@ _logger = logging.getLogger(__name__)
 
 class TrackServiceAdapter:
 
-    METADATA_SERVICES = {
-        FileType.MP3: MP3MetadataService,
-    }
-
-    INFO_SERVICES = {
-        FileType.MP3: MP3AudioInfoService,
+    AUDIO_FILE_SERVICES = {
+        FileType.MP3: MP3AudioFileService,
     }
 
     def __init__(self, file_type: str = 'mp3') -> None:
         self.file_type = self._check_file_extension(file_type)
 
-        self._metadata_service = None
+        self._audio_file_service = None
 
-    def read_metadata(self, track: bytes) -> dict[str, str | int | None]:
+    def read_audio_info(self, track: bytes) -> dict[str, str | int | None]:
         try:
-            service = self._get_metadata_service()
-            metadata = service.get_track_metadata(self._load_decoded_stream(track))
+            audio_file_service = self._get_audio_file_service()
+            track_data = audio_file_service.get_full_data(self._load_decoded_stream(track))
+
+            metadata = track_data.metadata
+            info = track_data.info
 
             return {
+                # Audio metadata
                 'tmp_album': metadata.TALB,
                 'tmp_album_artist': metadata.TPE2,
                 'tmp_artists': metadata.TPE1,
@@ -56,10 +55,15 @@ class TrackServiceAdapter:
                 'tmp_total_disk': metadata.TPOS[1],
                 'tmp_total_track': metadata.TRCK[1],
                 'tmp_year': metadata.TDRC,
-                # 'duration': 0,  # NOTE: Valor por defecto de momento
-                # FIXME: NO devolver ni duración ni MIME
-                # 'mime_type': "NO MIMETYPE",   # NOTE: Valor por defecto de momento
                 'picture': base64_encode(metadata.APIC) if metadata.APIC else None,
+
+                # Audio info
+                'bitrate': info.bitrate,
+                'channels': self._get_channel_info(info.channels),
+                'codec': info.codec,
+                'duration': self._format_track_duration(info.duration),
+                'mime_type': info.mime_type,
+                'sample_rate': info.sample_rate,
             }
 
         except InvalidFileFormatError as corrupt_file:
@@ -102,8 +106,8 @@ class TrackServiceAdapter:
         }
 
         try:
-            service = self._get_metadata_service()
-            service.set_track_metadata(output_path, metadata)
+            audio_file_service = self._get_audio_file_service()
+            audio_file_service.set_track_metadata(output_path, metadata)
 
         except ReadingFileError as invalid_metadata:
             _logger.error(f"Failed to process file metadata: {invalid_metadata}")
@@ -127,19 +131,19 @@ class TrackServiceAdapter:
                 _("\nDamn! Something went wrong while processing metadata file.\nPlease, contact with your Admin.")
             )
 
-    def _get_file_type_service(self) -> FileMetadataService:
-        metadata_service = self.METADATA_SERVICES.get(self.file_type)
+    def _get_audio_file_type_service(self) -> AudioFileService:
+        audio_file_service = self.AUDIO_FILE_SERVICES.get(self.file_type)
 
-        if not metadata_service:
-            raise MetadataServiceError("Unsupported metadata file type")
+        if not audio_file_service:
+            raise AudioInfoServiceError("Unsupported metadata file type")
 
-        return metadata_service()
+        return audio_file_service()
 
-    def _get_metadata_service(self) -> FileMetadataService:
-        if not self._metadata_service:
-            self._metadata_service = self._get_file_type_service()
+    def _get_audio_file_service(self) -> AudioFileService:
+        if not self._audio_file_service:
+            self._audio_file_service = self._get_audio_file_type_service()
 
-        return self._metadata_service
+        return self._audio_file_service
 
     @staticmethod
     def _check_file_extension(extension: str) -> FileType:
@@ -148,6 +152,10 @@ class TrackServiceAdapter:
             raise InvalidFileFormatError(f"The file extension '{extension}' is not valid.")
 
         return FileType(extension)
+
+    @staticmethod
+    def _get_channel_info(value: int) -> str:
+        return "Mono" if value == 1 else "Stereo"
 
     @staticmethod
     def _load_decoded_stream(encoded_bytes_file: bytes) -> io.BytesIO:

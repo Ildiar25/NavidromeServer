@@ -10,7 +10,6 @@ from odoo.models import Model
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..adapters import FileServiceAdapter, TrackServiceAdapter
-from ..utils.custom_types import TrackVals
 from ..utils.exceptions import FilePersistenceError, MusicManagerError, InvalidPathError
 
 
@@ -25,13 +24,19 @@ class Track(Model, ProcessImageMixin):
     # Basic fields
     picture = Binary(string=_("Picture"), attachment=True)
     disk_no = Integer(string=_("Disk no"))
-    duration = Char(string=_("Duration (min)"), readonly=True, default="0:00")
-    mime_type = Char(string=_("MIME"), readonly=True, default="None MIME")
     name = Char(string=_("Title"))
     total_disk = Integer(string=_("Total disk no"))
     total_track = Integer(string=_("Total track no"))
     track_no = Integer(string=_("Track no"))
     year = Char(string=_("Year"))
+
+    # Readonly fields
+    bitrate = Integer(string=_("Kbps"), default=0, readonly=True)
+    channels = Char(string=_("Channels"), default="Stereo", readonly=True)
+    codec = Char(string=_("Codec"), default="Unknown", readonly=True)
+    duration = Char(string=_("Duration (min)"), default="0:00", readonly=True)
+    mime_type = Char(string=_("MIME"), default="Unknown", readonly=True)
+    sample_rate = Integer(string=_("Frequency (Hz)"), default=0, readonly=True)
 
     # Relational fields
     album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"), copy=False)
@@ -63,14 +68,13 @@ class Track(Model, ProcessImageMixin):
     owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
-    def create(self, list_vals: list[TrackVals]):
+    def create(self, list_vals):
         for vals in list_vals:
             self._process_picture_image(vals)
 
-        # noinspection PyNoneFunctionAssignment
         tracks = super().create(list_vals)
 
-        for track in tracks:  # type:ignore
+        for track in tracks:
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
@@ -78,12 +82,12 @@ class Track(Model, ProcessImageMixin):
 
         return tracks
 
-    def write(self, vals: TrackVals):
+    def write(self, vals):
         self._process_picture_image(vals)
 
         res = super().write(vals)
 
-        for track in self:  # type:ignore
+        for track in self:
             if track.is_deleted:
                 raise UserError(_("You cannot modify a deleted file."))
             # noinspection PyProtectedMember
@@ -96,8 +100,10 @@ class Track(Model, ProcessImageMixin):
         return res
 
     def unlink(self):
-        file_paths = [(track.file_path, track.is_deleted) for track in self]  # type:ignore
+        file_paths = [(track.file_path, track.is_deleted) for track in self]
         check_albums = self.mapped('album_id')
+
+        file_service = self._get_file_service_adapter()
 
         res = super().unlink()
 
@@ -113,7 +119,7 @@ class Track(Model, ProcessImageMixin):
 
                 if is_admin or still_used == 0:
                     try:
-                        FileServiceAdapter().delete_file(path)
+                        file_service.delete_file(path)
 
                     except InvalidPathError as invalid_path:
                         _logger.warning(f"File to delete not found, continuing: {invalid_path}")
@@ -152,8 +158,10 @@ class Track(Model, ProcessImageMixin):
 
     @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
     def _compute_file_path(self) -> None:
+        file_service = self._get_file_service_adapter()
+
         for track in self:
-            track.file_path = FileServiceAdapter().set_new_path(
+            track.file_path = file_service.set_new_path(
                 artist=track.album_artist_id.name or '',
                 album=track.album_id.name or '',
                 track=str(track.track_no) or '',
@@ -183,7 +191,9 @@ class Track(Model, ProcessImageMixin):
 
     def _search_is_deleted(self, operator, value):
         matching_ids = []
-        for track in self.search([('is_saved', operator, True)]):
+        saved_records = self.search([('is_saved', operator, True)])
+
+        for track in saved_records:
             deleted = not track.file_exists(track.old_path)
 
             if (value and deleted) or (not value and not deleted):
@@ -211,11 +221,14 @@ class Track(Model, ProcessImageMixin):
 
     @api.constrains('file_path')
     def _validate_file_path(self) -> None:
+
+        file_service = self._get_file_service_adapter()
+
         for track in self:
             if not (track.file_path and isinstance(track.file_path, str)):
                 continue
 
-            track.has_valid_path = FileServiceAdapter().is_valid(track.file_path)
+            track.has_valid_path = file_service.is_valid(track.file_path)
 
     @api.onchange('collection')
     def _display_album_artist_changes(self) -> None:
@@ -232,6 +245,8 @@ class Track(Model, ProcessImageMixin):
 
     def save_changes(self):
         track = self.ensure_one()
+
+        # noinspection PyProtectedMember
         results = track._perform_save_changes()
         final_message = []
 
@@ -265,7 +280,6 @@ class Track(Model, ProcessImageMixin):
         artists = self.env['music_manager.artist']
 
         if artist_name and artist_name.lower() != 'unknown':
-            # noinspection PyNoneFunctionAssignment
             artist = artists.search([('name', 'ilike', artist_name)])
 
             if artist:
@@ -279,11 +293,21 @@ class Track(Model, ProcessImageMixin):
 
         return False
 
+    def _get_file_service_adapter(self):
+        settings = self.env['music_manager.audio_settings'].search([], limit=1)
+
+        root = settings.root_dir if settings else '/music'
+        file_extension = settings.sound_format if settings else 'mp3'
+
+        return FileServiceAdapter(str_root_dir=root, file_extension=file_extension)
+
     def _perform_save_changes(self):
         failure_messages = []
         success_counter = 0
 
-        for track in self:  # type:ignore
+        file_service = self._get_file_service_adapter()
+
+        for track in self:
             if not isinstance(track.old_path, str):
                 failure_messages.append(
                     _("Track '%s' was skipped because it is not saved into your library.", track.name)
@@ -297,7 +321,7 @@ class Track(Model, ProcessImageMixin):
                 continue
 
             try:
-                FileServiceAdapter().update_file_path(track.old_path, track.file_path)
+                file_service.update_file_path(track.old_path, track.file_path)
                 success_counter += 1
 
             except InvalidPathError as invalid_path:
@@ -319,7 +343,7 @@ class Track(Model, ProcessImageMixin):
                 )
 
             if success_counter > 0:
-                self._update_metadata()  # type:ignore
+                self._update_metadata()
                 track.old_path = track.file_path
 
         return {

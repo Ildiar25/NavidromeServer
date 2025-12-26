@@ -23,7 +23,7 @@ class ImageServiceError(MusicManagerError):
     ...
 
 
-class MetadataServiceError(MusicManagerError):
+class AudioInfoServiceError(MusicManagerError):
     """General exception for metadata errors."""
     ...
 
@@ -69,13 +69,13 @@ class InvalidImageFormatError(ImageServiceError):
     ...
 
 
-# ---- Specific METADATA SERVICE exceptions ---- #
+# ---- Specific AUDIOINFO SERVICE exceptions ---- #
 
-class MetadataPersistenceError(MetadataServiceError):
+class MetadataPersistenceError(AudioInfoServiceError):
     """Raised when metadata cannot be saved."""
     ...
 
 
-class ReadingFileError(MetadataServiceError):
+class ReadingFileError(AudioInfoServiceError):
     """Raised when file is unreadable or has not any tag."""
     ...

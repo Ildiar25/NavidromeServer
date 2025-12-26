@@ -18,13 +18,15 @@ class TrackMetadata:
 
 @dataclass()
 class TrackInfo:
-    duration: int = 0                   # Duration (in seconds)
     bitrate: int = 0                    # Bitrate (in seconds)
-    sample_rate: int = 0                # Hertz frequency (Hz)
-    channels: int = 0                   # Mono (1) or stereo (2)
-    mode: str = "Unknown"               # Flow mode ('stereo', 'mono', 'joint stereo', ...)
+    channels: int = 0                   # Mono (1), stereo (2), ...
     codec: str = "Unknown"              # MPEG (mp3)
-    version: int = 0                    # Codec version
-    layer: int = 0                      # Codec layer (3 for mp3)
-    total_frames: int = 0               # Total file frames
-    constant_bitrate: bool = True       # True if CBR, False if VBR
+    duration: int = 0                   # Duration (in seconds)
+    mime_type: str = "Unknown"          # MIME type
+    sample_rate: int = 0                # Hertz frequency (Hz)
+
+
+@dataclass()
+class FullTrackData:
+    info: TrackInfo
+    metadata: TrackMetadata
