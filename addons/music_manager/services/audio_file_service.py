@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import io
 import logging
 from abc import ABC, abstractmethod
@@ -7,20 +6,20 @@ from typing import Any, Dict
 
 import mutagen.id3 as tag_type
 import mutagen.mp3 as exception
-from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
+from mutagen.mp3 import MP3
 
+from ..utils.track_data import FullTrackData, TrackInfo, TrackMetadata
 from ..utils.exceptions import InvalidFileFormatError, MetadataPersistenceError, MusicManagerError, ReadingFileError
-from ..utils.track_data import TrackMetadata
 
 
 _logger = logging.getLogger(__name__)
 
 
-class FileMetadataService(ABC):
+class AudioFileService(ABC):
 
     @abstractmethod
-    def get_track_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
+    def get_full_data(self, buffered_file: io.BytesIO) -> FullTrackData:
         ...
 
     @abstractmethod
@@ -28,7 +27,10 @@ class FileMetadataService(ABC):
         ...
 
 
-class MP3MetadataService(FileMetadataService):
+class MP3AudioFileService(AudioFileService):
+
+    MIME_TYPE = "audio/mpeg"
+
     ID3_TAG_MAPPING = {
         'TIT2': tag_type.TIT2,
         'TPE1': tag_type.TPE1,
@@ -43,35 +45,21 @@ class MP3MetadataService(FileMetadataService):
         'APIC': tag_type.APIC,
     }
 
-    def get_track_metadata(self, buffered_file: io.BytesIO) -> TrackMetadata:
-        tag_parsers = {
-            'APIC': self._parse_apic_image,
-            'TRCK': self._parse_numeric_pair,
-            'TPOS': self._parse_numeric_pair,
-            'TCMP': self._parse_is_compilation,
-        }
+    def get_full_data(self, buffered_file: io.BytesIO) -> FullTrackData:
 
         track = self._open_mp3_file(buffered_file)
+        metadata = self._extract_metadata(track)
 
-        if not track.tags:
-            return TrackMetadata()
+        info = TrackInfo(
+            bitrate=track.info.bitrate // 1000,
+            channels=track.info.channels,
+            codec="MP3",
+            duration=round(track.info.length),
+            mime_type=self.MIME_TYPE,
+            sample_rate=track.info.sample_rate,
+        )
 
-        metadata = {}
-
-        for key, value in track.tags.items():
-            base_key = key[:4]
-
-            if base_key not in TrackMetadata.__annotations__:
-                continue
-
-            parser = tag_parsers.get(base_key, self._parse_text)
-            parsed_value = parser(value)
-
-            if parsed_value:
-                metadata[base_key] = parsed_value
-
-        return TrackMetadata(**metadata)
-
+        return FullTrackData(info=info, metadata=metadata)
 
     def set_track_metadata(
             self, output_path: Path, new_metadata: Dict[str, str | int | None], preserve_unknown_tags: bool = False
@@ -100,6 +88,33 @@ class MP3MetadataService(FileMetadataService):
             writer(track, tag, value)
 
         self._save(track)
+
+    def _extract_metadata(self, track: MP3) -> TrackMetadata:
+        tag_parsers = {
+            'APIC': self._parse_apic_image,
+            'TRCK': self._parse_numeric_pair,
+            'TPOS': self._parse_numeric_pair,
+            'TCMP': self._parse_is_compilation,
+        }
+
+        if not track.tags:
+            return TrackMetadata()
+
+        metadata = {}
+
+        for key, value in track.tags.items():
+            base_key = key[:4]
+
+            if base_key not in TrackMetadata.__annotations__:
+                continue
+
+            parser = tag_parsers.get(base_key, self._parse_text)
+            parsed_value = parser(value)
+
+            if parsed_value:
+                metadata[base_key] = parsed_value
+
+        return TrackMetadata(**metadata)
 
     def _parse_numeric_pair(self, value: Any) -> tuple[int, int]:
         text: str = value.text[0]
