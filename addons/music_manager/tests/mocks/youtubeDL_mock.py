@@ -12,7 +12,7 @@ ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 class YouTubeDLMock(BaseMock):
     """
-    Simulates different YouTubeDL behaviours.
+    Simulates different YouTubeDL behaviors.
 
     Operations covered:
     -------------------
@@ -72,7 +72,7 @@ class YouTubeDLMock(BaseMock):
             return_value: Optional[Any] = None,
             error_name: Type[ExceptionType] | None = None,
             message: str | None = None,
-            **kwargs
+            **kwargs: Any
     ) -> MagicMock:
 
         youtube_dl_mock = cls.create_mock(YoutubeDL)

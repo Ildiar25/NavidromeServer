@@ -28,7 +28,7 @@ class TestMetadataServiceAdapter(TransactionCase):
         )
 
     def test_init_metadata_service(self) -> None:
-        self.assertIsNone(self.adapter._service, msg="Service must be None when instantiate the adapter.")
+        self.assertIsNone(self.adapter._metadata_service, msg="Service must be None when instantiate the adapter.")
 
     # =========================================================================================
     # Testing for 'read_metadata'

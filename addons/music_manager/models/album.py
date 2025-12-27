@@ -14,7 +14,6 @@ _logger = logging.getLogger(__name__)
 
 
 class Album(Model, ProcessImageMixin):
-
     _name = 'music_manager.album'
     _description = 'album_table'
     _order = 'is_favorite desc, name'

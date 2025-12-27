@@ -30,7 +30,6 @@ _logger = logging.getLogger(__name__)
 
 
 class TrackWizard(TransientModel, ProcessImageMixin):
-
     _name = 'music_manager.track_wizard'
     _description = 'track_wizard_table'
 
@@ -68,9 +67,9 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     # Computed fields
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
+    has_valid_path = Boolean(string=_("Valid path"), compute='_compute_has_valid_path', default=False)
 
     # Technical fields
-    has_valid_path = Boolean(string=_("Valid path"), default=False)
     state = Selection(
         selection=[
             ('start', _("Start")),
@@ -86,6 +85,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     @api.depends('tmp_name', 'possible_album_artist_id', 'possible_album_id', 'tmp_track_no')
     def _compute_file_path(self) -> None:
         file_service = self._get_file_service_adapter()
+
         for wizard in self:
             wizard.file_path = file_service.set_new_path(
                 artist=wizard.possible_album_artist_id.name or '',
@@ -93,7 +93,16 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 track=str(wizard.tmp_track_no) or '',
                 title=wizard.tmp_name or '',
             )
-            _logger.info(f"CALCULATED PATH: {wizard.file_path}")
+
+    @api.depends('file_path')
+    def _compute_has_valid_path(self) -> None:
+        file_service = self._get_file_service_adapter()
+
+        for wizard in self:
+            if not (wizard.file_path and isinstance(wizard.file_path, str)):
+                continue
+
+            wizard.has_valid_path = file_service.is_valid(wizard.file_path)
 
     @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
@@ -110,16 +119,6 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 raise ValidationError(
                     _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
                 )
-
-    @api.onchange('file_path')
-    def _validate_file_path(self) -> None:
-        file_service = self._get_file_service_adapter()
-
-        for wizard in self:
-            if not (wizard.file_path and isinstance(wizard.file_path, str)):
-                continue
-
-            wizard.has_valid_path = file_service.is_valid(wizard.file_path)
 
     @api.onchange('file')
     def _validate_file_type(self) -> CustomWarningMessage | None:
@@ -142,71 +141,6 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 }
 
         return None
-
-    @api.onchange('tmp_album')
-    def _match_album_id(self) -> None:
-        for wizard in self:
-            wizard.possible_album_id = False
-
-            if not wizard.tmp_album:
-                continue
-
-            found = self.env['music_manager.album'].search([('name', 'ilike', wizard.tmp_album)], limit=1)
-            wizard.possible_album_id = found.id
-
-    @api.onchange('tmp_album_artist')
-    def _match_album_artist_id(self) -> None:
-        for wizard in self:
-            wizard.possible_album_artist_id = False
-
-            if not wizard.tmp_album_artist:
-                continue
-
-            found = self.env['music_manager.artist'].search([('name', 'ilike', wizard.tmp_album_artist)], limit=1)
-            wizard.possible_album_artist_id = found.id
-
-    @api.onchange('tmp_artists')
-    def _match_artist_ids(self) -> None:
-        for wizard in self:
-            wizard.possible_artist_ids = [Command.clear()]
-
-            if not wizard.tmp_artists:
-                continue
-
-            names = [name.strip() for name in wizard.tmp_artists.split(",")]
-            artist_ids = []
-
-            for name in names:
-                found = self.env['music_manager.artist'].search([('name', 'ilike', name)], limit=1)
-
-                if not found:
-                    continue
-
-                artist_ids.append(found.id)
-
-            wizard.possible_artist_ids = Command.set(artist_ids)
-
-    @api.onchange('tmp_genre')
-    def _match_genre_id(self) -> None:
-        for wizard in self:
-            wizard.possible_genre_id = False
-
-            if not wizard.tmp_genre:
-                continue
-
-            found = self.env['music_manager.genre'].search([('name', 'ilike', wizard.tmp_genre)], limit=1)
-            wizard.possible_genre_id = found.id
-
-    @api.onchange('tmp_original_artist')
-    def _match_original_artist_id(self) -> None:
-        for wizard in self:
-            wizard.possible_original_artist_id = False
-
-            if not wizard.tmp_original_artist:
-                continue
-
-            found = self.env['music_manager.artist'].search([('name', 'ilike', wizard.tmp_original_artist)], limit=1)
-            wizard.possible_original_artist_id = found.id
 
     @api.onchange('url')
     def _validate_url_path(self) -> CustomWarningMessage | None:
@@ -270,6 +204,13 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             'res_id': self.id,
             'target': 'new',
         }
+
+    def match_all_metadata(self) -> None:
+        self._match_album_id()
+        self._match_album_artist_id()
+        self._match_artist_ids()
+        self._match_genre_id()
+        self._match_original_artist_id()
 
     def save_file(self):
         file_service = self._get_file_service_adapter()
@@ -385,7 +326,6 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
         return DownloadServiceAdapter(video_url=video_url, adapter_type=adapter_type, config=config)
 
-
     def _get_file_service_adapter(self):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
 
@@ -401,6 +341,69 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
         return TrackServiceAdapter(file_type=file_extension)
 
+    def _match_album_id(self) -> None:
+        for wizard in self:
+            wizard.possible_album_id = False
+            _logger.info(f"TMP_ALBUM: {wizard.tmp_album}")
+
+            if not wizard.tmp_album:
+                _logger.info(f"OPS: Not tmp album: {wizard.tmp_album}")
+                continue
+
+            found = self.env['music_manager.album'].search([('name', 'ilike', wizard.tmp_album)], limit=1)
+            _logger.info(f"ALBUM FOUNDED: {found.name} | ID: {found.id}")
+            wizard.possible_album_id = found.id
+
+    def _match_album_artist_id(self) -> None:
+        for wizard in self:
+            wizard.possible_album_artist_id = False
+
+            if not wizard.tmp_album_artist:
+                continue
+
+            found = self.env['music_manager.artist'].search([('name', 'ilike', wizard.tmp_album_artist)], limit=1)
+            wizard.possible_album_artist_id = found.id
+
+    def _match_artist_ids(self) -> None:
+        for wizard in self:
+            wizard.possible_artist_ids = [Command.clear()]
+
+            if not wizard.tmp_artists:
+                continue
+
+            names = [name.strip() for name in wizard.tmp_artists.split(",")]
+            artist_ids = []
+
+            for name in names:
+                found = self.env['music_manager.artist'].search([('name', 'ilike', name)], limit=1)
+
+                if not found:
+                    continue
+
+                artist_ids.append(found.id)
+
+            wizard.possible_artist_ids = [Command.set(artist_ids)]
+
+    def _match_genre_id(self) -> None:
+        for wizard in self:
+            wizard.possible_genre_id = False
+
+            if not wizard.tmp_genre:
+                continue
+
+            found = self.env['music_manager.genre'].search([('name', 'ilike', wizard.tmp_genre)], limit=1)
+            wizard.possible_genre_id = found.id
+
+    def _match_original_artist_id(self) -> None:
+        for wizard in self:
+            wizard.possible_original_artist_id = False
+
+            if not wizard.tmp_original_artist:
+                continue
+
+            found = self.env['music_manager.artist'].search([('name', 'ilike', wizard.tmp_original_artist)], limit=1)
+            wizard.possible_original_artist_id = found.id
+
     def _update_fields(self) -> None:
         track_service = self._get_track_service_adapter()
 
@@ -410,3 +413,5 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             for attr_name, value in audio_info.items():
                 if hasattr(wizard, attr_name):
                     setattr(wizard, attr_name, value)
+
+            wizard.match_all_metadata()

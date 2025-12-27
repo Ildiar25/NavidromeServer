@@ -2,8 +2,8 @@ import io
 import hashlib
 from contextlib import contextmanager, nullcontext
 from pathlib import Path
-from typing import Any, ContextManager
-from unittest.mock import MagicMock, mock_open, patch
+from typing import Dict
+from unittest.mock import mock_open, patch
 
 from odoo.tests.common import TransactionCase
 
@@ -70,7 +70,12 @@ class TestPyTubeAdapter(TransactionCase):
 
         self.given_data = b'Fake mp3'
 
-        self.pytube_adapter = PyTubeAdapter(self.fake_url)
+        self.config = {
+            'format': "mp3",
+            'quality': "192",
+        }
+
+        self.pytube_adapter = PyTubeAdapter(self.fake_url, self.config)
 
     def tearDown(self) -> None:
         self.buffer.close()
@@ -95,6 +100,16 @@ class TestPyTubeAdapter(TransactionCase):
             msg=f"Path must be a 'Path' instance, got {type(self.pytube_adapter.tmp_path)} instead."
         )
 
+    def test_init_with_config_instance(self) -> None:
+        self.assertIsNotNone(self.pytube_adapter._options, msg="Options is mandatory before instantiate the adapter.")
+        self.assertIsInstance(
+            self.pytube_adapter._options,
+            Dict,
+            msg=f"Options must be a 'Dict' instance, got {type(self.pytube_adapter.options)} instead."
+        )
+        self.assertTrue('format' in self.pytube_adapter.options.keys(), msg="Options must have 'format' key.")
+        self.assertTrue('quality' in self.pytube_adapter.options.keys(), msg="Options must have 'quality' key.")
+
     def test_init_with_given_url(self) -> None:
         self.assertIsInstance(self.pytube_adapter.url, str, msg=f"URL must be returned as 'str' instance.")
         self.assertEqual(self.pytube_adapter.url, self.fake_url, msg=f"URL must be {self.fake_url}")
@@ -103,12 +118,26 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(self.pytube_adapter.tmp_path, str, msg=f"Path must be returned as 'str' instance.")
         self.assertEqual(self.pytube_adapter.tmp_path, str(self.tmp_path), msg=f"Path must be {self.tmp_path}.")
 
+    def test_init_with_given_config(self) -> None:
+        self.assertIsInstance(self.pytube_adapter.options['format'], str, msg="Format must be a 'str' instance.")
+        self.assertEqual(
+            self.pytube_adapter.options['format'],
+            self.config['format'],
+            msg=f"Format must be {self.config['format']}"
+        )
+        self.assertIsInstance(self.pytube_adapter.options['quality'], str, msg="Quality must be a 'str' instance.")
+        self.assertEqual(
+            self.pytube_adapter.options['quality'],
+            self.config['quality'],
+            msg=f"Format must be {self.config['quality']}"
+        )
+
     # =========================================================================================
     # Testing for 'stream_to_file'
     # =========================================================================================
 
     def test_pytube_stream_to_file_success(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_success()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_success()) as mock:
             self.pytube_adapter.stream_to_file(self.fake_path)
 
             mock['download'].assert_called_once_with(self.tmp_path, self.filename)
@@ -116,7 +145,7 @@ class TestPyTubeAdapter(TransactionCase):
             mock['clean'].assert_called_once_with(self.fake_download_path)
 
     def test_pytube_stream_to_file_with_regex_match_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_regex_match_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_regex_match_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -127,7 +156,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_pytube_stream_to_file_with_video_private_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_video_private_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_video_private_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -138,7 +167,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_pytube_stream_to_file_with_video_region_blocked_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_video_region_blocked_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_video_region_blocked_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -149,7 +178,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_pytube_stream_to_file_with_video_unavailable_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_video_unavailable_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_video_unavailable_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -160,7 +189,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_pytube_stream_to_file_with_http_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_http_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_http_error()) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -171,7 +200,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, MusicManagerError)
 
     def test_pytube_stream_to_file_with_os_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_os_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_os_error()) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -182,7 +211,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, MusicManagerError)
 
     def test_pytube_stream_to_file_with_ffmpeg_process_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_subprocess_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_subprocess_error()) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -193,7 +222,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, VideoProcessingError)
 
     def test_pytube_stream_to_file_with_file_not_found_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_file_not_found_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_file_not_found_error()) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -204,7 +233,7 @@ class TestPyTubeAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, VideoProcessingError)
 
     def test_pytube_stream_to_file_with_permission_error(self) -> None:
-        with self.create_context(PytubeAdapterMock.stream_to_with_permission_error()) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_with_permission_error()) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_file(self.fake_path)
 
@@ -222,7 +251,7 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b'Fake mp3'
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             self.pytube_adapter.stream_to_buffer(self.buffer)
 
             mock['download'].assert_called_once_with(self.tmp_path, self.filename)
@@ -244,7 +273,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b''
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_regex_match_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_regex_match_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -264,7 +295,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b''
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_video_private_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_video_private_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -284,7 +317,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b''
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_video_region_blocked_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_video_region_blocked_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -304,7 +339,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b''
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_video_unavailable_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_video_unavailable_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -324,7 +361,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b''
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_subprocess_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_subprocess_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -344,7 +383,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b'Fake mp3'
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_file_not_found_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_file_not_found_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -364,7 +405,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b'Fake mp3'
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_permission_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_permission_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -384,7 +427,9 @@ class TestPyTubeAdapter(TransactionCase):
         expected_data = b'Fake mp3'
         open_mock = mock_open(read_data=self.given_data)
 
-        with self.create_context(PytubeAdapterMock.stream_to_with_unknown_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=PytubeAdapterMock.stream_to_with_unknown_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -405,7 +450,7 @@ class TestPyTubeAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         open_mock.side_effect = FileNotFoundError
 
-        with self.create_context(PytubeAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -426,7 +471,7 @@ class TestPyTubeAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         open_mock.side_effect = PermissionError
 
-        with self.create_context(PytubeAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -447,7 +492,7 @@ class TestPyTubeAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         open_mock.side_effect = Exception
 
-        with self.create_context(PytubeAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=PytubeAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.pytube_adapter.stream_to_buffer(self.buffer)
 
@@ -465,7 +510,7 @@ class TestPyTubeAdapter(TransactionCase):
 
 
     @contextmanager
-    def create_context(self, mock_factory: ContextManager[Any], open_mock: MagicMock | None = None):
+    def create_context(self, mock_factory, open_mock = None):
         with (
             mock_factory,
             patch.object(
@@ -479,7 +524,6 @@ class TestPyTubeAdapter(TransactionCase):
             ) as mock_subprocess,
             patch('builtins.open', open_mock) if open_mock else nullcontext()
         ):
-
             yield {
                 'clean': mock_clean,
                 'download': mock_download,
@@ -501,46 +545,12 @@ class TestYTDLPAdapter(TransactionCase):
 
         self.given_data = b'Fake mp3'
 
-        self.options_to_file = {
-            'format': 'bestaudio/best',
-            'outtmpl': str(self.fake_download_path.with_suffix('.%(ext)s')),
-            'quiet': False,
-            'keepvideo': False,
-            'noplaylist': True,
-            'no_warnings': True,
-            'prefer_ffmpeg': True,
-            'postprocessors': [
-                {
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192'
-                },
-                {
-                    'key': 'FFmpegMetadata'
-                },
-            ]
-        }
-        self.options_to_buffer = {
-            'format': 'bestaudio/best',
-            'outtmpl': str(self.tmp_path / f'{self.filename}.%(ext)s'),
-            'quiet': False,
-            'keepvideo': False,
-            'noplaylist': True,
-            'no_warnings': True,
-            'prefer_ffmpeg': True,
-            'postprocessors': [
-                {
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192'
-                },
-                {
-                    'key': 'FFmpegMetadata'
-                },
-            ]
+        self.config = {
+            'format': "mp3",
+            'quality': "192",
         }
 
-        self.ytdlp_adapter = YTDLPAdapter(self.fake_url)
+        self.ytdlp_adapter = YTDLPAdapter(self.fake_url, self.config)
 
     def tearDown(self) -> None:
         self.buffer.close()
@@ -549,41 +559,28 @@ class TestYTDLPAdapter(TransactionCase):
     # Testing for '__init__'
     # =========================================================================================
 
-    def test_class_options_attribute(self) -> None:
-        self.assertIsNotNone(self.ytdlp_adapter.DEFAULT_OPTIONS, msg="Default Options is a mandatory field.")
-        self.assertIsInstance(
-            self.ytdlp_adapter.DEFAULT_OPTIONS,
-            dict,
-            msg=f"Default options must be 'dict' instance, got '{type(self.ytdlp_adapter.DEFAULT_OPTIONS)}' instead."
-        )
-
-    def test_init_default_options(self) -> None:
-        self.assertFalse(
-            'outtmpl' in self.ytdlp_adapter.DEFAULT_OPTIONS, msg="Default options must not have 'outtmpl' key."
-        )
-
     def test_init_url_instance(self) -> None:
         self.assertIsNotNone(self.ytdlp_adapter._url, msg="URL is mandatory before instantiate the adapter.")
         self.assertIsInstance(
             self.ytdlp_adapter._url,
             str,
-            msg=f"URL path must be 'str' instance, got '{type(self.ytdlp_adapter._url)}' instead."
+            msg=f"URL path must be a 'str' instance, got '{type(self.ytdlp_adapter._url)}' instead."
         )
 
     def test_init_options_instance(self) -> None:
         self.assertIsNotNone(self.ytdlp_adapter._options, msg="Options is mandatory before instantiate the adapter.")
         self.assertIsInstance(
             self.ytdlp_adapter._options,
-            dict,
-            msg=f"Options must be 'dict' instance, got '{type(self.ytdlp_adapter._options)}' instead."
+            Dict,
+            msg=f"Options must be a 'Dict' instance, got '{type(self.ytdlp_adapter._options)}' instead."
         )
 
-    def test_init_options_equal_to_default_options(self) -> None:
-        self.assertEqual(
-            self.ytdlp_adapter._options,
-            self.ytdlp_adapter.DEFAULT_OPTIONS,
-            msg=(f"Without a given parameter, options must be equal to "
-                 f"default options, got '{self.ytdlp_adapter._options}' instead.")
+    def test_init_tmp_path_instance(self) -> None:
+        self.assertIsNotNone(self.ytdlp_adapter._tmp_path, msg="Temp Path is mandatory before instantiate the adapter.")
+        self.assertIsInstance(
+            self.ytdlp_adapter._tmp_path,
+            Path,
+            msg=f"Tmp Path must be a 'Path' instance, got '{type(self.ytdlp_adapter._options)}' instead."
         )
 
     def test_init_with_given_url(self) -> None:
@@ -594,12 +591,26 @@ class TestYTDLPAdapter(TransactionCase):
         self.assertIsInstance(self.ytdlp_adapter.tmp_path, str, msg="Path must be returned as 'str' instance.")
         self.assertEqual(self.ytdlp_adapter.tmp_path, str(self.tmp_path), msg=f"Path must be '{self.tmp_path}'.")
 
-    def test_init_with_initial_options(self) -> None:
-        self.assertIsInstance(self.ytdlp_adapter.options, dict, msg="Options must be returned as 'dict' instance.")
+    def test_init_with_given_config(self) -> None:
+        self.assertIsInstance(
+            self.ytdlp_adapter.options['postprocessors'][0]['preferredcodec'],
+            str,
+            msg="Format must be a 'str' instance."
+        )
         self.assertEqual(
-            self.ytdlp_adapter.options,
-            self.ytdlp_adapter.DEFAULT_OPTIONS,
-            msg=f"Options must be equal to {self.ytdlp_adapter.DEFAULT_OPTIONS}"
+            self.ytdlp_adapter.options['postprocessors'][0]['preferredcodec'],
+            self.config['format'],
+            msg=f"Format must be {self.config['format']}"
+        )
+        self.assertIsInstance(
+            self.ytdlp_adapter.options['postprocessors'][0]['preferredquality'],
+            str,
+            msg="Quality must be a 'str' instance."
+        )
+        self.assertEqual(
+            self.ytdlp_adapter.options['postprocessors'][0]['preferredquality'],
+            self.config['quality'],
+            msg=f"Format must be {self.config['quality']}"
         )
 
     # =========================================================================================
@@ -607,7 +618,7 @@ class TestYTDLPAdapter(TransactionCase):
     # =========================================================================================
 
     def test_ytdlp_stream_to_file_success(self) -> None:
-        with self.create_context(YTDLPAdapterMock.stream_to_success()) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_success()) as mock:
             self.ytdlp_adapter.stream_to_file(self.fake_download_path)
 
             mock['options'].assert_called_once_with(self.fake_download_path)
@@ -615,7 +626,7 @@ class TestYTDLPAdapter(TransactionCase):
             mock['clean'].assert_not_called()
 
     def test_ytdlp_stream_to_file_with_regex_not_found_error(self) -> None:
-        with self.create_context(YTDLPAdapterMock.stream_to_with_regex_not_found_error()) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_with_regex_not_found_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_file(self.fake_download_path)
 
@@ -625,7 +636,7 @@ class TestYTDLPAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_ytdlp_stream_to_file_with_max_downloads_reached_error(self) -> None:
-        with self.create_context(YTDLPAdapterMock.stream_to_with_max_downloads_reached_error()) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_with_max_downloads_reached_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_file(self.fake_download_path)
 
@@ -635,7 +646,7 @@ class TestYTDLPAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_ytdlp_stream_to_file_with_unavailable_video_error(self) -> None:
-        with self.create_context(YTDLPAdapterMock.stream_to_with_unavailable_video_error()) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_with_unavailable_video_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_file(self.fake_download_path)
 
@@ -645,7 +656,7 @@ class TestYTDLPAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_ytdlp_stream_to_file_with_download_error(self) -> None:
-        with self.create_context(YTDLPAdapterMock.stream_to_with_download_error()) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_with_download_error()) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_file(self.fake_download_path)
 
@@ -655,7 +666,7 @@ class TestYTDLPAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, ClientPlatformError)
 
     def test_ytdlp_stream_to_file_with_youtubedl_error(self) -> None:
-        with self.create_context(YTDLPAdapterMock.stream_to_with_youtube_dl_error()) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_with_youtube_dl_error()) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.ytdlp_adapter.stream_to_file(self.fake_download_path)
 
@@ -665,7 +676,7 @@ class TestYTDLPAdapter(TransactionCase):
         self.assertIsInstance(caught_error.exception, VideoProcessingError)
 
     def test_ytdlp_stream_to_file_with_unkown_error(self) -> None:
-        with self.create_context(YTDLPAdapterMock.download_stream_to_with_unknown_error()) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.download_stream_to_with_unknown_error()) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.ytdlp_adapter.stream_to_file(self.fake_download_path)
 
@@ -683,7 +694,7 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
             mock['options'].assert_called_once_with(download_filename)
@@ -702,7 +713,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_regex_not_found_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_regex_not_found_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -723,7 +736,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_max_downloads_reached_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_max_downloads_reached_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -744,7 +759,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_unavailable_video_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_unavailable_video_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -765,7 +782,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_download_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_download_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(ClientPlatformError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -786,7 +805,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_youtube_dl_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_youtube_dl_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -807,7 +828,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.download_stream_to_with_unknown_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.download_stream_to_with_unknown_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -828,7 +851,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_file_not_found_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_file_not_found_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -849,7 +874,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_permission_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_permission_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -870,7 +897,9 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock = mock_open(read_data=self.given_data)
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_with_permission_error(), open_mock) as mock:
+        with self.create_context(
+                mock_factory=YTDLPAdapterMock.stream_to_with_permission_error(), open_mock=open_mock
+        ) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -892,7 +921,7 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock.side_effect = FileNotFoundError
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -914,7 +943,7 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock.side_effect = PermissionError
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             with self.assertRaises(VideoProcessingError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -936,7 +965,7 @@ class TestYTDLPAdapter(TransactionCase):
         open_mock.side_effect = Exception("SIMULATING ERROR || Exception ||")
         download_filename = self.tmp_path / self.filename
 
-        with self.create_context(YTDLPAdapterMock.stream_to_success(), open_mock) as mock:
+        with self.create_context(mock_factory=YTDLPAdapterMock.stream_to_success(), open_mock=open_mock) as mock:
             with self.assertRaises(MusicManagerError) as caught_error:
                 self.ytdlp_adapter.stream_to_buffer(self.buffer)
 
@@ -953,7 +982,7 @@ class TestYTDLPAdapter(TransactionCase):
         )
 
     @contextmanager
-    def create_context(self, mock_factory: ContextManager[Any], open_mock: MagicMock | None = None):
+    def create_context(self, mock_factory, open_mock = None):
         with (
             mock_factory as mock_result,
             patch.object(
@@ -964,7 +993,6 @@ class TestYTDLPAdapter(TransactionCase):
             ) as mock_clean,
             patch('builtins.open', open_mock) if open_mock else nullcontext()
         ):
-
             yield {
                 'youtube': mock_result['youtube'],
                 'unlink': mock_result['unlink'],

@@ -17,7 +17,7 @@ ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 class DownloadMock(BaseMock):
     """
-    Simulates different behaviours when downloading files.
+    Simulates different behaviors when downloading files.
 
     Operations covered:
     -------------------
@@ -50,7 +50,7 @@ class DownloadMock(BaseMock):
             return_value: Optional[Any] = None,
             error_name: Type[ExceptionType] | None = None,
             message: str | None = None,
-            **kwargs
+            **kwargs: Any
     ) -> MagicMock:
 
         stream_protocol_mock = cls.create_mock(StreamProtocol)
@@ -67,11 +67,11 @@ class DownloadMock(BaseMock):
 
 class PytubeAdapterMock(BaseMock):
     """
-    Simulates different PyTube behaviours.
+    Simulates different PyTube behaviors.
 
     Operations covered:
     -------------------
-    - stream_to (default class behaviour)
+    - stream_to (default class behavior)
 
     For each operation, mocks are provided for:
     -------------------------------------------
@@ -243,11 +243,11 @@ class PytubeAdapterMock(BaseMock):
 
 class YTDLPAdapterMock(BaseMock):
     """
-    Simulates different YTDLP behaviours.
+    Simulates different YTDLP behaviors.
 
     Operations covered:
     -------------------
-    - stream_to (default class behaviour)
+    - stream_to (default class behavior)
 
     For each operation, mocks are provided for:
     -------------------------------------------

@@ -6,7 +6,7 @@ from .base_mock_helper import BaseMock
 
 class PathMock(BaseMock):
     """
-    Simulates different Path behaviours ONLY in DOWNLOAD SERVICE.
+    Simulates different Path behaviors ONLY in DOWNLOAD SERVICE.
 
     Operations covered:
     -------------------

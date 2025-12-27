@@ -166,8 +166,10 @@ class MP3AudioFileService(AudioFileService):
             return MP3(track_file, ID3=ID3)
 
         except tag_type.ID3NoHeaderError as no_tags:
-            _logger.warning(f"No tags founded in this file: {no_tags}")
-            raise ReadingFileError(no_tags)
+            _logger.warning(f"No tags founded in this file: {no_tags}. Adding new tags...")
+            mp3_audio = MP3(track_file)
+            mp3_audio.add_tags()
+            return mp3_audio
 
         except exception.HeaderNotFoundError as corrupt_file:
             _logger.error(f"There was a problem with the file: {corrupt_file}")
@@ -195,6 +197,8 @@ class MP3AudioFileService(AudioFileService):
         track.tags.add(
             tag(
                 encoding=3,
+
+                # INFO: Actualmene solo se admite PNG pero si en el futuro se quiere cambiar el formato se debe actualizar
                 mime='image/png',
                 type=3,
                 data=value
