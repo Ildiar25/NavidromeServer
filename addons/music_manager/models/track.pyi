@@ -153,10 +153,6 @@ class Track:
         :return: None
         """
 
-    def _update_metadata(self: Iterable[Self]) -> None:
-        """Updates track metadata according to field values.
-        :return: None
-        """
 
     def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.

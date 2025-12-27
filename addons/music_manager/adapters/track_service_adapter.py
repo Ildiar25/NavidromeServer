@@ -58,12 +58,12 @@ class TrackServiceAdapter:
                 'picture': base64_encode(metadata.APIC) if metadata.APIC else None,
 
                 # Audio info
-                'bitrate': info.bitrate,
+                'bitrate': self._format_bitrate(info.bitrate),
                 'channels': self._get_channel_info(info.channels),
                 'codec': info.codec,
                 'duration': self._format_track_duration(info.duration),
                 'mime_type': info.mime_type,
-                'sample_rate': info.sample_rate,
+                'sample_rate': self._format_sample_rate(info.sample_rate),
             }
 
         except InvalidFileFormatError as corrupt_file:
@@ -160,6 +160,14 @@ class TrackServiceAdapter:
     @staticmethod
     def _load_decoded_stream(encoded_bytes_file: bytes) -> io.BytesIO:
         return io.BytesIO(base64_decode(encoded_bytes_file))
+
+    @staticmethod
+    def _format_bitrate(value: int) -> str:
+        return f"{value} kbps"
+
+    @staticmethod
+    def _format_sample_rate(value: int) -> str:
+        return f"{value} kHz"
 
     @staticmethod
     def _format_track_duration(duration: int):

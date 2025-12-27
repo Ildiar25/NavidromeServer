@@ -31,13 +31,13 @@
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
                     <field name="duration" string="Duration"/>
-                    <field name="file_path" string="Path" optional="hide"/>
                     <field name="has_valid_path" column_invisible="True"/>
                     <field name="is_saved" column_invisible="True"/>
                     <field name="is_deleted" column_invisible="True"/>
                     <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="file_path" string="Path" optional="hide"/>
                 </tree>
             </field>
         </record>
@@ -47,68 +47,72 @@
             <field name="name">music_manager.track.view.form</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <form string="Track" disable_autofocus="True">
-<!--                    <field name="state" string="" widget="statusbar"/>-->
+                <form string="Track" disable_autofocus="True" create="False">
                     <field name="is_deleted" invisible="True"/>
                     <sheet>
-                        <div class="d-flex flex-column justify-content-between">
-                            <div>
-                                <section>
-                                    <header>
-                                        <h1>🎯 Edit song metadata</h1>
-                                    </header>
-                                    <separator/>
-                                    <div>
-                                        <div class="d-flex flex-row justify-content-start">
-                                            <div class="mx-3">
-                                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
-                                            </div>
-                                            <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                            <div class="d-flex flex-row justify-content-between w-100">
-                                                <div class="flex-grow-1 mx-3">
-                                                    <group>
-                                                        <field name="name" string="Title"/>
-                                                        <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
-                                                        <field name="album_id" string="Album"/>
-                                                        <field name="genre_id" string="Genre"/>
-                                                        <field name="collection" string="Part of a collection"/>
-                                                        <field name="file_path" string="Path"/>
-                                                        <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
-                                                        <field name="has_valid_path" invisible="True"/>
-                                                    </group>
-                                                </div>
-                                                <div class="flex-grow-1 mx-3">
-                                                    <group>
-                                                        <field name="album_artist_id" string="Album artist" edit="collection"/>
-                                                        <field name="original_artist_id" string="Original artist"/>
-                                                        <field name="year" string="Year"/>
-
-                                                    </group>
-                                                    <div class="d-flex flex-row">
-                                                        <group>
-                                                            <field name="track_no" string="Track"/>
-                                                            <field name="disk_no" string="Disk"/>
-                                                        </group>
-                                                        <group>
-                                                            <field name="total_track" string="Total track"/>
-                                                            <field name="total_disk" string="Total disk"/>
-                                                        </group>
-                                                    </div>
-                                                    <group>
-                                                        <field name="mime_type" string="MIME"/>
-                                                    </group>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <separator/>
-                                        <div class="d-flex flex-row justify-content-center">
-                                            <h3 invisible="not is_deleted">😱 MY GOSH! It is impossible to find this song. Add it again!</h3>
-                                            <button name="save_changes" string="Update" class="btn-outline-success w-50" type="object" invisible="is_deleted"/>
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
+                        <header>
+                            <h1> 🎯 Editing track metadata</h1>
+                        </header>
+                        <separator/>
+                        <group class="flex-row justify-content-start">
+                            <group style="border-right: 1px solid #ccc; height: auto; width: 250px">
+                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
+                            </group>
+                            <group class="flex-grow-1">
+                                <group>
+                                    <field name="name" string="Title"/>
+                                    <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
+                                    <field name="album_id" string="Album"/>
+                                    <field name="genre_id" string="Genre"/>
+                                    <field name="collection" string="Part of a collection"/>
+                                    <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                    <field name="has_valid_path" invisible="True"/>
+                                </group>
+                                <group>
+                                    <group colspan="2">
+                                        <field name="album_artist_id" string="Album artist" edit="collection"/>
+                                        <field name="original_artist_id" string="Original artist"/>
+                                        <field name="year" string="Year"/>
+                                    </group>
+                                    <group colspan="2">
+                                        <group>
+                                            <field name="track_no" string="Track"/>
+                                            <field name="disk_no" string="Disk"/>
+                                        </group>
+                                        <group>
+                                            <field name="total_track" string="Total track"/>
+                                            <field name="total_disk" string="Total disk"/>
+                                        </group>
+                                    </group>
+                                </group>
+                            </group>
+                        </group>
+                        <separator/>
+                        <div class="d-flex flex-row justify-content-center">
+                            <h3 invisible="not is_deleted">😱 MY GOSH! It is impossible to find this song. Add it again!</h3>
+                            <button name="save_changes" string="Update" class="btn-outline-success w-50" type="object" invisible="is_deleted"/>
                         </div>
+                        <notebook>
+                            <page string="Techincal info">
+                                <group string="Summary">
+                                    <group>
+                                        <field name="duration" string="Duration (min)"/>
+                                        <field name="bitrate" string="Bit rate"/>
+                                        <field name="sample_rate" string="Sample rate"/>
+                                        <field name="channels" string="Channel"/>
+                                    </group>
+                                    <group>
+                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="codec" string="Codec"/>
+                                        <field name="mime_type" string="MIME"/>
+                                    </group>
+                                </group>
+                                <group string="Location">
+                                    <field name="file_path" string="Path"/>
+                                </group>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>

@@ -52,12 +52,12 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     url = Char(string=_("Youtube URL"))
 
     # Readonly fields
-    bitrate = Integer(string=_("Kbps"), default=0, readonly=True)
+    bitrate = Char(string=_("Bit rate"), default="Unknown", readonly=True)
     channels = Char(string=_("Channels"), default="Stereo", readonly=True)
     codec = Char(string=_("Codec"), default="Unknown", readonly=True)
     duration = Char(string=_("Duration (min)"), default="0:00", readonly=True)
     mime_type = Char(string=_("MIME"), default="Unknown", readonly=True)
-    sample_rate = Integer(string=_("Frequency (Hz)"), default=0, readonly=True)
+    sample_rate = Char(string=_("Sample rate"), default="Unknown", readonly=True)
 
     # Relational fields
     possible_album_id = Many2one(comodel_name='music_manager.album', string="Matched album")
@@ -67,7 +67,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     possible_original_artist_id = Many2one(comodel_name='music_manager.artist', string="Matched original artist")
 
     # Computed fields
-    file_path = Char(string=_("File path"), compute='_compute_file_path')
+    file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
 
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False)
@@ -86,7 +86,6 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     @api.depends('tmp_name', 'possible_album_artist_id', 'possible_album_id', 'tmp_track_no')
     def _compute_file_path(self) -> None:
         file_service = self._get_file_service_adapter()
-
         for wizard in self:
             wizard.file_path = file_service.set_new_path(
                 artist=wizard.possible_album_artist_id.name or '',
@@ -94,6 +93,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 track=str(wizard.tmp_track_no) or '',
                 title=wizard.tmp_name or '',
             )
+            _logger.info(f"CALCULATED PATH: {wizard.file_path}")
 
     @api.constrains('file', 'url', 'file_path')
     def _check_fields(self) -> None:
@@ -394,10 +394,18 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
         return FileServiceAdapter(str_root_dir=root, file_extension=file_extension)
 
-    def _update_fields(self) -> None:
-        for wizard in self:  # type:ignore
+    def _get_track_service_adapter(self):
+        settings = self.env['music_manager.audio_settings'].search([], limit=1)
 
-            audio_info = TrackServiceAdapter().read_audio_info(wizard.file)
+        file_extension = settings.sound_format if settings else 'mp3'
+
+        return TrackServiceAdapter(file_type=file_extension)
+
+    def _update_fields(self) -> None:
+        track_service = self._get_track_service_adapter()
+
+        for wizard in self:
+            audio_info = track_service.read_audio_info(wizard.file)
 
             for attr_name, value in audio_info.items():
                 if hasattr(wizard, attr_name):

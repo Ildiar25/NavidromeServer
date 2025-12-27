@@ -37,13 +37,18 @@
             <field name="model">music_manager.genre</field>
             <field name="arch" type="xml">
                 <form string="Genre">
-                    <sheet>
-                        <div class="d-flex flex-column justify-content-between w-100 genre-form-title">
-                            <h1 class="big-title"><field name="name"/></h1>
-                            <group class="w-25">
-                                <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
-                            </group>
-                            <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
+                    <sheet class="form-bg-decoration">
+                        <header>
+                            <h1> 🎵 Editing genre</h1>
+                        </header>
+                        <separator/>
+                        <group class="flex-row justify-content-start">
+                            <field name="name" string="Genre name"/>
+                            <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                        </group>
+                        <separator/>
+                        <div class="d-flex flex-row justify-content-center">
+                            <button name="update_songs" string="Update metadata for all songs" class="btn-outline-primary w-50" type="object"/>
                         </div>
                         <separator/>
                         <notebook>
