@@ -29,7 +29,7 @@ class MP3Mock(BaseMock):
         'APIC': b"Cover Image",
     }
 
-    MP3_CONSTRUCTOR = 'odoo.addons.music_manager.services.metadata_service.MP3'
+    MP3_CONSTRUCTOR = 'odoo.addons.music_manager.services.audio_file_service.MP3'
 
     @classmethod
     def read_mp3_file_success(cls) -> ContextManager[MagicMock]:
@@ -38,7 +38,10 @@ class MP3Mock(BaseMock):
 
     @classmethod
     def read_mp3_with_id3_no_header_error(cls) -> ContextManager[MagicMock]:
-        return patch(cls.MP3_CONSTRUCTOR, side_effect=cls.simulate_error(mutagen_tags.ID3NoHeaderError))
+        mp3_mocked = cls._mp3_mock_helper()
+        return patch(
+            cls.MP3_CONSTRUCTOR, side_effect=cls.simulate_error(mutagen_tags.ID3NoHeaderError), return_value=mp3_mocked
+        )
 
     @classmethod
     def read_mp3_with_header_not_found_error(cls) -> ContextManager[MagicMock]:
