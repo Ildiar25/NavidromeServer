@@ -43,6 +43,10 @@ class PyTubeAdapter(StreamProtocol):  # ❌️ Library no updated -> It does not
     def tmp_path(self) -> str:
         return str(self._tmp_path)
 
+    @property
+    def options(self) -> Dict[str, str]:
+        return self._options
+
     def stream_to_file(self, output_path: Path) -> None:
         filename = hashlib.sha256(self._url.encode()).hexdigest()
         download_path = self._download_track(self._tmp_path, filename)

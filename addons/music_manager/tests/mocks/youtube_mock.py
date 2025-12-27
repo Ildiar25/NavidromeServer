@@ -93,6 +93,6 @@ class YouTubeMock(BaseMock):
             stream_instance.download.return_value = '/fake/video/path.mp4'
 
         stream_query = cls.create_mock(StreamQuery)
-        stream_query.filter.return_value.first.return_value = stream_instance
+        stream_query.filter.return_value.order_by.return_value.desc.return_value.first.return_value = stream_instance
 
         return cls.create_mock(YouTube, streams=stream_query)
