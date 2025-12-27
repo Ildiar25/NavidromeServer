@@ -14,7 +14,7 @@ ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 class YouTubeMock(BaseMock):
     """
-    Simulates different YouTube behaviours.
+    Simulates different YouTube behaviors.
 
     Operations covered:
     -------------------

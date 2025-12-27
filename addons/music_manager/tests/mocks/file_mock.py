@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Any, TypeVar, Type
+from typing import Any, Optional, Type, TypeVar
 from unittest.mock import MagicMock
 
 from .base_mock_helper import BaseMock
@@ -10,7 +10,7 @@ ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 class FileMock(BaseMock):
     """
-    Simulates different behaviours when working with files.
+    Simulates different behaviors when working with files.
 
     Operations covered:
     -------------------
@@ -116,7 +116,7 @@ class FileMock(BaseMock):
             return_value: Optional[Any] = None,
             error_name: Type[ExceptionType] | None = None,
             message: str | None = None,
-            **kwargs
+            **kwargs: Any
     ) -> MagicMock:
 
         pathlib_mock_path = cls.create_mock(Path)

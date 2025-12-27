@@ -1,4 +1,4 @@
-from typing import Optional, Any, TypeVar, Type
+from typing import Any, Optional, Type, TypeVar
 from unittest.mock import MagicMock
 
 from PIL.Image import Image
@@ -11,7 +11,7 @@ ExceptionType = TypeVar("ExceptionType", bound=BaseException)
 
 class ImageMock(BaseMock):
     """
-    Simulates different behaviours when working with images.
+    Simulates different behaviors when working with images.
 
     Operations covered:
     -------------------
@@ -66,7 +66,7 @@ class ImageMock(BaseMock):
             return_value: Optional[Any] = None,
             error_name: Type[ExceptionType] | None = None,
             message: str | None = None,
-            **kwargs
+            **kwargs: Any
     ) -> MagicMock:
 
         image_mock = cls.create_mock(Image)

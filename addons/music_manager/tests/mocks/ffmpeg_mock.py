@@ -7,7 +7,7 @@ from .base_mock_helper import BaseMock
 
 class FFmpegMock(BaseMock):
     """
-    Simulates different FFmpeg behaviours.
+    Simulates different FFmpeg behaviors.
 
     Operations covered:
     -------------------
