@@ -12,7 +12,9 @@ from ..utils.exceptions import InvalidPathError, DownloadServiceError
 
 class TestAdapterImageService(TransactionCase):
 
-    patch_path = 'odoo.addons.music_manager.adapters.download_service_adapter.DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE'
+    patch_path = (
+        'odoo.addons.music_manager.adapters.download_service_adapter.DownloadServiceAdapter.DOWNLOAD_ADAPTER_TYPE'
+    )
 
     def setUp(self) -> None:
         self.fake_url = "https://www.fake-url.com/"
