@@ -75,27 +75,29 @@
             <field name="name">music_manager.artist.view.form</field>
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
-                <form string="Artist">
-                    <sheet>
+                <form string="Artist" disable_autofocus="True">
+                    <sheet class="form-bg-decoration">
                         <header>
-                            <h1><field name="display_title"/></h1>
+                            <h1> 👤 Editing artist</h1>
                         </header>
-                        <div class="d-flex flex-row justify-content-start">
-                            <div class="mx-3">
+                        <separator/>
+                        <group class="flex-row justify-content-start">
+                            <group style="border-right: 1px solid #ccc; height: auto; width: 250px">
                                 <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
-                            </div>
-                            <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                            <div class="d-flex flex-column justify-content-between w-100">
-                                <group class="w-25">
+                            </group>
+                            <group class="flex-grow-1">
+                                <group>
                                     <field name="name" string="Group or artist name"/>
                                     <field name="real_name" string="Members"/>
                                     <field name="founded_in" string="Founded in"/>
                                     <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                 </group>
-                                <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
-                            </div>
-                        </div>
+                            </group>
+                        </group>
                         <separator/>
+                        <div class="d-flex flex-row justify-content-center">
+                            <button name="update_songs" string="Update metadata for all songs" class="btn-outline-primary w-50" type="object"/>
+                        </div>
                         <notebook>
                             <page string="Albums">
                                 <field name="album_ids" readonly="True">

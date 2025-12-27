@@ -31,12 +31,12 @@ class Track(Model, ProcessImageMixin):
     year = Char(string=_("Year"))
 
     # Readonly fields
-    bitrate = Integer(string=_("Kbps"), default=0, readonly=True)
+    bitrate = Char(string=_("Bit rate"), default="Unknown", readonly=True)
     channels = Char(string=_("Channels"), default="Stereo", readonly=True)
     codec = Char(string=_("Codec"), default="Unknown", readonly=True)
     duration = Char(string=_("Duration (min)"), default="0:00", readonly=True)
     mime_type = Char(string=_("MIME"), default="Unknown", readonly=True)
-    sample_rate = Integer(string=_("Frequency (Hz)"), default=0, readonly=True)
+    sample_rate = Char(string=_("Sample rate"), default="Unknown", readonly=True)
 
     # Relational fields
     album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"), copy=False)
@@ -293,13 +293,20 @@ class Track(Model, ProcessImageMixin):
 
         return False
 
-    def _get_file_service_adapter(self):
+    def _get_file_service_adapter(self) -> FileServiceAdapter:
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
 
         root = settings.root_dir if settings else '/music'
         file_extension = settings.sound_format if settings else 'mp3'
 
         return FileServiceAdapter(str_root_dir=root, file_extension=file_extension)
+
+    def _get_track_service_adapter(self) -> TrackServiceAdapter:
+        settings = self.env['music_manager.audio_settings'].search([], limit=1)
+
+        file_extension = settings.sound_format if settings else 'mp3'
+
+        return TrackServiceAdapter(file_type=file_extension)
 
     def _perform_save_changes(self):
         failure_messages = []
@@ -394,6 +401,9 @@ class Track(Model, ProcessImageMixin):
         self.album_id = found_album.id
 
     def _update_metadata(self) -> None:
+
+        track_service = self._get_track_service_adapter()
+
         for track in self:
             metadata = {
                 'TIT2': track.name,
@@ -409,7 +419,7 @@ class Track(Model, ProcessImageMixin):
                 'APIC': track.picture,
             }
 
-            TrackServiceAdapter().write_metadata(track.file_path, metadata)
+            track_service.write_metadata(track.file_path, metadata)
 
     @staticmethod
     def file_exists(filepath: str) -> bool:

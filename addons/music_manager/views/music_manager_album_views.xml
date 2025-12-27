@@ -66,29 +66,34 @@
             <field name="name">music_manager.album.view.form</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <form string="Album">
+                <form string="Album" disable_autofocus="True">
                     <sheet>
-                        <div class="d-flex flex-column justify-content-between">
-                            <div class="d-flex flex-row justify-content-start">
-                                <div class="mx-3">
-                                    <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
-                                </div>
-                                <div class="mx-3" style="border-left: 1px solid #ccc; height: auto;"> </div>
-                                <div class="d-flex flex-column justify-content-between w-100">
-                                    <h1 class="form_title"><field name="name"/></h1>
-                                    <group class="w-25">
-                                        <field name="year" string="Year"/>
-                                        <field name="album_artist_id" string="Album artist"/>
-                                        <field name="genre_id" string="Genre"/>
-                                        <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
-                                    </group>
-                                    <button name="update_songs" string="Update metadata" class="btn-outline-primary w-25" type="object"/>
-                                </div>
-                            </div>
-                            <separator string="Songs"/>
-                            <field name="track_ids" readonly="True">
+                        <header>
+                            <h1> 💽 Editing album</h1>
+                        </header>
+                        <separator/>
+                        <group class="flex-row justify-content-start">
+                            <group style="border-right: 1px solid #ccc; height: auto; width: 250px">
+                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
+                            </group>
+                            <group class="flex-grow-1">
+                                <field name="name" string="Album title"/>
+                                <field name="year" string="Year"/>
+                                <field name="album_artist_id" string="Album artist"/>
+                                <field name="genre_id" string="Genre"/>
+                                <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                            </group>
+                        </group>
+                        <separator/>
+                        <div class="d-flex flex-row justify-content-center">
+                            <button name="update_songs" string="Update metadata for all songs" class="btn-outline-primary w-50" type="object"/>
+                        </div>
+                        <separator/>
+                        <notebook>
+                            <page string="Track list">
+                                <field name="track_ids" readonly="True">
                                 <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
-                                    <field name="track_no" string="Track no" optional="hide"/>
+                                    <field name="track_no" string="Track no" nolabel="1"/>
                                     <field name="name" string="Title"/>
                                     <field name="album_artist_id" string="Album artist"/>
                                     <field name="album_id" string="Album"/>
@@ -99,7 +104,8 @@
                                     <field name="is_deleted" column_invisible="True"/>
                                 </tree>
                             </field>
-                        </div>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>

@@ -1,18 +1,15 @@
 
-.form_title {
-    width: 100%;
-}
-
-.genre-form-title {
-    height: 250px;
+/* Designs */
+.form-bg-decoration {
     background: url("/music_manager/static/src/img/form-bg.png") no-repeat top right;
     background-size: 1080px;
 }
 
-.big-title {
-    font-size: 48px;
+.o_form_view .o_form_sheet {
+    background-color: #ffffffa1 !important;
 }
 
+/* Animations */
 @keyframes heartbeat {
     0%   { transform: scale(1); }
     25%  { transform: scale(1.2); }
