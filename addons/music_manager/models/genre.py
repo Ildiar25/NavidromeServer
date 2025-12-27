@@ -9,7 +9,6 @@ from ..utils.custom_types import GenreVals
 
 
 class Genre(Model):
-
     _name = 'music_manager.genre'
     _description = 'genre_table'
     _order = 'name'

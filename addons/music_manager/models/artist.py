@@ -15,7 +15,6 @@ _logger = logging.getLogger(__name__)
 
 
 class Artist(Model, ProcessImageMixin):
-
     _name = 'music_manager.artist'
     _description = 'artist_table'
     _order = 'name'
