@@ -20,7 +20,7 @@
             <field name="name">music_manager.artist.view.kanban</field>
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
-                <kanban>
+                <kanban string="Artist kanban view">
                     <template>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click" style="box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
@@ -56,7 +56,7 @@
             <field name="name">music_manager.artist.view.tree</field>
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree string="Artist tree view">
                     <field name="picture" string="Picture" widget="image" options="{'preview_image': 'picture', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Artist or Group"/>
                     <field name="real_name" string="Real name"/>
@@ -65,7 +65,8 @@
                     <field name="album_amount" string="Total albums"/>
                     <field name="owner" string="Owner"/>
                     <field name="create_date" string="Create date"/>
-                    <field name="write_uid" string="Last update"/>
+                    <field name="write_date" string="Last update"/>
+                    <field name="write_uid" string="Updated by"/>
                 </tree>
             </field>
         </record>
@@ -75,7 +76,7 @@
             <field name="name">music_manager.artist.view.form</field>
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
-                <form string="Artist" disable_autofocus="True">
+                <form string="Artist form view" disable_autofocus="True">
                     <sheet class="form-bg-decoration">
                         <header>
                             <h1> 👤 Editing artist</h1>

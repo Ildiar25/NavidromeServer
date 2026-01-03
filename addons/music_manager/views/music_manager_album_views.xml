@@ -21,7 +21,7 @@
             <field name="name">music_manager.album.view.kanban</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <kanban>
+                <kanban srting="Album kanban view">
                     <field name="name"/>
                     <field name="is_favorite"/>
                     <template>
@@ -46,7 +46,7 @@
             <field name="name">music_manager.album.view.tree</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree string="Album tree view">
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
                     <field name="name" string="Album title"/>
                     <field name="album_artist_id" string="Album artist"/>
@@ -66,7 +66,7 @@
             <field name="name">music_manager.album.view.form</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <form string="Album" disable_autofocus="True">
+                <form string="Album form view" disable_autofocus="True">
                     <sheet>
                         <header>
                             <h1> 💽 Editing album</h1>
@@ -93,7 +93,7 @@
                             <page string="Track list">
                                 <field name="track_ids" readonly="True">
                                 <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
-                                    <field name="track_no" string="Track no" nolabel="1"/>
+                                    <field name="track_no" string="#" nolabel="1" width="20px" decoration-bf="True"/>
                                     <field name="name" string="Title"/>
                                     <field name="album_artist_id" string="Album artist"/>
                                     <field name="album_id" string="Album"/>
@@ -116,7 +116,7 @@
             <field name="name">music_manager.album.view.searchbar</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <search string="Search">
+                <search string="Album searchbar view">
                     <!-- Custom fields -->
                     <field name="name" string="by album title"/>
                     <field name="album_artist_id" string="by album artist"/>

@@ -20,7 +20,7 @@
             <field name="name">music_manager.genre.view.tree</field>
             <field name="model">music_manager.genre</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree string="Genre tree view">
                     <field name="name" string="Name"/>
                     <field name="track_amount" string="Track amount"/>
                     <field name="disk_amount" string="Disk amount"/>
@@ -36,7 +36,7 @@
             <field name="name">music_manager.genre.view.form</field>
             <field name="model">music_manager.genre</field>
             <field name="arch" type="xml">
-                <form string="Genre">
+                <form string="Genre form view">
                     <sheet class="form-bg-decoration">
                         <header>
                             <h1> 🎵 Editing genre</h1>

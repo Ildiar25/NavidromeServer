@@ -21,10 +21,10 @@
             <field name="name">music_manager.track.view.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <tree string="Songs" decoration-danger="is_deleted" decoration-warning="not is_saved" create="False">
+                <tree string="Track tree view" decoration-danger="is_deleted" decoration-warning="not is_saved" create="False">
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}" optional="hide"/>
-                    <field name="disk_no" string="Disk no" optional="hide"/>
-                    <field name="track_no" string="Track no" optional="hide"/>
+                    <field name="disk_no" string="Disk no" decoration-bf="True" width="40px" optional="hide"/>
+                    <field name="track_no" string="Track no" decoration-bf="True" width="40px" optional="hide"/>
                     <field name="name" string="Title"/>
                     <field name="display_artist_names" string="Artist(s)"/>
                     <field name="album_id" string="Album"/>
@@ -37,6 +37,8 @@
                     <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="bitrate" string="Quality" optional="hide"/>
+                    <field name="sample_rate" string="Frequency (kHz)" optional="hide"/>
                     <field name="file_path" string="Path" optional="hide"/>
                 </tree>
             </field>
@@ -47,7 +49,7 @@
             <field name="name">music_manager.track.view.form</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <form string="Track" disable_autofocus="True" create="False">
+                <form string="Track form view" disable_autofocus="True" create="False">
                     <field name="is_deleted" invisible="True"/>
                     <sheet>
                         <header>
@@ -97,7 +99,7 @@
                                 <group string="Summary">
                                     <group>
                                         <field name="duration" string="Duration (min)"/>
-                                        <field name="bitrate" string="Bit rate"/>
+                                        <field name="bitrate" string="Bitrate"/>
                                         <field name="sample_rate" string="Sample rate"/>
                                         <field name="channels" string="Channel"/>
                                     </group>
@@ -123,7 +125,7 @@
             <field name="name">music_manager.track.view.searchbar</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <search string="Search">
+                <search string="Track searchbar view">
                     <!-- Custom fields -->
                     <field name="name" string="by track title"/>
                     <field name="display_artist_names" string="by artist name"/>
@@ -139,6 +141,7 @@
                         <filter name="owner" string="Owner" context="{'group_by': 'owner'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
+                        <filter name="bitrate" string="Quality" context="{'group_by': 'bitrate'}"/>
                     </group>
                 </search>
             </field>

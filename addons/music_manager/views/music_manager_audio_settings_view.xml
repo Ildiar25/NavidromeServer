@@ -12,26 +12,48 @@
             <field name="name">music_manager.audio_settings.view.form</field>
             <field name="model">music_manager.audio_settings</field>
             <field name="arch" type="xml">
-                <form string="Audio settings" disable_autofocus="True" create="false" delete="false" edit="true">
-                    <sheet>
-                        <section>
-                            <header>
-                                <h1>Module settings 🛠️</h1>
-                            </header>
-                            <separator/>
-                            <group string="Audio settings">
+                <form string="Audio settings form view" disable_autofocus="True" create="false" delete="false" edit="true">
+                    <sheet class="form-bg-decoration">
+                        <header>
+                            <h1>Module Control Panel 🛠️</h1>
+                        </header>
+                        <separator/>
+                        <h3 class="text-muted">What can I do here? 🤔</h3>
+                        <p class="w-50">
+                            Manage global media processing preferences. In this section, you can set audio
+                            encoding standards, server storage paths, and automatic download criteria.
+                            <br/>
+                            <br/>
+                            <em>Any changes made here will apply to new songs added from now on.</em>
+                        </p>
+                        <group col="3">
+                            <group string="Audio settings 🎵">
+                                <p colspan="2" class="text-muted">
+                                    Set your library quality here. A higher <b>bitrate</b> means better fidelity, but
+                                    keep in mind that file sizes will be slightly larger.
+                                </p>
                                 <field name="sound_format" string="Sound format"/>
                                 <field name="bitrate" string="Quality"/>
                             </group>
-                            <group string="Download settings">
+                            <group string="Download settings 📂">
+                                <p colspan="2" class="text-muted">
+                                    Check your main music directory here. Additionally, you can manage the available
+                                    <b>adapters</b>: these are the <em>'engines'</em> which get the audio from external
+                                    sources.
+                                </p>
                                 <field name="root_dir" string="Root directory"/>
                                 <field name="available_adapters" string="Downloaders"/>
                             </group>
-                            <group string="Image settings">
+                            <group string="Image settings 🎨">
+                                <p colspan="2" class="text-muted">
+                                    Set the final size and format for your images. They will be automatically
+                                    <b>center-cropped to a 1:1</b> aspect ratio and resized according to your
+                                    preferences.
+                                </p>
                                 <field name="image_format" string="Image format"/>
                                 <field name="image_size" string="Image size"/>
                             </group>
-                        </section>
+                        </group>
                     </sheet>
                 </form>
             </field>

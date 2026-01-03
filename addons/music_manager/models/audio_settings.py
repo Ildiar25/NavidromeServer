@@ -34,9 +34,9 @@ class AudioSettings(Model):
     )
     bitrate = Selection(
         selection=[
-            ('128', _("128k")),
-            ('192', _("192k")),
-            ('320', _("320k")),
+            ('128', _("128 kbps")),
+            ('192', _("192 kbps")),
+            ('320', _("320 kbps")),
         ],
         string=_("Global bitrate"),
         default='192',
@@ -52,10 +52,10 @@ class AudioSettings(Model):
     )
     image_size = Selection(
         selection=[
-            ('300', _("300x300px")),
-            ('400', _("400x400px")),
-            ('600', _("600x600px")),
-            ('1000', _("1000x1000px")),
+            ('300', _("300x300 px")),
+            ('400', _("400x400 px")),
+            ('600', _("600x600 px")),
+            ('1000', _("1000x1000 px")),
         ],
         string=_("General image size"),
         default='400',
