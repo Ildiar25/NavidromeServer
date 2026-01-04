@@ -51,7 +51,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     url = Char(string=_("Youtube URL"))
 
     # Readonly fields
-    bitrate = Char(string=_("Bit rate"), default="Unknown", readonly=True)
+    bitrate = Char(string=_("Bitrate"), default="Unknown", readonly=True)
     channels = Char(string=_("Channels"), default="Stereo", readonly=True)
     codec = Char(string=_("Codec"), default="Unknown", readonly=True)
     duration = Char(string=_("Duration (min)"), default="0:00", readonly=True)

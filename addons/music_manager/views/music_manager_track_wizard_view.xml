@@ -12,7 +12,7 @@
         <field name="name">music_manager.track_wizard.view.form</field>
         <field name="model">music_manager.track_wizard</field>
         <field name="arch" type="xml">
-            <form string="Track Wizard" disable_autofocus="True">
+            <form string="Track wizard form view" disable_autofocus="True">
                 <field name="state" string="" widget="statusbar"/>
                 <field name="has_valid_path" invisible="True"/>
                 <field name="file_path" invisible="True"/>
@@ -46,7 +46,7 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-column align-items-center mx-3">
-                                <img src="music_manager/static/src/img/youtube-img.png" width="180" height="180" alt="YouTubeimage"/>
+                                <img src="music_manager/static/src/img/youtube-img.png" width="180" height="180" alt="YouTube image"/>
                                 <p class="mx-auto"><b>YouTube URL</b></p>
                                 <div class="align-items-center">
                                     <field name="url" placeholder="https://" tooltip="Insert a URL"/>
