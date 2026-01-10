@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
+from typing import List
 
 from ..utils.enums import FileType
 from ..utils.exceptions import FilePersistenceError, InvalidPathError, MusicManagerError
@@ -28,6 +29,9 @@ class FolderManager:
             file_path.parent.mkdir(parents=True, exist_ok=True)
 
         return self
+
+    def get_all_file_paths(self) -> List[Path]:
+        return list(self._root_dir.rglob(f"*.{self.file_extension}"))
 
     def set_path(self, artist: str, album: str, track: str, title: str) -> Path:
         new_path = self._root_dir / artist / album / f'{track}_{title}'

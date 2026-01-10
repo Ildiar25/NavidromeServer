@@ -3,7 +3,7 @@ import logging
 
 from urllib.parse import urlparse
 # noinspection PyProtectedMember
-from odoo import _, api, Command
+from odoo import _, api
 from odoo.exceptions import ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Selection, Many2many, Many2one
 from odoo.models import TransientModel
@@ -255,7 +255,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 'album_id': wizard.possible_album_id.id,
                 'genre_id': wizard.possible_genre_id.id,
                 'original_artist_id': wizard.possible_original_artist_id.id,
-                'track_artist_ids': [Command.set(wizard.possible_artist_ids.ids)],
+                'track_artist_ids': [(6, 0, wizard.possible_artist_ids.ids)],
                 'collection': wizard.tmp_collection,
                 'file_path': wizard.file_path,
                 'old_path': wizard.file_path,
@@ -267,6 +267,9 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 'mime_type': wizard.mime_type,
                 'sample_rate': wizard.sample_rate,
             })
+
+            # noinspection PyProtectedMember
+            track._update_metadata()
 
             return {
                 'name': _('New Track'),
@@ -344,14 +347,12 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     def _match_album_id(self) -> None:
         for wizard in self:
             wizard.possible_album_id = False
-            _logger.info(f"TMP_ALBUM: {wizard.tmp_album}")
 
             if not wizard.tmp_album:
-                _logger.info(f"OPS: Not tmp album: {wizard.tmp_album}")
+                _logger.info(f"There is no TMP ALBUM: {wizard.tmp_album}")
                 continue
 
             found = self.env['music_manager.album'].search([('name', 'ilike', wizard.tmp_album)], limit=1)
-            _logger.info(f"ALBUM FOUNDED: {found.name} | ID: {found.id}")
             wizard.possible_album_id = found.id
 
     def _match_album_artist_id(self) -> None:
@@ -359,6 +360,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             wizard.possible_album_artist_id = False
 
             if not wizard.tmp_album_artist:
+                _logger.info(f"There is no TMP ALBUM ARTIST: {wizard.tmp_album}")
                 continue
 
             found = self.env['music_manager.artist'].search([('name', 'ilike', wizard.tmp_album_artist)], limit=1)
@@ -366,9 +368,10 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_artist_ids(self) -> None:
         for wizard in self:
-            wizard.possible_artist_ids = [Command.clear()]
+            wizard.possible_artist_ids = []
 
             if not wizard.tmp_artists:
+                _logger.info(f"There is no TMP ARTISTS: {wizard.tmp_album}")
                 continue
 
             names = [name.strip() for name in wizard.tmp_artists.split(",")]
@@ -382,7 +385,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
                 artist_ids.append(found.id)
 
-            wizard.possible_artist_ids = [Command.set(artist_ids)]
+            wizard.possible_artist_ids = [(6, 0, artist_ids)]
 
     def _match_genre_id(self) -> None:
         for wizard in self:
