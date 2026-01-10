@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
+from typing import List
 
 from ..services.file_service import FolderManager
 from ..utils.file_utils import clean_path_section, is_valid_path
@@ -78,6 +79,9 @@ class FileServiceAdapter:
             raise InvalidPathError(f"Unavailable to delete the file: not found or it is not a file. Try another one.")
 
         self._folder_manager.delete_file(file_path)
+
+    def get_all_file_paths(self) -> List[Path]:
+        return self._folder_manager.get_all_file_paths()
 
     def set_new_extension(self, new_extension: str) -> None:
         self.file_extension = self._check_file_extension(new_extension)

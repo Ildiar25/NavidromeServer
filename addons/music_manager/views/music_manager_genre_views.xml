@@ -43,8 +43,16 @@
                         </header>
                         <separator/>
                         <group class="flex-row justify-content-start">
-                            <field name="name" string="Genre name"/>
-                            <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                            <group style="border-right: 1px solid #ccc; height: auto; width: 200px">
+                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [150, 150]}"/>
+                            </group>
+                            <group class="flex-grow-1">
+                                <group>
+                                    <field name="name" string="Genre name"/>
+                                    <field name="description" string="Description"/>
+                                    <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                </group>
+                            </group>
                         </group>
                         <separator/>
                         <div class="d-flex flex-row justify-content-center">

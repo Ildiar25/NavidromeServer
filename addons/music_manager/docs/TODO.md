@@ -4,7 +4,8 @@
 
  - [x] Añadir automatización al crear las carpetas principales en Linux (y permisos).
  - [x] Actualizar 'makefile' y el módulo 'Utils.psm1' con el archivo 'permissions.sh'.
- - [ ] **Añadir la lectura y automatización de la carpeta principal de música para generar los registros automáticamente desde el Administrador.**
+ - [x] Añadir la lectura y automatización de la carpeta principal de música para generar los registros automáticamente desde el Administrador.
+ - [ ] **Crear un **CRON** para la importación asíncrona de la carpeta *'root'* y que genere registros sin colapsar la UI.**
 
 ### Modelos
 
@@ -12,6 +13,7 @@
  - [x] Evitar la eliminación de los campos género o artista si el usuario no es Admin.
  - [x] Que el usuario pueda marcar género o artista para eliminar. El Admin puede eliminar dichos registros.
  - [x] Informar correctamente al usuario mediante notificaciones.
+ - [x] Añadir el modelo *'Opciones'* que permita la configuración global del módulo.
 
 ### Adaptadores
  - [x] Crear Numeradores para tipo de archivo (*PNG*, *JPEG*, ... ), tipo de descargador (*PyTube*, ...), tipo de metadatos (*MP3*, *FLAC*, ...).
@@ -32,6 +34,7 @@
 ### Módulo
 
  - [x] Preparar bien los diferentes pasos del formulario principal.
+ - [x] Convertir el formulario principal en un *'Wizard'*.
  - [x] Método al pulsar *'save'* que devuelva las etiquetas añadidas al archivo y actualice los campos.
  - [x] Arreglar botón *'save'*. *'Constrains'* detecta que no hay URL ni archivo y da error.
  - [ ] **Crear test para revisar todos los servicios creados.**
@@ -42,20 +45,21 @@
  - [x] Añadir documentación y tipado de los modelos.
  - [x] Añadir textos informativos al actualizar los metadatos de las canciones.
  - [ ] **Implementar soporte multilenguaje.**
-   - [x] Inglés 100%.
-   - [ ] **Francés 0%.**
-   - [x] Español 100%.
-   - [x] Catalán 100%.
+   - [x] Inglés.
+   - [ ] **Francés.**
+   - [ ] **Español.**
+   - [ ] **Catalán.**
  - [ ] ~~Cuando se elimine un registro (*'user general'*) se elimine su propietario, pero que Admin pueda ver qué registros no tienen propietario.~~
  - [x] Error al eliminar Género y Artista de forma automática al eliminar todos los registros. No se tienen permisos de Admin.
- - [ ] **Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.**
+ - [x] Al agregar una canción ya existente, el registro queda guardado habiendo dado error. Un registro en blanco aparece.
  - [x] Crear menús y vistas de *'Albums'* y *'Artists'* según el tipo de usuario (*'General'*, *'Admin'*).
  - [x] Los artistas son globales y, por tanto, configurar si es favorito o no también. Eliminar dicho atributo y añadirlo a álbum.
- - [x] Revisar textos en inglés.
+ - [ ] **Revisar textos en inglés.**
  - [x] Revisar excepciones dadas.
  - [ ] **Conseguir que los formularios se muestren de modo *'solo lectura'* cuando el usuario no es propietario (*'artist'*, *'genre'*).**
  - [x] El administrador no puede ver los resultados obtenidos agrupados por usuario en *'artist'* y *'genre'* en las pestañas álbum o canciones.
  - [ ] ~~Incluir en *'file_service'* la lectura de archivo (*'read_bytes'*) y pasar dichos datos a *'metadata_service'*.~~
+ - [ ] **Cuando el usuario agregue varios artistas, dichas etiquetas deben colocarse en orden alfabético *(Artistas: Lester Frances, Sarah Trevino)* de forma automática**.
 
 ### Marco legal
 

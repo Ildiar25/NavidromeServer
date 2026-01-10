@@ -21,6 +21,9 @@
             <field name="model">music_manager.artist</field>
             <field name="arch" type="xml">
                 <kanban string="Artist kanban view">
+                    <field name="is_group"/>
+                    <field name="country_id"/>
+                    <field name="country_code"/>
                     <template>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click" style="box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
@@ -29,6 +32,7 @@
                                         <field name="name"/>
                                         <p class="text-muted"><small><em>by <field name="owner"/></em></small></p>
                                     </div>
+                                    <img t-if="record.country_id.raw_value" t-attf-src="/base/static/img/country_flags/#{record.country_code.raw_value.toLowerCase()}.png" t-att-title="record.country_id.value" width="20" height="15" alt="Country flag"/>
                                 </div>
                                 <hr class="mb-2"/>
                                 <div class="o_kanban_content d-flex flex-row">
@@ -37,10 +41,11 @@
                                     </div>
                                     <div class="oe_kanban_details flex-grow-1">
                                         <ul>
-                                            <li><i class="fa fa-user me-2" title="User icon"/><field name="real_name"/></li>
-                                            <li t-if="record.founded_in.raw_value"><i class="fa fa-calendar me-2" title="Calendar icon"/><field name="founded_in"/></li>
-                                            <li><i class="fa fa-dot-circle-o me-2" title="Disk icon"/><field name="album_amount"/></li>
-                                            <li><i class="fa fa-music me-2" title="Music icon"/><field name="track_amount"/></li>
+                                            <li class="text-truncate" t-if="!record.is_group.raw_value" t-att-title="record.real_name.value"><i class="fa fa-user me-2" title="User icon"/><field name="real_name"/></li>
+                                            <li class="text-truncate" t-if="record.start_year.raw_value"><i class="fa fa-calendar me-2" title="Calendar icon"/><field name="start_year"/></li>
+                                            <li class="text-truncate"><i class="fa fa-dot-circle-o me-2" title="Disk icon"/><field name="album_amount"/></li>
+                                            <li class="text-truncate"><i class="fa fa-music me-2" title="Music icon"/><field name="track_amount"/></li>
+                                            <li class="text-truncate" t-if="record.website.raw_value" t-att-title="record.website.value"><i class="fa fa-globe me-2" title="Globe icon"/><field name="website"/></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -60,10 +65,12 @@
                     <field name="picture" string="Picture" widget="image" options="{'preview_image': 'picture', 'size': [28]}" optional="hide"/>
                     <field name="name" string="Artist or Group"/>
                     <field name="real_name" string="Real name"/>
-                    <field name="founded_in" string="Founded in" optional="hide"/>
+                    <field name="start_year" string="Debut year" optional="hide"/>
+                    <field name="website" string="Website" optional="hide"/>
                     <field name="track_amount" string="Total tracks"/>
                     <field name="album_amount" string="Total albums"/>
                     <field name="owner" string="Owner"/>
+                    <field name="country_id" string="Country"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
                     <field name="write_uid" string="Updated by"/>
@@ -89,9 +96,17 @@
                             <group class="flex-grow-1">
                                 <group>
                                     <field name="name" string="Group or artist name"/>
-                                    <field name="real_name" string="Members"/>
-                                    <field name="founded_in" string="Founded in"/>
+                                    <field name="real_name" string="Real name"/>
+                                    <field name="start_year" string="Debut year"/>
+                                    <field name="is_group" string="Is group"/>
+                                    <field name="website" string="Website" widget="url"/>
                                     <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                </group>
+                                <group>
+                                    <field name="country_id" string="Country"/>
+                                    <field name="biography" string="Biography"/>
+                                    <field name="group_ids" widget="many2many_tags" string="Groups" invisible="is_group"/>
+                                    <field name="member_ids" widget="many2many_tags" string="Members" invisible="not is_group"/>
                                 </group>
                             </group>
                         </group>
@@ -137,6 +152,29 @@
                         </notebook>
                     </sheet>
                 </form>
+            </field>
+        </record>
+
+        <!-- Searchbar -->
+        <record id="music_manager_artist_view_searchbar" model="ir.ui.view">
+            <field name="name">music_manager.artist.view.searchbar</field>
+            <field name="model">music_manager.artist</field>
+            <field name="arch" type="xml">
+                <search string="Artist searchbar view">
+                    <!-- Custom fields -->
+                    <field name="name" string="by artist name"/>
+
+                    <!-- Custom filters -->
+                    <filter name="by_group" string="Is group" domain="[('is_group', '=', True)]"/>
+                    <filter name="by_artist" string="Is artist" domain="[('is_group', '=', False)]"/>
+
+                    <!-- Custom groups -->
+                    <group string="Group by" expand="1">
+                        <filter name="owner" string="Owner" context="{'group_by': 'owner'}" groups="music_manager.group_music_manager_user_admin"/>
+                        <filter name="start_year" string="Year" context="{'group_by': 'start_year'}"/>
+                        <filter name="country_id" string="Country" context="{'group_by': 'country_id'}"/>
+                    </group>
+                </search>
             </field>
         </record>
     </data>

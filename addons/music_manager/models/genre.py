@@ -3,12 +3,13 @@
 from odoo import _, api
 from odoo.exceptions import UserError
 from odoo.models import Model
-from odoo.fields import Char, Integer, Many2one, One2many
+from odoo.fields import Binary, Char, Html, Integer, Many2one, One2many
 
+from .mixins.process_image_mixin import ProcessImageMixin
 from ..utils.custom_types import GenreVals
 
 
-class Genre(Model):
+class Genre(Model, ProcessImageMixin):
     _name = 'music_manager.genre'
     _description = 'genre_table'
     _order = 'name'
@@ -18,6 +19,8 @@ class Genre(Model):
 
     # Default fields
     name = Char(string=_("Name"), required=True)
+    description = Html(string=_("Description"))
+    picture = Binary(string=_("Picture"))
 
     # Relationships
     track_ids = One2many(comodel_name='music_manager.track', inverse_name='genre_id', string=_("Track(s)"))

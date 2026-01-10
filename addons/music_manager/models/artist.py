@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
+from typing import List, Tuple
 
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import UserError
 from odoo.models import Model
-from odoo.fields import Binary, Char, Date, Integer, Many2many, Many2one, One2many, Text
+from odoo.fields import Binary, Boolean, Char, Date, Html, Integer, Many2many, Many2one, One2many, Selection, Text
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..utils.custom_types import ArtistVals
@@ -17,22 +19,44 @@ _logger = logging.getLogger(__name__)
 class Artist(Model, ProcessImageMixin):
     _name = 'music_manager.artist'
     _description = 'artist_table'
-    _order = 'name'
+    _order = 'is_group, name'
 
     # Basic fields
-    founded_in = Date(string=_("Founded in"))
+    biography = Html(string=_("Biography"))
+    is_group = Boolean(string=_("Is group"))
     name = Char(string=_("Name"), required=True)
-    picture = Binary(string=_("Profile"))
-    real_name = Text(string=_("Real name"), compute='_compute_artist_name', readonly=False, store=True)
+    picture = Binary(string=_("Picture"))
+    real_name = Char(string=_("Real name"))
+    start_year = Selection(string=_("Debut year"), selection='_get_years_list')
+    website = Char(string=_("Website"))
 
     # Relational fields
     album_ids = One2many(comodel_name='music_manager.album', inverse_name='album_artist_id', string=_("Album(s)"))
+    country_id = Many2one(comodel_name='res.country', string=_("Country"))
+    group_ids = Many2many(
+        comodel_name='music_manager.artist',
+        relation='music_manager_artist_relatives',
+        column1='child_id',
+        column2='parent_id',
+        string=_("Music groups"),
+        readonly=True,
+    )
+    member_ids = Many2many(
+        comodel_name='music_manager.artist',
+        relation='music_manager_artist_relatives',
+        column1='parent_id',
+        column2='child_id',
+        string=_("Members")
+    )
     track_ids = Many2many(comodel_name='music_manager.track', string=_("Track(s)"))
 
     # Computed fields
     album_amount = Integer(string=_("Album amount"), compute='_compute_album_amount', default=0, store=False)
     display_title = Char(string=_("Display title"), compute='_compute_display_title_form', store=True)
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0, store=False)
+
+    # Related fields
+    country_code = Char(related='country_id.code', string=_("Country code"))
 
     # Technical fields
     owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
@@ -91,12 +115,6 @@ class Artist(Model, ProcessImageMixin):
         for artist in self:
             artist.track_amount = len(artist.track_ids) if artist.track_ids else 0
 
-    @api.depends('name')
-    def _compute_artist_name(self) -> None:
-        for artist in self:
-            if isinstance(artist.name, str):
-                artist.real_name = artist.name
-
     def update_songs(self):
         self.ensure_one()
 
@@ -145,3 +163,8 @@ class Artist(Model, ProcessImageMixin):
                 'sticky': False,
             }
         }
+
+    @staticmethod
+    def _get_years_list() -> List[Tuple[str, str]]:
+        current_year = datetime.datetime.now().year
+        return [(str(year), str(year)) for year in range(current_year, 1599, -1)]

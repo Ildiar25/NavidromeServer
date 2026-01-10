@@ -69,7 +69,7 @@ class TrackServiceAdapter:
         except InvalidFileFormatError as corrupt_file:
             _logger.error(f"There was a problem reading the file metadata: {corrupt_file}")
             raise ValidationError(
-                _("\nThe uploaded file has an invalid format or is corrupt.")
+                _("\nThe read file has an invalid format or is corrupt.")
             )
 
         except ReadingFileError as invalid_metadata:

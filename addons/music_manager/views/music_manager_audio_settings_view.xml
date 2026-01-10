@@ -26,6 +26,7 @@
                             <br/>
                             <em>Any changes made here will apply to new songs added from now on.</em>
                         </p>
+                        <button name="action_read_root_folder" string="Update Database" class="btn-outline-danger w-50" type="object"/>
                         <group col="3">
                             <group string="Audio settings 🎵">
                                 <p colspan="2" class="text-muted">

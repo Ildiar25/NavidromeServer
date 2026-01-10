@@ -36,6 +36,19 @@ def base64_encode(decoded_data: bytes) -> str:
     return base64.b64encode(decoded_data).decode()
 
 
+def base64_encode_in_bytes(decoded_data: bytes) -> bytes:
+    if not decoded_data:
+        raise ReadingFileError("No data provided!")
+
+    if not isinstance(decoded_data, bytes):
+        raise InvalidFileFormatError(f"Invalid datatype: {type(decoded_data)}.")
+
+    if _is_base64_encoded(decoded_data):
+        raise InvalidFileFormatError("Already base64-encoded file")
+
+    return base64.b64encode(decoded_data)
+
+
 def base64_decode(encoded_data: bytes | str) -> bytes:
     if not encoded_data:
         raise ReadingFileError("No data provided!")
