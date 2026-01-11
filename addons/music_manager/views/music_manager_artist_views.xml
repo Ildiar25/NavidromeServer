@@ -69,11 +69,11 @@
                     <field name="website" string="Website" optional="hide"/>
                     <field name="track_amount" string="Total tracks"/>
                     <field name="album_amount" string="Total albums"/>
-                    <field name="owner" string="Owner"/>
                     <field name="country_id" string="Country"/>
+                    <field name="owner" string="Owner"/>
+                    <field name="write_uid" string="Updated by"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
-                    <field name="write_uid" string="Updated by"/>
                 </tree>
             </field>
         </record>
@@ -91,7 +91,7 @@
                         <separator/>
                         <group class="flex-row justify-content-start">
                             <group style="border-right: 1px solid #ccc; height: auto; width: 250px">
-                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
+                                <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>

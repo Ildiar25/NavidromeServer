@@ -75,7 +75,7 @@
                         </p>
                         <group class="flex-row justify-content-start" style="width: 946px">
                             <group style="border-right: 1px solid #ccc; height: auto; width: 182px">
-                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [132, 132]}" readonly="True"/>
+                                <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [132, 132]}" readonly="True"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>
@@ -119,7 +119,7 @@
                         </p>
                         <group class="flex-row justify-content-start" style="width: 946px">
                             <group style="border-right: 1px solid #ccc; height: auto; width: 182px">
-                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [132, 132]}"/>
+                                <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [132, 132]}"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>
@@ -163,7 +163,7 @@
                         </p>
                         <group class="flex-row justify-content-start" style="width: 946px">
                             <group style="border-right: 1px solid #ccc; height: auto; width: 182px">
-                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [132, 132]}" readonly="True"/>
+                                <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [132, 132]}" readonly="True"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>

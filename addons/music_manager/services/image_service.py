@@ -33,12 +33,16 @@ class ImageProcessor(ABC):
 
     def center_image(self) -> ImgProcessor:
         width, height = self._image.size
+
+        if width == height:
+            return self
+
         min_dimension = min(width, height)
 
-        left = (width - min_dimension) / 2
-        top = (height - min_dimension) / 2
-        right = (width + min_dimension) / 2
-        bottom = (height + min_dimension) / 2
+        left = (width - min_dimension) // 2
+        top = (height - min_dimension) // 2
+        right = left + min_dimension
+        bottom = top + min_dimension
 
         self._image = self._image.crop(box=(left, top, right, bottom))
         return self
