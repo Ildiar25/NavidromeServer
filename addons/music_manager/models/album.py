@@ -32,7 +32,7 @@ class Album(Model, ProcessImageMixin):
         string=_("Picture"),
         compute='_compute_album_picture',
         inverse='_inverse_album_picture',
-        store=True,
+        store=False,
     )
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
@@ -104,20 +104,20 @@ class Album(Model, ProcessImageMixin):
             disk_amount = album.track_ids.mapped('total_disk')
             album.disk_amount = max(disk_amount) if disk_amount else 0
 
-    @api.depends('track_ids', 'track_ids.picture')
+    @api.depends('track_ids.picture')
     def _compute_album_picture(self) -> None:
         for album in self:
-            if not album.picture:
-                track_picture = next((t.picture for t in album.track_ids if t.picture), False)
-                album.picture = track_picture
+            tracks_with_pic = album.track_ids.filtered(lambda track: track.picture)
+
+            if tracks_with_pic:
+                album.picture = tracks_with_pic[0].picture
+
+            else:
+                album.picture = False
 
     def _inverse_album_picture(self) -> None:
         for album in self:
-            if album.picture:
-                album.track_ids.write({'picture': album.picture})
-
-            else:
-                album.track_ids.write({'picture': False})
+            album.track_ids.write({'picture': album.picture})
 
     @api.depends('track_ids', 'track_ids.year')
     def _compute_album_year(self) -> None:
