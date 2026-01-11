@@ -44,7 +44,7 @@
                         <separator/>
                         <group class="flex-row justify-content-start">
                             <group style="border-right: 1px solid #ccc; height: auto; width: 200px">
-                                <field name="picture" string="" widget="image" options="{'preview_image': 'picture', 'size': [150, 150]}"/>
+                                <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [150, 150]}"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>

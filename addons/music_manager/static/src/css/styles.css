@@ -9,6 +9,12 @@
     background-color: #ffffffa1 !important;
 }
 
+.crop-image-preview img {
+    object-fit: cover !important;
+    object-position: center !important;
+    aspect-ratio: 1 / 1;
+}
+
 /* Animations */
 @keyframes heartbeat {
     0%   { transform: scale(1); }
