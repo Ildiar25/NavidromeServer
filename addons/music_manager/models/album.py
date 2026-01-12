@@ -4,10 +4,11 @@ import logging
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.models import Model
-from odoo.fields import Binary, Boolean, Char, Integer, Many2one, One2many
+from odoo.fields import Binary, Boolean, Char, Integer, Many2one, One2many, Selection
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..utils.custom_types import AlbumVals
+from ..utils.file_utils import get_years_list
 
 
 _logger = logging.getLogger(__name__)
@@ -28,15 +29,23 @@ class Album(Model, ProcessImageMixin):
     track_ids = One2many(comodel_name='music_manager.track', inverse_name='album_id', string=_("Tracks"))
 
     # Computed fields
+    disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', store=False)
+    display_duration = Char(string=_("Duration (min)"), compute='_compute_display_duration', store=False, readonly=True)
+    duration = Integer(string=_("Duration (sec)"), compute='_compute_disk_duration', store=False)
     picture = Binary(
         string=_("Picture"),
         compute='_compute_album_picture',
         inverse='_inverse_album_picture',
         store=False,
     )
-    disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
-    year = Char(string=_("Year"), compute='_compute_album_year', inverse='_inverse_album_year', store=True)
+    year = Selection(
+        string=_("Debut year"),
+        selection='_get_years_list',
+        compute='_compute_album_year',
+        inverse='_inverse_album_year',
+        store=True,
+    )
 
     # Techincal fields
     owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
@@ -87,11 +96,8 @@ class Album(Model, ProcessImageMixin):
         return res
 
     def unlink(self):
-
-        for album in self:
-            album.track_ids.unlink()
-
-        return super().unlink()
+        self.mapped('track_ids').unlink()
+        return super(Album, self.exists()).unlink()
 
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:
@@ -103,6 +109,19 @@ class Album(Model, ProcessImageMixin):
         for album in self:
             disk_amount = album.track_ids.mapped('total_disk')
             album.disk_amount = max(disk_amount) if disk_amount else 0
+
+    @api.depends('track_ids.duration')
+    def _compute_disk_duration(self) -> None:
+        for album in self:
+            disk_duration = album.track_ids.mapped('duration')
+            album.duration = sum(disk_duration) if disk_duration else 0
+
+    @api.depends('duration')
+    def _compute_display_duration(self) -> None:
+        for album in self:
+            hours, remainder = divmod(album.duration, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            album.display_duration = f"{hours:02}:{minutes:02}:{seconds:02}"
 
     @api.depends('track_ids.picture')
     def _compute_album_picture(self) -> None:
@@ -119,20 +138,20 @@ class Album(Model, ProcessImageMixin):
         for album in self:
             album.track_ids.write({'picture': album.picture})
 
-    @api.depends('track_ids', 'track_ids.year')
+    @api.depends('track_ids.year')
     def _compute_album_year(self) -> None:
         for album in self:
-            if not album.year:
-                track_year = next((t.year for t in album.track_ids if t.year), False)
-                album.year = track_year
+            tracks_with_year = album.track_ids.filtered(lambda track: track.year)
+
+            if tracks_with_year:
+                album.year = tracks_with_year[0].year
+
+            else:
+                album.year = False
 
     def _inverse_album_year(self) -> None:
         for album in self:
-            if album.year:
-                album.track_ids.write({'year': album.year})
-
-            else:
-                album.track_ids.write({'year': False})
+            album.track_ids.write({'year': album.year})
 
     def set_favorite(self) -> None:
         for album in self:
@@ -186,3 +205,7 @@ class Album(Model, ProcessImageMixin):
                 'sticky': False,
             }
         }
+
+    @staticmethod
+    def _get_years_list():
+        return get_years_list()

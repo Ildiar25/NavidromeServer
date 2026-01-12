@@ -30,15 +30,15 @@
                     <field name="album_id" string="Album"/>
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
-                    <field name="duration" string="Duration"/>
+                    <field name="display_duration" string="Duration"/>
                     <field name="has_valid_path" column_invisible="True"/>
                     <field name="is_saved" column_invisible="True"/>
                     <field name="is_deleted" column_invisible="True"/>
                     <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
-                    <field name="bitrate" string="Quality" optional="hide"/>
-                    <field name="sample_rate" string="Frequency (kHz)" optional="hide"/>
+                    <field name="display_bitrate" string="Quality" optional="hide"/>
+                    <field name="display_sample_rate" string="Frequency (kHz)" optional="hide"/>
                     <field name="file_path" string="Path" optional="hide"/>
                 </tree>
             </field>
@@ -51,7 +51,7 @@
             <field name="arch" type="xml">
                 <form string="Track form view" disable_autofocus="True" create="False">
                     <field name="is_deleted" invisible="True"/>
-                    <sheet>
+                    <sheet class="form-bg-decoration">
                         <header>
                             <h1> 🎯 Editing track metadata</h1>
                         </header>
@@ -98,9 +98,9 @@
                             <page string="Techincal info">
                                 <group string="Summary">
                                     <group>
-                                        <field name="duration" string="Duration (min)"/>
-                                        <field name="bitrate" string="Bitrate"/>
-                                        <field name="sample_rate" string="Sample rate"/>
+                                        <field name="display_duration" string="Duration (min)"/>
+                                        <field name="display_bitrate" string="Bitrate"/>
+                                        <field name="display_sample_rate" string="Sample rate"/>
                                         <field name="channels" string="Channel"/>
                                     </group>
                                     <group>

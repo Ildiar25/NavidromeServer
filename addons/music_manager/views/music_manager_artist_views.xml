@@ -97,7 +97,8 @@
                                 <group>
                                     <field name="name" string="Group or artist name"/>
                                     <field name="real_name" string="Real name"/>
-                                    <field name="start_year" string="Debut year"/>
+                                    <field name="start_year" string="Birth year" invisible="is_group"/>
+                                    <field name="start_year" string="Debut year" invisible="not is_group"/>
                                     <field name="is_group" string="Is group"/>
                                     <field name="website" string="Website" widget="url"/>
                                     <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>

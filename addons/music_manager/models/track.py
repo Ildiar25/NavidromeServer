@@ -5,12 +5,13 @@ from pathlib import Path
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import UserError, ValidationError
-from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one
+from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..adapters import FileServiceAdapter, TrackServiceAdapter
 from ..utils.exceptions import FilePersistenceError, MusicManagerError, InvalidPathError
+from ..utils.file_utils import get_years_list
 
 
 _logger = logging.getLogger(__name__)
@@ -28,15 +29,15 @@ class Track(Model, ProcessImageMixin):
     total_disk = Integer(string=_("Total disk no"))
     total_track = Integer(string=_("Total track no"))
     track_no = Integer(string=_("Track no"))
-    year = Char(string=_("Year"))
+    year = Selection(string=_("Year"), selection='_get_years_list')
 
     # Readonly fields
-    bitrate = Char(string=_("Bitrate"), default="Unknown", readonly=True)
+    bitrate = Integer(string=_("Bitrate"), default=0, readonly=True)
     channels = Char(string=_("Channels"), default="Stereo", readonly=True)
     codec = Char(string=_("Codec"), default="Unknown", readonly=True)
-    duration = Char(string=_("Duration (min)"), default="0:00", readonly=True)
+    duration = Integer(string=_("Duration (sec)"), default=0, readonly=True)
     mime_type = Char(string=_("MIME"), default="Unknown", readonly=True)
-    sample_rate = Char(string=_("Sample rate"), default="Unknown", readonly=True)
+    sample_rate = Integer(string=_("Sample rate"), default=0, readonly=True)
 
     # Relational fields
     album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"), copy=False)
@@ -53,6 +54,9 @@ class Track(Model, ProcessImageMixin):
         default=False,
     )
     display_artist_names = Char(string=_("Display artist name"), compute='_compute_display_artist_name', store=False)
+    display_bitrate = Char(string=_("Display bitrate"), compute='_compute_display_bitrate', store=False)
+    display_duration = Char(string=_("Display duration (min)"), compute='_compute_display_duration', store=False)
+    display_sample_rate = Char(string=_("Display sample rate"), compute='_compute_display_sample_rate', store=False)
     is_deleted = Boolean(
         string=_("Is deleted"), compute='_compute_file_is_deleted', search='_search_is_deleted', store=False
     )
@@ -100,44 +104,58 @@ class Track(Model, ProcessImageMixin):
         return res
 
     def unlink(self):
-        file_paths = [(track.file_path, track.is_deleted) for track in self]
-        check_albums = self.mapped('album_id')
-
+        settings = self.env['music_manager.audio_settings'].search([], limit=1)
+        delete_files = settings.to_delete if settings else False
         file_service = self._get_file_service_adapter()
 
+        # Check DB info
+        files_to_check = [(track.file_path, track.is_deleted) for track in self]
+        potential_empty_albums = self.mapped('album_id')
+
+        # Delete track records
         res = super().unlink()
 
-        for album in check_albums:
-            if not self.env['music_manager.track'].search([('album_id', '=', album.id)]):
-                album.unlink()
+        # Look for empty albums
+        album_with_tracks = self.env['music_manager.track'].search(
+            [('album_id', 'in', potential_empty_albums.ids)]
+        ).mapped('album_id')
 
-        is_admin = self.env.user.has_group('music_manager.group_music_manager_user_admin')
+        albums_to_delete = potential_empty_albums - album_with_tracks
 
-        for path, is_deleted in file_paths:
-            if not is_deleted:
-                still_used = self.env['music_manager.track'].sudo().search_count([('file_path', '=', path)])
+        if albums_to_delete:
+            albums_to_delete.unlink()
 
-                if is_admin or still_used == 0:
-                    try:
-                        file_service.delete_file(path)
+        if not delete_files:
+            return res
 
-                    except InvalidPathError as invalid_path:
-                        _logger.warning(f"File to delete not found, continuing: {invalid_path}")
-                        continue
+        # File cleaning
+        for path, is_deleted in files_to_check:
+            if not path or is_deleted:
+                continue
 
-                    except FilePersistenceError as not_allowed:
-                        _logger.error(f"Cannot delete the file: {not_allowed}")
-                        raise ValidationError(
-                            _("\nAn internal issue ocurred while trying to delete the file."
-                              "\nPlease, try it again with a different record.")
-                        )
+            still_used = self.env['music_manager.track'].sudo().search_count([('file_path', '=', path)])
 
-                    except MusicManagerError as unknown_error:
-                        _logger.error(f"Unespected error while trying to delete the file: {unknown_error}")
-                        raise ValidationError(
-                            _("\nDamn! Something went wrong while deleting the file."
-                              "\nPlease, contact with your Admin.")
-                        )
+            if still_used == 0:
+                try:
+                    file_service.delete_file(path)
+
+                except InvalidPathError as invalid_path:
+                    _logger.warning(f"File to delete not found, continuing: {invalid_path}")
+                    continue
+
+                except FilePersistenceError as not_allowed:
+                    _logger.error(f"Cannot delete the file: {not_allowed}")
+                    raise ValidationError(
+                        _("\nAn internal issue ocurred while trying to delete the file."
+                          "\nPlease, try it again with a different record.")
+                    )
+
+                except MusicManagerError as unknown_error:
+                    _logger.error(f"Unespected error while trying to delete the file: {unknown_error}")
+                    raise ValidationError(
+                        _("\nDamn! Something went wrong while deleting the file."
+                          "\nPlease, contact with your Admin.")
+                    )
 
         return res
 
@@ -146,6 +164,22 @@ class Track(Model, ProcessImageMixin):
         for track in self:
             artist_names = track.track_artist_ids.mapped('name')
             track.display_artist_names = ", ".join(artist_names) if artist_names else ""
+
+    @api.depends('bitrate')
+    def _compute_display_bitrate(self):
+        for track in self:
+            track.display_bitrate = f"{track.bitrate} kbps"
+
+    @api.depends('duration')
+    def _compute_display_duration(self):
+        for track in self:
+            minutes, seconds = divmod(track.duration, 60)
+            track.display_duration = f"{minutes:02}:{seconds:02}"
+
+    @api.depends('sample_rate')
+    def _compute_display_sample_rate(self):
+        for track in self:
+            track.display_sample_rate = f"{track.sample_rate} kHz"
 
     @api.depends('old_path')
     def _compute_file_is_deleted(self) -> None:
@@ -427,3 +461,7 @@ class Track(Model, ProcessImageMixin):
             return False
 
         return Path(filepath).exists()
+
+    @staticmethod
+    def _get_years_list():
+        return get_years_list()

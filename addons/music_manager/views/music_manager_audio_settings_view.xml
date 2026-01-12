@@ -44,6 +44,7 @@
                                 </p>
                                 <field name="root_dir" string="Root directory"/>
                                 <field name="available_adapters" string="Downloaders"/>
+                                <field name="to_delete" string="Delete server files"/>
                             </group>
                             <group string="Image settings 🎨">
                                 <p colspan="2" class="text-muted">
