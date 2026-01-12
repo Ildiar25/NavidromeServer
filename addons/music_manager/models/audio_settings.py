@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 import logging
 from typing import Any, Dict
 
 # noinspection PyProtectedMember
 from odoo import _
 from odoo.models import Model
-from odoo.fields import Char, Integer, Selection
+from odoo.fields import Boolean, Char, Integer, Selection
 
 from ..adapters.file_service_adapter import FileServiceAdapter
 from ..adapters.track_service_adapter import TrackServiceAdapter
 from ..utils.custom_types import DisplayNotification
 from ..utils.data_encoding import base64_encode_in_bytes
+from ..utils.file_utils import get_years_list
 
 
 _logger = logging.getLogger(__name__)
@@ -71,6 +73,7 @@ class AudioSettings(Model):
         required=True,
     )
     root_dir = Char(string="Root directory", default="/music", readonly=True, required=True)
+    to_delete = Boolean(string=_("Delete files"), default=False, required=True)
 
     # Technical fields
     name = Char(string="", default=' ', readonly=True, required=True)
@@ -138,7 +141,7 @@ class AudioSettings(Model):
             'total_disk': data['tmp_total_disk'],
             'total_track': data['tmp_total_track'],
             'track_no': data['tmp_track_no'],
-            'year': data['tmp_year'],
+            'year': self._match_track_year(data['tmp_year']),
             'album_artist_id': album_artist_id,
             'album_id': self._match_album_id(data['tmp_album'], album_artist_id),
             'genre_id': self._match_genre_id(data['tmp_genre']),
@@ -208,6 +211,19 @@ class AudioSettings(Model):
             })
 
         return genre_id.id
+
+    @staticmethod
+    def _match_track_year(year: str):
+        allowed_years = [year[0] for year in get_years_list()]
+
+        if not isinstance(year, str):
+            year = str(year)
+
+        return year if year in allowed_years else ""
+
+    @staticmethod
+    def _get_years_list():
+        return get_years_list()
 
     @staticmethod
     def _notify_user(message: str, style: str, sticky: bool = False) -> DisplayNotification:

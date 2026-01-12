@@ -1,5 +1,7 @@
+import datetime
 import magic
 import re
+from typing import List, Tuple
 from unidecode import unidecode
 
 from ..utils.constants import SYMBOL_MAP
@@ -62,3 +64,13 @@ def _map_special_characters(string: str) -> str:
 
 def _normalize_characters(string: str) -> str:
     return unidecode(string).lower()
+
+
+    # =========================================================================================
+    # Utils for dates
+    # =========================================================================================
+
+
+def get_years_list() -> List[Tuple[str, str]]:
+    current_year = datetime.datetime.now().year
+    return [(str(year), str(year)) for year in range(current_year, 1299, -1)]

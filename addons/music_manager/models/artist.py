@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-import datetime
 import logging
-from typing import List, Tuple
 
 # noinspection PyProtectedMember
 from odoo import _, api
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.models import Model
 from odoo.fields import Binary, Boolean, Char, Date, Html, Integer, Many2many, Many2one, One2many, Selection, Text
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..utils.custom_types import ArtistVals
+from ..utils.file_utils import get_years_list
 
 
 _logger = logging.getLogger(__name__)
@@ -27,7 +26,7 @@ class Artist(Model, ProcessImageMixin):
     name = Char(string=_("Name"), required=True)
     picture = Binary(string=_("Picture"))
     real_name = Char(string=_("Real name"))
-    start_year = Selection(string=_("Debut year"), selection='_get_years_list')
+    start_year = Selection(string=_("Artist year"), selection='_get_years_list')
     website = Char(string=_("Website"))
 
     # Relational fields
@@ -72,7 +71,7 @@ class Artist(Model, ProcessImageMixin):
         for artist in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if artist.owner != self.env.user:
-                    raise UserError(_("\nCannot update this artist because you are not the owner. 🤷"))
+                    raise AccessError(_("\nCannot update this artist because you are not the owner. 🤷"))
 
         self._process_picture_image(vals)
 
@@ -82,16 +81,16 @@ class Artist(Model, ProcessImageMixin):
         for artist in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if artist.owner != self.env.user:
-                    raise UserError(_("\nCannot delete this artist because you are not the owner. 🤷"))
+                    raise AccessError(_("\nCannot delete this artist because you are not the owner. 🤷"))
 
-                related_tracks = self.env['music_manager.track'].sudo().search(
+                related_track = self.env['music_manager.track'].sudo().search(
                     [('original_artist_id', '=', artist.id)], limit=1
                 )
-                related_albums = self.env['music_manager.album'].sudo().search(
+                related_album = self.env['music_manager.album'].sudo().search(
                     [('album_artist_id', '=', artist.id)], limit=1
                 )
 
-                if related_tracks or related_albums:
+                if related_track or related_album:
                     raise UserError(_("\nCannot delete this artist because it is in use by other users. 🤷"))
 
         return super().unlink()
@@ -165,6 +164,5 @@ class Artist(Model, ProcessImageMixin):
         }
 
     @staticmethod
-    def _get_years_list() -> List[Tuple[str, str]]:
-        current_year = datetime.datetime.now().year
-        return [(str(year), str(year)) for year in range(current_year, 1599, -1)]
+    def _get_years_list():
+        return get_years_list()
