@@ -133,7 +133,7 @@
                                 <group>
                                     <field name="possible_album_artist_id" string="Album artist" placeholder="Select or create album artist"/>
                                     <field name="possible_original_artist_id" string="Original artist" placeholder="Select or create original artist"/>
-                                    <field name="tmp_year" string="Year"/>
+                                    <field name="year" string="Year"/>
                                     <field name="tmp_collection" string="Part of a collection"/>
                                     <field name="tmp_total_track" string="Total track"/>
                                     <field name="tmp_total_disk" string="Total disk"/>
@@ -177,7 +177,7 @@
                                 <group>
                                     <field name="possible_album_artist_id" string="Album artist" placeholder="Select or create album artist" readonly="True"/>
                                     <field name="possible_original_artist_id" string="Original artist" placeholder="Select or create original artist" readonly="True"/>
-                                    <field name="tmp_year" string="Year" readonly="True"/>
+                                    <field name="year" string="Year" readonly="True"/>
                                     <field name="tmp_collection" string="Part of a collection" readonly="True"/>
                                     <field name="tmp_total_track" string="Total track" readonly="True"/>
                                     <field name="tmp_total_disk" string="Total disk" readonly="True"/>

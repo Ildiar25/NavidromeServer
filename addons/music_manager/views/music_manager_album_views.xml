@@ -13,7 +13,6 @@
             <field name="res_model">music_manager.album</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
-            <field name="context">{'group_by': 'owner'}</field>
         </record>
 
         <!-- Kanban view -->
@@ -53,7 +52,8 @@
                     <field name="genre_id" string="Genre"/>
                     <field name="track_amount" string="Track amount" optional="hide"/>
                     <field name="disk_amount" string="Disk amount" optional="hide"/>
-                    <field name="year" string="Year" optional="hide"/>
+                    <field name="display_duration" string="Total duration"/>
+                    <field name="year" string="Year"/>
                     <field name="owner" string="Owner" optional="hide"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
@@ -67,7 +67,7 @@
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
                 <form string="Album form view" disable_autofocus="True">
-                    <sheet>
+                    <sheet class="form-bg-decoration">
                         <header>
                             <h1> 💽 Editing album</h1>
                         </header>
@@ -77,11 +77,16 @@
                                 <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
                             </group>
                             <group class="flex-grow-1">
-                                <field name="name" string="Album title"/>
-                                <field name="year" string="Year"/>
-                                <field name="album_artist_id" string="Album artist"/>
-                                <field name="genre_id" string="Genre"/>
-                                <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                <group>
+                                    <field name="name" string="Album title"/>
+                                    <field name="year" string="Year"/>
+                                    <field name="album_artist_id" string="Album artist"/>
+                                    <field name="genre_id" string="Genre"/>
+                                    <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                </group>
+                                <group>
+                                    <field name="display_duration" string="Total duration"/>
+                                </group>
                             </group>
                         </group>
                         <separator/>
@@ -93,13 +98,14 @@
                             <page string="Track list">
                                 <field name="track_ids" readonly="True">
                                 <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
-                                    <field name="track_no" string="#" nolabel="1" width="20px" decoration-bf="True"/>
+                                    <field name="track_no" string="#" width="20px" decoration-bf="True"/>
                                     <field name="name" string="Title"/>
+                                    <field name="display_artist_names" string="Track artist(s)"/>
                                     <field name="album_artist_id" string="Album artist"/>
                                     <field name="album_id" string="Album"/>
                                     <field name="year" string="Year"/>
                                     <field name="genre_id" string="Genre"/>
-                                    <field name="duration" string="Duration"/>
+                                    <field name="display_duration" string="Duration"/>
                                     <field name="is_saved" column_invisible="True"/>
                                     <field name="is_deleted" column_invisible="True"/>
                                 </tree>
