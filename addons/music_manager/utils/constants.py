@@ -30,4 +30,6 @@ SYMBOL_MAP: Final[Dict[str, str]] = {
     "+": "_plus_",
     "@": "_at_",
     "!!!": "_three_exclamation_marks_",
+    "=": "_equals_",
+    "÷": "_divide_",
 }
