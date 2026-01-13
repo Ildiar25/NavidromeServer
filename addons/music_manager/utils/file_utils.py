@@ -39,9 +39,9 @@ def validate_allowed_mimes(file_data: bytes, allowed_mimes: set[str]) -> str:
 
 
 def clean_path_section(section: str) -> str:
-    normalized = _normalize_characters(section)
-    mapped_chars = _map_special_characters(normalized)
-    cleaned = re.sub(pattern=r'[^a-z0-9]', repl='_', string=mapped_chars)
+    mapped_chars = _map_special_characters(section)
+    normalized = _normalize_characters(mapped_chars)
+    cleaned = re.sub(pattern=r'[^a-z0-9]', repl='_', string=normalized)
     return re.sub(pattern=r'_+', repl='_', string=cleaned).strip('_')
 
 
