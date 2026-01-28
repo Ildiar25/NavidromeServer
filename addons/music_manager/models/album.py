@@ -4,7 +4,7 @@ import logging
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.models import Model
-from odoo.fields import Binary, Boolean, Char, Integer, Many2one, One2many, Selection
+from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, One2many, Selection
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..utils.custom_types import AlbumVals
@@ -48,7 +48,8 @@ class Album(Model, ProcessImageMixin):
     )
 
     # Techincal fields
-    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+    owner_ids = Many2many(comodel_name='res.users', string=_("Owners"), compute='_compute_album_owners', store=True)
+    all_track_ids = Many2many(comodel_name='music_manager.track', string=_("All tracks"), compute='_compute_all_track_ids')
 
     @api.model_create_multi
     def create(self, list_vals: list[AlbumVals]):
@@ -73,7 +74,7 @@ class Album(Model, ProcessImageMixin):
 
         return albums
 
-    def write(self, vals: AlbumVals):
+    def write(self, vals):
         self._process_picture_image(vals)
 
         res = super().write(vals)
@@ -87,17 +88,43 @@ class Album(Model, ProcessImageMixin):
             if 'album_artist_id' in vals:
                 update_vals['album_artist_id'] = vals['album_artist_id']
 
-            if 'owner' in vals:
-                update_vals['owner'] = vals['owner']
-
             if update_vals and album.track_ids:
                 album.track_ids.write(update_vals)
 
         return res
 
     def unlink(self):
-        self.mapped('track_ids').unlink()
-        return super(Album, self.exists()).unlink()
+        if self.env.context.get('skip_album_sync'):
+            return super().unlink()
+
+        for album in self:
+            own_tracks = album.track_ids.filtered(lambda track: track.owner.id == self.env.user.id)
+
+            if own_tracks:
+                own_tracks.unlink()
+
+            if album.exists():
+                remaining_tracks = self.env['music_manager.track'].sudo().search_count([
+                    ('album_id', '=', album.id)
+                ])
+
+                if remaining_tracks == 0:
+                    super(Album, album).sudo().unlink()
+
+        return True
+
+    @api.depends('track_ids.owner')
+    def _compute_album_owners(self) -> None:
+        for album in self:
+            album.owner_ids = album.track_ids.mapped('owner')
+
+    @api.depends('track_ids')
+    def _compute_all_track_ids(self) -> None:
+        for album in self:
+            all_tracks = self.env['music_manager.track'].sudo().search([
+                ('album_id', '=', album.id)
+            ])
+            album.all_track_ids = all_tracks
 
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:

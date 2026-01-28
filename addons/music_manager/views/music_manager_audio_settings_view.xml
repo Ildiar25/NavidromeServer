@@ -34,7 +34,7 @@
                                     keep in mind that file sizes will be slightly larger.
                                 </p>
                                 <field name="sound_format" string="Sound format"/>
-                                <field name="bitrate" string="Quality"/>
+                                <field name="bitrate" string="Quality" widget="radio"/>
                             </group>
                             <group string="Download settings 📂">
                                 <p colspan="2" class="text-muted">
@@ -44,7 +44,7 @@
                                 </p>
                                 <field name="root_dir" string="Root directory"/>
                                 <field name="available_adapters" string="Downloaders"/>
-                                <field name="to_delete" string="Delete server files"/>
+                                <field name="to_delete" string="Delete server files" widget="boolean_toggle"/>
                             </group>
                             <group string="Image settings 🎨">
                                 <p colspan="2" class="text-muted">
@@ -53,7 +53,7 @@
                                     preferences.
                                 </p>
                                 <field name="image_format" string="Image format"/>
-                                <field name="image_size" string="Image size"/>
+                                <field name="image_size" string="Image size" widget="radio"/>
                             </group>
                         </group>
                     </sheet>

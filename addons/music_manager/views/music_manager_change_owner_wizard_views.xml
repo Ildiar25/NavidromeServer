@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+<!--        <record id="action_change_owner_id_album" model="ir.actions.act_window">-->
+<!--            <field name="name">&#128100; Change owner</field>-->
+<!--            <field name="res_model">music_manager.change_owner_wizard</field>-->
+<!--            <field name="view_mode">form</field>-->
+<!--            <field name="target">new</field>-->
+<!--            <field name="binding_model_id" ref="model_music_manager_album"/>-->
+<!--        </record>-->
+
+        <record id="action_change_owner_id_artist" model="ir.actions.act_window">
+            <field name="name">&#128100; Change owner</field>
+            <field name="res_model">music_manager.change_owner_wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_music_manager_artist"/>
+        </record>
+
+        <record id="action_change_owner_id_genre" model="ir.actions.act_window">
+            <field name="name">&#128100; Change owner</field>
+            <field name="res_model">music_manager.change_owner_wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_music_manager_genre"/>
+        </record>
+
+        <record id="action_change_owner_id_track" model="ir.actions.act_window">
+            <field name="name">&#128100; Change owner</field>
+            <field name="res_model">music_manager.change_owner_wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_music_manager_track"/>
+        </record>
+
+        <!-- Form view -->
+        <record id="music_manager_change_owner_wizard_view_form" model="ir.ui.view">
+            <field name="name">music_manager.change_owner_wizard.view.form</field>
+            <field name="model">music_manager.change_owner_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Change owner form view">
+                    <group>
+                        <field name="new_owner_id" string="New owner"/>
+                    </group>
+                    <footer>
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                        <button string="Apply" type="object" name="apply_owner_changes" class="btn btn-success"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
