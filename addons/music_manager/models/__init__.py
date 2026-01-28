@@ -4,7 +4,6 @@ from .artist import Artist
 from .audio_settings import AudioSettings
 from .genre import Genre
 from .track import Track
-from .track_wizard import TrackWizard
 from . import mixins
 
 __all__ = [
@@ -13,5 +12,4 @@ __all__ = [
     "AudioSettings",
     "Genre",
     "Track",
-    "TrackWizard",
 ]
