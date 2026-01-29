@@ -126,7 +126,7 @@
                                         <field name="disk_amount" string="Disk amount" optional="hide"/>
                                         <field name="genre_id" string="Genre"/>
                                         <field name="year" string="Year"/>
-                                        <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="owner_ids" string="Owner(s)" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
@@ -168,6 +168,7 @@
                     <!-- Custom filters -->
                     <filter name="by_group" string="Is group" domain="[('is_group', '=', True)]"/>
                     <filter name="by_artist" string="Is artist" domain="[('is_group', '=', False)]"/>
+                    <filter name="my_contributions" string="My contributions" domain="[('owner', '=', uid)]"/>
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">

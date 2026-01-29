@@ -7,6 +7,7 @@
     <menuitem id="music_manager_music_menu" name="Music" parent="music_manager_menu_root"/>
     <menuitem id="music_manager_music_menu_wizard_action_admin" name="Add track" parent="music_manager_menu_root" action="music_manager_track_wizard_action"/>
     <menuitem id="music_manager_music_menu_settings" name="Settings" parent="music_manager_menu_root" action="music_manager_audio_settings_action" groups="music_manager.group_music_manager_user_admin"/>
+    <menuitem id="music_manager_music_menu_import_queue" name="Import queue" parent="music_manager_menu_root" action="music_manager_music_import_queue_action" groups="music_manager.group_music_manager_user_admin"/>
 
     <!-- Actions User General -->
     <menuitem id="music_manager_music_menu_song_action_general" name="Songs" parent="music_manager_music_menu" action="music_manager_track_view_action_general" groups="music_manager.group_music_manager_user_general"/>

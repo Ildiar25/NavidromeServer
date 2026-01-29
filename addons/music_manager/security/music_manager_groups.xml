@@ -29,28 +29,28 @@
 
         <!-- Music manager model rules: USER -->
         <record id="rule_music_manager_own_tracks" model="ir.rule">
-            <field name="name">Music Manager: Own Tracks</field>
+            <field name="name">Music Manager | Own Tracks</field>
             <field name="model_id" ref="music_manager.model_music_manager_track"/>
-            <field name="domain_force">[('owner', '=', user.id)]</field>
+            <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
         </record>
 
         <record id="rule_music_manager_own_albums" model="ir.rule">
-            <field name="name">Music Manager: Own Albums</field>
+            <field name="name">Music Manager | Shared Albums</field>
             <field name="model_id" ref="music_manager.model_music_manager_album"/>
-            <field name="domain_force">[('owner', '=', user.id)]</field>
+            <field name="domain_force">[('owner_ids', 'in', [user.id])]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
         </record>
 
         <record id="rule_music_manager_all_artists" model="ir.rule">
-            <field name="name">Music manager: All Artists</field>
+            <field name="name">Music Manager | All Artists</field>
             <field name="model_id" ref="music_manager.model_music_manager_artist"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
         </record>
 
         <record id="rule_music_manager_all_genres" model="ir.rule">
-            <field name="name">Music Manager: All Genres</field>
+            <field name="name">Music Manager | All Genres</field>
             <field name="model_id" ref="music_manager.model_music_manager_genre"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
@@ -58,14 +58,14 @@
 
         <!-- Music manager model rules: ADMIN -->
         <record id="rule_music_manager_all_tracks" model="ir.rule">
-            <field name="name">Music Manager: All Tracks</field>
+            <field name="name">Music Manager | All Tracks</field>
             <field name="model_id" ref="music_manager.model_music_manager_track"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_admin'))]"/>
         </record>
 
         <record id="rule_music_manager_all_albums" model="ir.rule">
-            <field name="name">Music Manager: All Albums</field>
+            <field name="name">Music Manager | All Albums</field>
             <field name="model_id" ref="music_manager.model_music_manager_album"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_admin'))]"/>

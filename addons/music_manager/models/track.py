@@ -116,14 +116,15 @@ class Track(Model, ProcessImageMixin):
         res = super().unlink()
 
         # Look for empty albums
-        album_with_tracks = self.env['music_manager.track'].search(
-            [('album_id', 'in', potential_empty_albums.ids)]
-        ).mapped('album_id')
+        tracks_still_in_db = self.env['music_manager.track'].sudo().search([
+            ('album_id', 'in', potential_empty_albums.ids)
+        ])
 
-        albums_to_delete = potential_empty_albums - album_with_tracks
+        album_ids_with_content = tracks_still_in_db.mapped('album_id').ids
+        albums_to_delete = potential_empty_albums.filtered(lambda album: album.id not in album_ids_with_content)
 
         if albums_to_delete:
-            albums_to_delete.unlink()
+            albums_to_delete.sudo().with_context(skip_album_sync=True).unlink()
 
         if not delete_files:
             return res
@@ -410,29 +411,34 @@ class Track(Model, ProcessImageMixin):
 
     def _sync_album_with_owner(self) -> None:
         self.ensure_one()
-        if not self.owner:
+
+        if not self.owner or not self.album_id:
             return
 
-        if not (self.album_id.name or self.album_name):
-            return
-
-        if self.album_id and self.album_id.owner == self.owner:
+        if self.owner in self.album_id.owner_ids:
             return
 
         album_class = self.env['music_manager.album']
-        found_album = album_class.search([('owner', '=', self.owner.id)], limit=1)
+        found_album = album_class.search([
+            ('name', '=', self.album_id.name),
+            ('album_artist_id', '=', self.album_artist_id.id),
+        ], limit=1)
 
         if not found_album:
             found_album = album_class.create(
                 {
                     'name': self.album_id.name,
-                    'owner': self.owner.id,
                     'album_artist_id': self.album_artist_id.id if self.album_artist_id else False,
                     'genre_id': self.genre_id.id if self.genre_id else False,
                 }
             )
 
-        self.album_id = found_album.id
+        old_album = self.album_id
+        if found_album != old_album:
+            self.album_id = found_album.id
+
+        if old_album and not old_album.exists().track_ids:
+            old_album.unlink()
 
     def _update_metadata(self) -> None:
 

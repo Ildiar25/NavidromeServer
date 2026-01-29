@@ -20,7 +20,7 @@
             <field name="name">music_manager.album.view.kanban</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <kanban srting="Album kanban view">
+                <kanban srting="Album kanban view" create="False">
                     <field name="name"/>
                     <field name="is_favorite"/>
                     <template>
@@ -45,7 +45,7 @@
             <field name="name">music_manager.album.view.tree</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <tree string="Album tree view">
+                <tree string="Album tree view" create="False">
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
                     <field name="name" string="Album title"/>
                     <field name="album_artist_id" string="Album artist"/>
@@ -54,7 +54,7 @@
                     <field name="disk_amount" string="Disk amount" optional="hide"/>
                     <field name="display_duration" string="Total duration"/>
                     <field name="year" string="Year"/>
-                    <field name="owner" string="Owner" optional="hide"/>
+                    <field name="owner_ids" string="Owners" optional="hide" widget="many2many_tags"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
                 </tree>
@@ -66,7 +66,7 @@
             <field name="name">music_manager.album.view.form</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <form string="Album form view" disable_autofocus="True">
+                <form string="Album form view" disable_autofocus="True" create="False">
                     <sheet class="form-bg-decoration">
                         <header>
                             <h1> 💽 Editing album</h1>
@@ -82,9 +82,7 @@
                                     <field name="year" string="Year"/>
                                     <field name="album_artist_id" string="Album artist"/>
                                     <field name="genre_id" string="Genre"/>
-                                    <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
-                                </group>
-                                <group>
+                                    <field name="owner_ids" string="Owners" widget="many2many_tags"/>
                                     <field name="display_duration" string="Total duration"/>
                                 </group>
                             </group>
@@ -96,8 +94,8 @@
                         <separator/>
                         <notebook>
                             <page string="Track list">
-                                <field name="track_ids" readonly="True">
-                                <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
+                                <field name="all_track_ids" readonly="True">
+                                <tree decoration-danger="is_deleted" decoration-warning="not is_saved" decoration-muted="owner != uid" decoration-it="owner != uid" decoration-bf="owner == uid">
                                     <field name="track_no" string="#" width="20px" decoration-bf="True"/>
                                     <field name="name" string="Title"/>
                                     <field name="display_artist_names" string="Track artist(s)"/>
@@ -105,6 +103,7 @@
                                     <field name="album_id" string="Album"/>
                                     <field name="year" string="Year"/>
                                     <field name="genre_id" string="Genre"/>
+                                    <field name="owner" widget="many2one_avatar"/>
                                     <field name="display_duration" string="Duration"/>
                                     <field name="is_saved" column_invisible="True"/>
                                     <field name="is_deleted" column_invisible="True"/>
@@ -126,10 +125,14 @@
                     <!-- Custom fields -->
                     <field name="name" string="by album title"/>
                     <field name="album_artist_id" string="by album artist"/>
+                    <field name="owner_ids" string="by owner's name" filter_domain="[('owner_ids.name', 'ilike', self)]" groups="music_manager.group_music_manager_user_admin"/>
+
+                    <!-- Custom filters -->
+                    <filter name="my_contributions" string="My contributions" domain="[('track_ids.owner', '=', uid)]"/>
+                    <filter name="shared_albums" string="Shared albums" domain="[('owner_ids', 'in', [uid]), ('track_ids.owner', '!=', uid)]"/>
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
-                        <filter name="owner" string="Owner" context="{'group_by': 'owner'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                         <filter name="genre_id" string="Genre" context="{'group_by': 'genre_id'}"/>

@@ -3,8 +3,8 @@ from .album import Album
 from .artist import Artist
 from .audio_settings import AudioSettings
 from .genre import Genre
+from .music_import_queue import MusicImportQueue
 from .track import Track
-from .track_wizard import TrackWizard
 from . import mixins
 
 __all__ = [
@@ -12,6 +12,6 @@ __all__ = [
     "Artist",
     "AudioSettings",
     "Genre",
+    "MusicImportQueue",
     "Track",
-    "TrackWizard",
 ]

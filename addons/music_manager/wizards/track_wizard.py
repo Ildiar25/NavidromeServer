@@ -8,7 +8,7 @@ from odoo.exceptions import ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Selection, Many2many, Many2one
 from odoo.models import TransientModel
 
-from .mixins.process_image_mixin import ProcessImageMixin
+from ..models.mixins.process_image_mixin import ProcessImageMixin
 from ..adapters.download_service_adapter import DownloadServiceAdapter
 from ..adapters.file_service_adapter import FileServiceAdapter
 from ..adapters.track_service_adapter import TrackServiceAdapter
