@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="music_manager_music_import_queue_action" model="ir.actions.act_window">
+            <field name="name">Import queue</field>
+            <field name="res_model">music_manager.music_import_queue</field>
+            <field name="view_mode">tree</field>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
+        </record>
+
+        <!-- Tree view -->
+        <record id="music_manager_music_import_queue_view_tree" model="ir.ui.view">
+            <field name="name">music_manager.music_import_queue.view.tree</field>
+            <field name="model">music_manager.music_import_queue</field>
+            <field name="arch" type="xml">
+                <tree string="Music import queue tree view" create="False">
+                    <field name="file_path" string="File path"/>
+                    <field name="state" string="State" widget="badge" decoration-danger="state == 'error'" decoration-info="state == 'pending'" decoration-success="state == 'processed'"/>
+                    <field name="error_message" string="Error message" invisible="state != 'error'"/>
+                    <field name="write_date" string="Last update"/>
+                </tree>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -96,134 +96,36 @@ class AudioSettings(Model):
 
     def action_read_root_folder(self):
         self.ensure_one()
-
         file_service = FileServiceAdapter(self.root_dir, self.sound_format)
-        track_service = TrackServiceAdapter(self.sound_format)
 
         str_file_paths = [str(file_path) for file_path in file_service.get_all_file_paths()]
 
         if not str_file_paths:
             return self._notify_user(_("Root folder is empty, add some files first!"), 'info')
 
-        track_records = self.env['music_manager.track'].search_read(
-            [('file_path', 'in', str_file_paths)],
-            ['file_path'],
+        existing_tracks = self.env['music_manager.track'].search_read(
+            [('file_path', 'in', str_file_paths)], ['file_path']
+        )
+        existing_queue = self.env['music_manager.music_import_queue'].search_read(
+            [('file_path', 'in', str_file_paths), ('state', 'in', ['pending', 'error'])], ['file_path']
         )
 
-        existing_paths = [record['file_path'] for record in track_records]
-        paths_to_process = [path for path in str_file_paths if path not in existing_paths]
+        processed_paths = {track['file_path'] for track in existing_tracks}
+        pending_paths = {track['file_path'] for track in existing_queue}
 
-        if not paths_to_process:
+        to_enqueue = [path for path in str_file_paths if path not in processed_paths and path not in pending_paths]
+
+        if not to_enqueue:
             return self._notify_user(_("All files are already in the library."), 'info')
 
-        total = 0
-        for str_path in paths_to_process:
-
-            file_bytes = file_service.read_file(str_path)
-            track_data = track_service.read_audio_info(base64_encode_in_bytes(file_bytes))
-
-            self.create_track_from_scan(str_path, track_data)
-            _logger.info(f"CREATED RECORDS FOR: {str_path}")
-            total += 1
+        self.env['music_manager.music_import_queue'].create(
+            [{'file_path': path, 'state': 'pending'} for path in to_enqueue],
+        )
 
         return self._notify_user(
-            _("Root folder scan finished! • %s new tracks added to the library.", total), 'success'
+            _("Root folder scan finished! • Found %s new files. Processing in background...", len(to_enqueue)),
+            'success'
         )
-
-    def create_track_from_scan(self, file_path: str, data: Dict[str, str | int | None]) -> None:
-
-        album_artist_id = self._match_artist_id(data['tmp_album_artist'])
-
-        self.env['music_manager.track'].create({
-            'picture': data['picture'],
-            'disk_no': data['tmp_disk_no'],
-            'name': data['tmp_name'],
-            'total_disk': data['tmp_total_disk'],
-            'total_track': data['tmp_total_track'],
-            'track_no': data['tmp_track_no'],
-            'year': self._match_track_year(data['tmp_year']),
-            'album_artist_id': album_artist_id,
-            'album_id': self._match_album_id(data['tmp_album'], album_artist_id),
-            'genre_id': self._match_genre_id(data['tmp_genre']),
-            'original_artist_id': self._match_artist_id(data['tmp_original_artist']),
-            'track_artist_ids': [(6, 0, self._match_various_artists_ids(data['tmp_artists']))],
-            'collection': data['tmp_collection'],
-            'file_path': file_path,
-            'old_path': file_path,
-            'is_saved': True,
-            'bitrate': data['bitrate'],
-            'channels': data['channels'],
-            'codec': data['codec'],
-            'duration': data['duration'],
-            'mime_type': data['mime_type'],
-            'sample_rate': data['sample_rate'],
-        })
-
-    def _match_album_id(self, album_name: str, album_artist_id: int):
-        album_id = self.env['music_manager.album'].search(
-            [('name', '=', album_name), ('album_artist_id', '=', album_artist_id)],
-            limit=1
-        )
-
-        if not album_id:
-            album_id = self.env['music_manager.album'].create({
-                'name': album_name,
-                'album_artist_id': album_artist_id,
-            })
-
-        return album_id.id
-
-    def _match_artist_id(self, artist_name: str):
-        artist_id = self.env['music_manager.artist'].search([('name', '=', artist_name)], limit=1)
-
-        if not artist_id:
-            artist_id = self.env['music_manager.artist'].create({
-                'name': artist_name,
-            })
-
-        return artist_id.id
-
-    def _match_various_artists_ids(self, artist_names: str):
-        names = [name.strip() for name in artist_names.split(",")]
-        artist_ids = []
-
-        for name in names:
-            found = self.env['music_manager.artist'].search([('name', '=', name)], limit=1)
-
-            if not found:
-                new_artist = self.env['music_manager.artist'].create({
-                    'name': name,
-                })
-                artist_ids.append(new_artist.id)
-
-                continue
-
-            artist_ids.append(found.id)
-
-        return artist_ids
-
-    def _match_genre_id(self, genre_name: str):
-        genre_id = self.env['music_manager.genre'].search([('name', '=', genre_name)], limit=1)
-
-        if not genre_id:
-            genre_id = self.env['music_manager.genre'].create({
-                'name': genre_name,
-            })
-
-        return genre_id.id
-
-    @staticmethod
-    def _match_track_year(year: str):
-        allowed_years = [year[0] for year in get_years_list()]
-
-        if not isinstance(year, str):
-            year = str(year)
-
-        return year if year in allowed_years else ""
-
-    @staticmethod
-    def _get_years_list():
-        return get_years_list()
 
     @staticmethod
     def _notify_user(message: str, style: str, sticky: bool = False) -> DisplayNotification:
