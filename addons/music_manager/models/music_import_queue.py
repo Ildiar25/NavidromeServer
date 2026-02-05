@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import traceback
 from datetime import timedelta
 from typing import Dict
 
@@ -57,8 +58,11 @@ class MusicImportQueue(Model):
                 self.env.cr.commit()
 
             except Exception as unknown_error:
+                traceback_error = traceback.format_exc()
+                _logger.error(traceback_error)
+
                 self.env.cr.rollback()
-                music_file.write({'state': 'error', 'error_message': str(unknown_error)})
+                music_file.write({'state': 'error', 'error_message': f"Message: {str(unknown_error)}"})
 
     @api.model
     def _cron_garbage_collector(self) -> None:
@@ -71,7 +75,6 @@ class MusicImportQueue(Model):
             records_to_delete.unlink()
 
     def create_track_from_scan(self, file_path: str, data: Dict[str, str | int | None]) -> None:
-
         album_artist_id = self._match_artist_id(data['tmp_album_artist'])
 
         self.env['music_manager.track'].create({
@@ -114,6 +117,7 @@ class MusicImportQueue(Model):
         return album_id.id
 
     def _match_artist_id(self, artist_name: str):
+
         artist_id = self.env['music_manager.artist'].search([('name', '=', artist_name)], limit=1)
 
         if not artist_id:
