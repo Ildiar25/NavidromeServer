@@ -315,7 +315,7 @@ class Track(Model, ProcessImageMixin):
         artists = self.env['music_manager.artist']
 
         if artist_name and artist_name.lower() != 'unknown':
-            artist = artists.search([('name', 'ilike', artist_name)])
+            artist = artists.search([('name', '=', artist_name)], limit=1)
 
             if artist:
                 return artist.id

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import traceback
 from datetime import timedelta
 from typing import Dict
 
@@ -57,8 +58,12 @@ class MusicImportQueue(Model):
                 self.env.cr.commit()
 
             except Exception as unknown_error:
+
+                traceback_error = traceback.format_exc()
+                _logger.error(traceback_error)
+
                 self.env.cr.rollback()
-                music_file.write({'state': 'error', 'error_message': str(unknown_error)})
+                music_file.write({'state': 'error', 'error_message': f"Message: {str(unknown_error)}"})
 
     @api.model
     def _cron_garbage_collector(self) -> None:
@@ -72,7 +77,11 @@ class MusicImportQueue(Model):
 
     def create_track_from_scan(self, file_path: str, data: Dict[str, str | int | None]) -> None:
 
+        _logger.info(f"Path: {file_path}")
+        _logger.info(f"Dictionari received: {data}")
         album_artist_id = self._match_artist_id(data['tmp_album_artist'])
+
+        _logger.info(f"Album Artist ID: {album_artist_id}")
 
         self.env['music_manager.track'].create({
             'picture': data['picture'],
@@ -100,6 +109,7 @@ class MusicImportQueue(Model):
         })
 
     def _match_album_id(self, album_name: str, album_artist_id: int):
+        _logger.info("|||| MATCH ALBUM ID ||||")
         album_id = self.env['music_manager.album'].search(
             [('name', '=', album_name), ('album_artist_id', '=', album_artist_id)],
             limit=1
@@ -110,23 +120,26 @@ class MusicImportQueue(Model):
                 'name': album_name,
                 'album_artist_id': album_artist_id,
             })
-
+        _logger.info(f"Album ID: {album_id} | Album name: {album_id.name}")
         return album_id.id
 
     def _match_artist_id(self, artist_name: str):
+        _logger.info("|||| MATCH ARTIST ID ||||")
         artist_id = self.env['music_manager.artist'].search([('name', '=', artist_name)], limit=1)
 
         if not artist_id:
             artist_id = self.env['music_manager.artist'].create({
                 'name': artist_name,
             })
-
+        _logger.info(f"Artist ID: {artist_id} | Artist name: {artist_id.name}")
         return artist_id.id
 
     def _match_various_artists_ids(self, artist_names: str):
+        _logger.info("|||| MATCH VARIOUS ARTISTS ID ||||")
         names = [name.strip() for name in artist_names.split(",")]
         artist_ids = []
 
+        _logger.info(f"Names founded: {names}")
         for name in names:
             found = self.env['music_manager.artist'].search([('name', '=', name)], limit=1)
 
@@ -135,21 +148,24 @@ class MusicImportQueue(Model):
                     'name': name,
                 })
                 artist_ids.append(new_artist.id)
-
+                _logger.info(f"Artist ID Created: {new_artist} | Artist name: {new_artist.name}")
                 continue
 
+            _logger.info(f"Artist ID Founded: {found} | Artist name: {found.name}")
             artist_ids.append(found.id)
 
+        _logger.info(f"Artist IDS: {artist_ids}")
         return artist_ids
 
     def _match_genre_id(self, genre_name: str):
+        _logger.info("|||| MATCH GENRE ID ||||")
         genre_id = self.env['music_manager.genre'].search([('name', '=', genre_name)], limit=1)
 
         if not genre_id:
             genre_id = self.env['music_manager.genre'].create({
                 'name': genre_name,
             })
-
+        _logger.info(f"Genre ID: {genre_id} | Genre name: {genre_id.name}")
         return genre_id.id
 
     @staticmethod
