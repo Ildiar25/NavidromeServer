@@ -45,12 +45,13 @@ class AudioSettings(Model):
     )
     bitrate = Selection(
         selection=[
+            ('0', _("Auto")),
             ('128', _("128 kbps")),
             ('192', _("192 kbps")),
             ('320', _("320 kbps")),
         ],
         string=_("Global bitrate"),
-        default='192',
+        default='0',
         required=True,
     )
     image_format = Selection(

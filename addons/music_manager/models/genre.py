@@ -3,7 +3,7 @@
 from odoo import _, api
 from odoo.exceptions import UserError
 from odoo.models import Model
-from odoo.fields import Binary, Char, Html, Integer, Many2one, One2many
+from odoo.fields import Binary, Char, Html, Integer, Many2one, One2many, Many2many
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..utils.custom_types import GenreVals

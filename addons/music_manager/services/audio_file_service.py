@@ -92,6 +92,7 @@ class MP3AudioFileService(AudioFileService):
     def _extract_metadata(self, track: MP3) -> TrackMetadata:
         tag_parsers = {
             'APIC': self._parse_apic_image,
+            'TDRC': self._parse_datetime,
             'TRCK': self._parse_numeric_pair,
             'TPOS': self._parse_numeric_pair,
             'TCMP': self._parse_is_compilation,
@@ -139,12 +140,16 @@ class MP3AudioFileService(AudioFileService):
         return value.data if value.type == 3 else None
 
     @staticmethod
+    def _parse_datetime(value: Any) -> str:
+        return value.text[0] if getattr(value, "text", None) else None
+
+    @staticmethod
     def _parse_is_compilation(value: Any) -> bool:
         return value.text[0] == "1"
 
     @staticmethod
     def _parse_text(value: Any) -> str:
-        return value.text[0] if getattr(value, "text", None) else None
+        return ", ".join(value.text) if getattr(value, "text", None) else ""
 
     @staticmethod
     def _parse_track_string(data: str) -> tuple[int, int]:

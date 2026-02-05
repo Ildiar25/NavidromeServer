@@ -7,7 +7,6 @@ from odoo.models import Model
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, One2many, Selection
 
 from .mixins.process_image_mixin import ProcessImageMixin
-from ..utils.custom_types import AlbumVals
 from ..utils.file_utils import get_years_list
 
 
@@ -52,7 +51,7 @@ class Album(Model, ProcessImageMixin):
     all_track_ids = Many2many(comodel_name='music_manager.track', string=_("All tracks"), compute='_compute_all_track_ids')
 
     @api.model_create_multi
-    def create(self, list_vals: list[AlbumVals]):
+    def create(self, list_vals):
         for vals in list_vals:
             self._process_picture_image(vals)
 
@@ -97,19 +96,15 @@ class Album(Model, ProcessImageMixin):
         if self.env.context.get('skip_album_sync'):
             return super().unlink()
 
-        for album in self:
-            own_tracks = album.track_ids.filtered(lambda track: track.owner.id == self.env.user.id)
+        tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.owner.id == self.env.user.id)
 
-            if own_tracks:
-                own_tracks.unlink()
+        if tracks_to_delete:
+            tracks_to_delete.unlink()
 
-            if album.exists():
-                remaining_tracks = self.env['music_manager.track'].sudo().search_count([
-                    ('album_id', '=', album.id)
-                ])
+        empty_albums = self.exists().filtered(lambda act_album: not act_album.track_ids)
 
-                if remaining_tracks == 0:
-                    super(Album, album).sudo().unlink()
+        if empty_albums:
+            return super(Album, empty_albums.with_context(skip_album_sync=True)).sudo().unlink()
 
         return True
 
