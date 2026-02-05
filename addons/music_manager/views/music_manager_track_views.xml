@@ -129,7 +129,7 @@
                 <search string="Track searchbar view">
                     <!-- Custom fields -->
                     <field name="name" string="by track title"/>
-                    <field name="display_artist_names" string="by artist name"/>
+                    <field name="track_artist_ids" string="by artist name"/>
                     <field name="album_id" string="by album title"/>
 
                     <!-- Custom filters -->

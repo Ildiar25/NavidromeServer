@@ -207,7 +207,7 @@
                         <button string="Cancel" class="btn-default" special="cancel"/>
                         <div class="ms-auto d-flex gap-2">
                             <button string="Back" type="object" name="action_back" class="btn btn-outline-primary" invisible="state == 'start'"/>
-                            <button string="Next" type="object" name="action_next" class="btn btn-outline-primary" invisible="state == 'done'"/>
+                            <button string="Next" type="object" name="action_next" class="btn btn-primary" invisible="state == 'done'"/>
                         </div>
                     </footer>
                 </sheet>

@@ -25,10 +25,10 @@ class Track(Model, ProcessImageMixin):
     # Basic fields
     picture = Binary(string=_("Picture"), attachment=True)
     disk_no = Integer(string=_("Disk no"))
-    name = Char(string=_("Title"))
+    name = Char(string=_("Title"), required=True)
     total_disk = Integer(string=_("Total disk no"))
     total_track = Integer(string=_("Total track no"))
-    track_no = Integer(string=_("Track no"))
+    track_no = Integer(string=_("Track no"), required=True)
     year = Selection(string=_("Year"), selection='_get_years_list')
 
     # Readonly fields
@@ -40,8 +40,8 @@ class Track(Model, ProcessImageMixin):
     sample_rate = Integer(string=_("Sample rate"), default=0, readonly=True)
 
     # Relational fields
-    album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"), copy=False)
-    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"), ondelete='cascade')
+    album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"), copy=False, required=True)
+    album_id = Many2one(comodel_name='music_manager.album', string=_("Album"), ondelete='cascade', required=True)
     genre_id = Many2one(comodel_name='music_manager.genre', string=_("Genre"))
     original_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Original artist"))
     track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
@@ -53,7 +53,7 @@ class Track(Model, ProcessImageMixin):
         inverse='_inverse_collection_value',
         default=False,
     )
-    display_artist_names = Char(string=_("Display artist name"), compute='_compute_display_artist_name', store=False)
+    display_artist_names = Char(string=_("Display artist names"), compute='_compute_display_artist_name', store=False)
     display_bitrate = Char(string=_("Display bitrate"), compute='_compute_display_bitrate', store=False)
     display_duration = Char(string=_("Display duration (min)"), compute='_compute_display_duration', store=False)
     display_sample_rate = Char(string=_("Display sample rate"), compute='_compute_display_sample_rate', store=False)
@@ -343,6 +343,24 @@ class Track(Model, ProcessImageMixin):
 
         return TrackServiceAdapter(file_type=file_extension)
 
+    def _ensure_optional_fields(self):
+        self.ensure_one()
+
+        protected_fields = [
+            ('track_artist_ids', _("Track artist(s)")),
+            ('genre_id', _("Genre")),
+            ('original_artist_id', _("Original artist")),
+            ('year', _("Year")),
+        ]
+
+        for field, label in protected_fields:
+            value = getattr(self, field, None)
+
+            if not value:
+                raise ValidationError(
+                    _("Field '%s' cannot be empty. Please fill it or restore previous value.", label)
+                )
+
     def _perform_save_changes(self):
         failure_messages = []
         success_counter = 0
@@ -350,6 +368,9 @@ class Track(Model, ProcessImageMixin):
         file_service = self._get_file_service_adapter()
 
         for track in self:
+            # noinspection PyProtectedMember
+            track._ensure_optional_fields()
+
             if not isinstance(track.old_path, str):
                 failure_messages.append(
                     _("Track '%s' was skipped because it is not saved into your library.", track.name)
@@ -363,7 +384,13 @@ class Track(Model, ProcessImageMixin):
                 continue
 
             try:
-                file_service.update_file_path(track.old_path, track.file_path)
+                # noinspection PyProtectedMember
+                track._update_metadata()
+
+                if track.old_path != track.file_path:
+                    file_service.update_file_path(track.old_path, track.file_path)
+
+                track.old_path = track.file_path
                 success_counter += 1
 
             except InvalidPathError as invalid_path:
@@ -384,9 +411,10 @@ class Track(Model, ProcessImageMixin):
                       "\nPlease, contact with your Admin.", track.name)
                 )
 
-            if success_counter > 0:
-                self._update_metadata()
-                track.old_path = track.file_path
+            # if success_counter > 0:
+            #
+            #     track._update_metadata()
+            #     track.old_path = track.file_path
 
         return {
             'success': success_counter,
@@ -446,14 +474,14 @@ class Track(Model, ProcessImageMixin):
 
         for track in self:
             metadata = {
-                'TIT2': track.name,
-                'TPE1': track.display_artist_names,
-                'TPE2': "Various Artists" if track.collection else track.album_artist_id.name,
+                'TIT2': track.name or "",
+                'TPE1': [record.name for record in track.track_artist_ids] if track.track_artist_ids else [],
+                'TPE2': ("Various Artists" if track.collection else track.album_artist_id.name) or "",
+                'TALB': track.album_id.name or "",
+                'TRCK': (track.track_no or 0, track.total_track or 0),
                 'TOPE': track.original_artist_id.name,
-                'TALB': track.album_id.name,
                 'TCMP': track.collection,
-                'TRCK': (track.track_no, track.total_track),
-                'TPOS': (track.disk_no, track.total_disk),
+                'TPOS': (track.disk_no or 0, track.total_disk or 0),
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,
                 'APIC': track.picture,

@@ -77,7 +77,6 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             ('uploaded', _("Uploaded")),
             ('metadata', _("Metadata Editing")),
             ('done', _("Done")),
-            ('added', _("Added")),
         ],
         string=_("State"),
         default='start'
@@ -163,18 +162,20 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     def action_back(self) -> dict[str, str]:
         self.ensure_one()
 
-        states = ['start', 'uploaded', 'metadata', 'done', 'added']
+        states = ['start', 'uploaded', 'metadata', 'done']
         current_index = states.index(self.state)
 
         if current_index > 0:
             self.state = states[current_index - 1]
 
         return {
+            'name': _("Track Wizard"),
             'type': 'ir.actions.act_window',
             'res_model': 'music_manager.track_wizard',
             'view_mode': 'form',
             'res_id': self.id,
             'target': 'new',
+            'context': self.env.context,
         }
 
     def action_next(self) -> dict[str, str]:
@@ -194,15 +195,14 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             case 'metadata':
                 self.state = 'done'
 
-            case 'added':
-                return {'type': 'ir.actions.act_window_close'}
-
         return {
+            'name': _("Track Wizard"),
             'type': 'ir.actions.act_window',
             'res_model': 'music_manager.track_wizard',
             'view_mode': 'form',
             'res_id': self.id,
             'target': 'new',
+            'context': self.env.context,
         }
 
     def match_all_metadata(self) -> None:
@@ -215,6 +215,8 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def save_file(self):
         self.ensure_one()
+        self._ensure_optional_fields()
+
         file_service = self._get_file_service_adapter()
 
         if not (isinstance(self.file, bytes) and self.has_valid_path):
@@ -316,6 +318,24 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             raise ValidationError(
                 _("\nDamn! Something went wrong while validating URL.\nPlease, contact with your Admin.")
             )
+
+    def _ensure_optional_fields(self):
+        self.ensure_one()
+
+        protected_fields = [
+            ('possible_artist_ids', _("Track artist(s)")),
+            ('possible_genre_id', _("Genre")),
+            ('possible_original_artist_id', _("Original artist")),
+            ('year', _("Year")),
+        ]
+
+        for field, label in protected_fields:
+            value = getattr(self, field, None)
+
+            if not value:
+                raise ValidationError(
+                    _("Field '%s' cannot be empty. Please fill it or restore previous value.", label)
+                )
 
     def _get_download_service_adapter(self, video_url: str):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)

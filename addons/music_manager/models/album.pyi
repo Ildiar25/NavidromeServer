@@ -33,22 +33,22 @@ class Album:
     year: str | None
     owner: Users
 
-    def create(self, list_vals: list[AlbumVals]) -> Self:
+    def create(self, list_vals: list[dict]) -> Self:
         """Overrides 'create' method to process cover album & propagate to linked tracks, genre or artist records.
         :param list_vals: Dictionary list with album information to create new records.
         :return: Created album records.
         """
 
-    def write(self, vals: AlbumVals) -> Literal[True]:
-        """Overrides 'write' method to update cover album & propagate to linked tracks, genre, or artist records.
-        :param vals: Dictionary with album values to update.
-        :return: Confirms updated album record.
-        """
+    # def write(self, vals: AlbumVals) -> Literal[True]:
+    #     """Overrides 'write' method to update cover album & propagate to linked tracks, genre, or artist records.
+    #     :param vals: Dictionary with album values to update.
+    #     :return: Confirms updated album record.
+    #     """
 
-    def unlink(self: Iterable[Self]) -> Self:
-        """Overrides 'unlink' method to delete all linked tracks before delete itself.
-        :return: Deleted records.
-        """
+    # def unlink(self: Iterable[Self]) -> Self:
+    #     """Overrides 'unlink' method to delete all linked tracks before delete itself.
+    #     :return: Deleted records.
+    #     """
 
     def _compute_track_amount(self: Iterable[Self]) -> None:
         """Calculates track amount linked to this album record.
@@ -91,16 +91,16 @@ class Album:
         :return: None
         """
 
-    def update_songs(self) -> DisplayNotification | None:
-        """Update track metadata linked to this album. It calls to the `save_changes()` method for each track.
-        :return: None | Dictionary with UI information
-        """
+    # def update_songs(self) -> DisplayNotification | None:
+    #     """Update track metadata linked to this album. It calls to the `save_changes()` method for each track.
+    #     :return: None | Dictionary with UI information
+    #     """
 
     def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.
         """
 
-    def _process_picture_image(self, vals: AlbumVals) -> None:
+    def _process_picture_image(self, vals: dict) -> None:
         """MIXIN: See process_image_mixin documentation.
         :param vals: Dictionary with vals to write
         :return: None
