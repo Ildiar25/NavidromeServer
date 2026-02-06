@@ -487,7 +487,7 @@ class Track(Model, ProcessImageMixin):
                 'APIC': track.picture,
             }
 
-            track_service.write_metadata(track.file_path, metadata)
+            track_service.write_metadata(track.old_path, metadata)
 
     @staticmethod
     def file_exists(filepath: str) -> bool:
