@@ -39,7 +39,6 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     tmp_album = Char(string=_("Album found"))
     tmp_album_artist = Char(string=_("Album artist found"))
     tmp_artists = Char(string=_("Track artist(s) found"))
-    tmp_collection = Boolean(string="Part of a collection")
     tmp_disk_no = Integer(string=_("Disk number found"))
     tmp_genre = Char(string=_("Genre found"))
     tmp_name = Char(string=_("Title found"))
@@ -60,15 +59,19 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     sample_rate = Integer(string=_("Sample rate"), default=0, readonly=True)
 
     # Relational fields
-    possible_album_id = Many2one(comodel_name='music_manager.album', string="Matched album")
-    possible_album_artist_id = Many2one(comodel_name='music_manager.artist', string="Matched album artist")
-    possible_artist_ids = Many2many(comodel_name='music_manager.artist', string="Matched artist(s)")
-    possible_genre_id = Many2one(comodel_name='music_manager.genre', string="Matched genre")
-    possible_original_artist_id = Many2one(comodel_name='music_manager.artist', string="Matched original artist")
+    possible_album_id = Many2one(comodel_name='music_manager.album', string=_("Matched album"))
+    possible_album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Matched album artist"))
+    possible_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Matched artist(s)"))
+    possible_genre_id = Many2one(comodel_name='music_manager.genre', string=_("Matched genre"))
+    possible_original_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Matched original artist"))
 
     # Computed fields
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
     has_valid_path = Boolean(string=_("Valid path"), compute='_compute_has_valid_path', default=False)
+    tmp_collection = Boolean(
+        string=_("Part of a collection"),
+        default=False,
+    )
 
     # Technical fields
     state = Selection(
@@ -118,6 +121,28 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             _logger.info(f"CONSTRAINT CHECK | file: {bool(self.file)} | url: {bool(self.url)}")
             raise ValidationError(
                 _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
+            )
+
+    @api.onchange('possible_album_artist_id')
+    def _compute_collection_value(self) -> None:
+        self.ensure_one()
+        if self.possible_album_artist_id and self.possible_album_artist_id.name.lower() == 'various artists':
+            self.tmp_collection = True
+
+        else:
+            self.tmp_collection = False
+
+    @api.onchange('tmp_collection')
+    def _compute_inverse_collection_value(self) -> None:
+        self.ensure_one()
+        if self.tmp_collection:
+            self.possible_album_artist_id = self._find_or_create_single_artist(
+                "Various Artists", []
+            )
+
+        else:
+            self.possible_album_artist_id = self._find_or_create_single_artist(
+                self.possible_original_artist_id.name, self.possible_artist_ids.ids
             )
 
     @api.onchange('file')
@@ -183,7 +208,9 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
         match self.state:
             case 'start':
+                self._reset_fields()
                 self.state = 'uploaded'
+
                 if self.url:
                     self._convert_to_mp3()
 
@@ -337,6 +364,23 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                     _("Field '%s' cannot be empty. Please fill it or restore previous value.", label)
                 )
 
+    def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]):
+        artists = self.env['music_manager.artist']
+
+        if artist_name and artist_name.lower() != 'unknown':
+            artist = artists.search([('name', '=', artist_name)], limit=1)
+
+            if artist:
+                return artist.id
+
+            else:
+                return artists.create([{'name': artist_name}]).id
+
+        elif fallback_ids:
+            return fallback_ids[0]
+
+        return False
+
     def _get_download_service_adapter(self, video_url: str):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
 
@@ -371,7 +415,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             _logger.info(f"There is no TMP ALBUM: {self.tmp_album}")
             return
 
-        found = self.env['music_manager.album'].search([('name', 'ilike', self.tmp_album)], limit=1)
+        found = self.env['music_manager.album'].search([('name', '=', self.tmp_album)], limit=1)
         self.possible_album_id = found.id
 
     def _match_album_artist_id(self) -> None:
@@ -382,7 +426,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             _logger.info(f"There is no TMP ALBUM ARTIST: {self.tmp_album}")
             return
 
-        found = self.env['music_manager.artist'].search([('name', 'ilike', self.tmp_album_artist)], limit=1)
+        found = self.env['music_manager.artist'].search([('name', '=', self.tmp_album_artist)], limit=1)
         self.possible_album_artist_id = found.id
 
     def _match_artist_ids(self) -> None:
@@ -397,7 +441,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         artist_ids = []
 
         for name in names:
-            found = self.env['music_manager.artist'].search([('name', 'ilike', name)], limit=1)
+            found = self.env['music_manager.artist'].search([('name', '=', name)], limit=1)
 
             if not found:
                 continue
@@ -413,7 +457,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         if not self.tmp_genre:
             return
 
-        found = self.env['music_manager.genre'].search([('name', 'ilike', self.tmp_genre)], limit=1)
+        found = self.env['music_manager.genre'].search([('name', '=', self.tmp_genre)], limit=1)
         self.possible_genre_id = found.id
 
     def _match_original_artist_id(self) -> None:
@@ -423,7 +467,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         if not self.tmp_original_artist:
             return
 
-        found = self.env['music_manager.artist'].search([('name', 'ilike', self.tmp_original_artist)], limit=1)
+        found = self.env['music_manager.artist'].search([('name', '=', self.tmp_original_artist)], limit=1)
         self.possible_original_artist_id = found.id
 
     def _match_track_year(self) -> None:
@@ -449,6 +493,32 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 setattr(self, attr_name, value)
 
         self.match_all_metadata()
+
+    def _reset_fields(self) -> None:
+        self.ensure_one()
+
+        # Fields with temporary metadata
+        self.tmp_album = False
+        self.tmp_album_artist = False
+        self.tmp_artists = False
+        self.tmp_disk_no = 0
+        self.tmp_genre = False
+        self.tmp_name = False
+        self.tmp_original_artist = False
+        self.tmp_track_no = 0
+        self.tmp_year = False
+
+        # Relational fields (Matched)
+        self.possible_album_id = False
+        self.possible_album_artist_id = False
+        self.possible_artist_ids = [(5, 0, 0)]  # Clean Many2many
+        self.possible_genre_id = False
+        self.possible_original_artist_id = False
+
+        # Technical audio metadata
+        self.bitrate = 0
+        self.duration = 0
+        self.year = False
 
     @staticmethod
     def _get_years_list():

@@ -20,7 +20,7 @@ _logger = logging.getLogger(__name__)
 class Track(Model, ProcessImageMixin):
     _name = 'music_manager.track'
     _description = 'track_table'
-    _order = 'album_name, disk_no, track_no'
+    _order = 'album_artist, album_name, disk_no, track_no'
 
     # Basic fields
     picture = Binary(string=_("Picture"), attachment=True)
@@ -65,6 +65,7 @@ class Track(Model, ProcessImageMixin):
 
     # Related fields
     album_name = Char(string="Album name", related='album_id.name', store=True)
+    album_artist = Char(string="Album artist", related='album_artist_id.name', store=True)
 
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
@@ -410,11 +411,6 @@ class Track(Model, ProcessImageMixin):
                     _("\nDamn! Something went wrong while updating the file '%s'."
                       "\nPlease, contact with your Admin.", track.name)
                 )
-
-            # if success_counter > 0:
-            #
-            #     track._update_metadata()
-            #     track.old_path = track.file_path
 
         return {
             'success': success_counter,

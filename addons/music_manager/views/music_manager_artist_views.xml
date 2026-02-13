@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record id="music_manager_artist_view_action_general" model="ir.actions.act_window">
-            <field name="name">My artists</field>
+            <field name="name">Artists</field>
             <field name="res_model">music_manager.artist</field>
             <field name="view_mode">kanban,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
@@ -126,7 +126,8 @@
                                         <field name="disk_amount" string="Disk amount" optional="hide"/>
                                         <field name="genre_id" string="Genre"/>
                                         <field name="year" string="Year"/>
-                                        <field name="owner_ids" string="Owner(s)" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="display_duration" string="Total duration"/>
+                                        <field name="owner_ids" string="Owner(s)" widget="many2many_tags"/>
                                         <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
@@ -141,10 +142,10 @@
                                         <field name="album_id" string="Album"/>
                                         <field name="year" string="Year"/>
                                         <field name="genre_id" string="Genre"/>
-                                        <field name="duration" string="Duration"/>
                                         <field name="is_saved" column_invisible="True"/>
                                         <field name="is_deleted" column_invisible="True"/>
-                                        <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="display_duration" string="Duration"/>
+                                        <field name="owner" widget="many2one_avatar" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     </tree>
