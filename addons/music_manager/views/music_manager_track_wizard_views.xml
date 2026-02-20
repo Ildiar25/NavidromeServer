@@ -5,6 +5,7 @@
         <field name="res_model">music_manager.track_wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field> <!-- Open as modal form -->
+        <field name="context">{'create': True}</field>
     </record>
 
     <!-- Track wizard form -->
@@ -90,7 +91,7 @@
                                     <field name="tmp_album_artist" string="Album artist" readonly="True"/>
                                     <field name="tmp_original_artist" string="Original artist" readonly="True"/>
                                     <field name="tmp_year" string="Year" readonly="True"/>
-                                    <field name="tmp_collection" string="Part of a collection" readonly="True"/>
+                                    <field name="tmp_compilation" string="Part of a compilation" readonly="True"/>
                                     <field name="tmp_total_track" string="Total track" readonly="True"/>
                                     <field name="tmp_total_disk" string="Total disk" readonly="True"/>
                                 </group>
@@ -134,7 +135,7 @@
                                     <field name="possible_album_artist_id" string="Album artist" placeholder="Select or create album artist"/>
                                     <field name="possible_original_artist_id" string="Original artist" placeholder="Select or create original artist"/>
                                     <field name="year" string="Year"/>
-                                    <field name="tmp_collection" string="Part of a collection"/>
+                                    <field name="tmp_compilation" string="Part of a compilation"/>
                                     <field name="tmp_total_track" string="Total track"/>
                                     <field name="tmp_total_disk" string="Total disk"/>
                                 </group>
@@ -178,7 +179,7 @@
                                     <field name="possible_album_artist_id" string="Album artist" placeholder="Select or create album artist" readonly="True"/>
                                     <field name="possible_original_artist_id" string="Original artist" placeholder="Select or create original artist" readonly="True"/>
                                     <field name="year" string="Year" readonly="True"/>
-                                    <field name="tmp_collection" string="Part of a collection" readonly="True"/>
+                                    <field name="tmp_compilation" string="Part of a compilation" readonly="True"/>
                                     <field name="tmp_total_track" string="Total track" readonly="True"/>
                                     <field name="tmp_total_disk" string="Total disk" readonly="True"/>
                                 </group>
