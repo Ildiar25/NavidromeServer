@@ -14,6 +14,7 @@
             <field name="res_model">music_manager.track</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
+            <field name="limit">1000</field>
             <field name="context">{'group_by': 'owner'}</field>
         </record>
 
@@ -67,13 +68,13 @@
                                     <field name="track_artist_ids" widget="many2many_tags" string="Track artist(s)"/>
                                     <field name="album_id" string="Album"/>
                                     <field name="genre_id" string="Genre"/>
-                                    <field name="collection" string="Part of a collection"/>
+                                    <field name="compilation" string="Part of a compilation"/>
                                     <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                     <field name="has_valid_path" invisible="True"/>
                                 </group>
                                 <group>
                                     <group colspan="2">
-                                        <field name="album_artist_id" string="Album artist" edit="collection"/>
+                                        <field name="album_artist_id" string="Album artist" edit="compilation"/>
                                         <field name="original_artist_id" string="Original artist"/>
                                         <field name="year" string="Year"/>
                                     </group>

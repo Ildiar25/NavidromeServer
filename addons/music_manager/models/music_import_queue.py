@@ -90,7 +90,7 @@ class MusicImportQueue(Model):
             'genre_id': self._match_genre_id(data['tmp_genre']),
             'original_artist_id': self._match_artist_id(data['tmp_original_artist']),
             'track_artist_ids': [(6, 0, self._match_various_artists_ids(data['tmp_artists']))],
-            'collection': data['tmp_collection'],
+            'compilation': data['tmp_compilation'],
             'file_path': file_path,
             'old_path': file_path,
             'is_saved': True,

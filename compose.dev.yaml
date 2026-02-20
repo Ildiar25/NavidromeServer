@@ -56,7 +56,7 @@ services:
       # Navidrome developing
       ND_DATAFOLDER: /data
       ND_MUSICFOLDER: /music
-      ND_LOGLEVEL: warning
+      ND_LOGLEVEL: debug
 
       # Navidrome behaviour
       ND_DEFAULTSHAREEXPIRATION: 24h

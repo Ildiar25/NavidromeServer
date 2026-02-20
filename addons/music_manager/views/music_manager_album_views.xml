@@ -22,16 +22,11 @@
             <field name="arch" type="xml">
                 <kanban srting="Album kanban view" create="False">
                     <field name="name"/>
-                    <field name="is_favorite"/>
                     <template>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click d-flex flex-column h-100" t-att-title="record.name.value" style="overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                                 <div class="position-relative" style="width: 100%; overflow: hidden; background: #f8f9fa;">
                                     <field name="picture" string="" widget="image" class="oe_kanban_image" options="{'preview_image': 'picture'}"/>
-                                    <button name="set_favorite" type="object" class="oe_stat_button btn-light position-absolute top-0 end-0 m-1 p-1 shadow-sm" style="z-index: 10;" help="Set favorite">
-                                        <i t-if="record.is_favorite.raw_value" class="fa fa-heart text-danger heartbeat"/>
-                                        <i t-else="" class="fa fa-heart-o"/>
-                                    </button>
                                 </div>
                             </div>
                         </t>
@@ -75,6 +70,7 @@
                         <group class="flex-row justify-content-start">
                             <group style="border-right: 1px solid #ccc; height: auto; width: 250px">
                                 <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
+                                <field name="album_type" string="" class="text-primary fw-bold fst-italic"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>
@@ -136,6 +132,7 @@
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                         <filter name="genre_id" string="Genre" context="{'group_by': 'genre_id'}"/>
+                        <filter name="album_type" string="Album type" context="{'group_by': 'album_type'}"/>
                     </group>
                 </search>
             </field>

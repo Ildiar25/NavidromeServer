@@ -95,6 +95,21 @@ class Artist(Model, ProcessImageMixin):
 
         return super().unlink()
 
+    @api.depends('name', 'start_year', 'country_id')
+    def _compute_display_name(self):
+        for artist in self:
+            name = artist.name
+            data = []
+
+            if artist.start_year:
+                data.append(artist.start_year)
+
+            if artist.country_id:
+                data.append(artist.country_id.code)
+
+            suffix = f" ({' · '.join(data)})" if data else ""
+            artist.display_name = f"{name}{suffix}"
+
     @api.depends('album_ids')
     def _compute_album_amount(self) -> None:
         for artist in self:
