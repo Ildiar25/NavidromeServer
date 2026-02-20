@@ -47,10 +47,10 @@ class Track(Model, ProcessImageMixin):
     track_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Track artist(s)"))
 
     # Computed fields
-    collection = Boolean(
-        string=_("Part of a collection"),
-        compute='_compute_collection_value',
-        inverse='_inverse_collection_value',
+    compilation = Boolean(
+        string=_("Part of a compilation"),
+        compute='_compute_compilation_value',
+        inverse='_inverse_compilation_value',
         default=False,
     )
     display_artist_names = Char(string=_("Display artist names"), compute='_compute_display_artist_name', store=False)
@@ -205,17 +205,17 @@ class Track(Model, ProcessImageMixin):
             )
 
     @api.depends('album_artist_id')
-    def _compute_collection_value(self) -> None:
+    def _compute_compilation_value(self) -> None:
         for track in self:
             if track.album_artist_id and track.album_artist_id.name.lower() == 'various artists':
-                track.collection = True
+                track.compilation = True
 
             else:
-                track.collection = False
+                track.compilation = False
 
-    def _inverse_collection_value(self) -> None:
+    def _inverse_compilation_value(self) -> None:
         for track in self:
-            if track.collection:
+            if track.compilation:
                 # noinspection PyProtectedMember
                 track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
 
@@ -266,10 +266,10 @@ class Track(Model, ProcessImageMixin):
 
             track.has_valid_path = file_service.is_valid(track.file_path)
 
-    @api.onchange('collection')
+    @api.onchange('compilation')
     def _display_album_artist_changes(self) -> None:
         for track in self:
-            if track.collection:
+            if track.compilation:
                 # noinspection PyProtectedMember
                 track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
 
@@ -472,11 +472,11 @@ class Track(Model, ProcessImageMixin):
             metadata = {
                 'TIT2': track.name or "",
                 'TPE1': [record.name for record in track.track_artist_ids] if track.track_artist_ids else [],
-                'TPE2': ("Various Artists" if track.collection else track.album_artist_id.name) or "",
+                'TPE2': ("Various Artists" if track.compilation else track.album_artist_id.name) or "",
                 'TALB': track.album_id.name or "",
                 'TRCK': (track.track_no or 0, track.total_track or 0),
                 'TOPE': track.original_artist_id.name,
-                'TCMP': track.collection,
+                'TCMP': track.compilation,
                 'TPOS': (track.disk_no or 0, track.total_disk or 0),
                 'TDRC': track.year,
                 'TCON': track.genre_id.name,

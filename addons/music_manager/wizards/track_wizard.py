@@ -68,8 +68,8 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     # Computed fields
     file_path = Char(string=_("File path"), compute='_compute_file_path', store=True)
     has_valid_path = Boolean(string=_("Valid path"), compute='_compute_has_valid_path', default=False)
-    tmp_collection = Boolean(
-        string=_("Part of a collection"),
+    tmp_compilation = Boolean(
+        string=_("Part of a compilation"),
         default=False,
     )
 
@@ -124,18 +124,18 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             )
 
     @api.onchange('possible_album_artist_id')
-    def _compute_collection_value(self) -> None:
+    def _compute_compilation_value(self) -> None:
         self.ensure_one()
         if self.possible_album_artist_id and self.possible_album_artist_id.name.lower() == 'various artists':
-            self.tmp_collection = True
+            self.tmp_compilation = True
 
         else:
-            self.tmp_collection = False
+            self.tmp_compilation = False
 
-    @api.onchange('tmp_collection')
-    def _compute_inverse_collection_value(self) -> None:
+    @api.onchange('tmp_compilation')
+    def _compute_inverse_compilation_value(self) -> None:
         self.ensure_one()
-        if self.tmp_collection:
+        if self.tmp_compilation:
             self.possible_album_artist_id = self._find_or_create_single_artist(
                 "Various Artists", []
             )
@@ -286,7 +286,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             'genre_id': self.possible_genre_id.id,
             'original_artist_id': self.possible_original_artist_id.id,
             'track_artist_ids': [(6, 0, self.possible_artist_ids.ids)],
-            'collection': self.tmp_collection,
+            'compilation': self.tmp_compilation,
             'file_path': self.file_path,
             'old_path': self.file_path,
             'is_saved': True,

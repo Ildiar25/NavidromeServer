@@ -46,7 +46,7 @@ class TrackServiceAdapter:
                 'tmp_album': metadata.TALB,
                 'tmp_album_artist': metadata.TPE2,
                 'tmp_artists': metadata.TPE1,
-                'tmp_collection': metadata.TCMP,
+                'tmp_compilation': metadata.TCMP,
                 'tmp_disk_no': metadata.TPOS[0],
                 'tmp_genre': metadata.TCON,
                 'tmp_name': metadata.TIT2,

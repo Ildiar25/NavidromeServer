@@ -16,11 +16,10 @@ _logger = logging.getLogger(__name__)
 class Album(Model, ProcessImageMixin):
     _name = 'music_manager.album'
     _description = 'album_table'
-    _order = 'is_favorite desc, name'
+    _order = 'name'
 
     # Basic fields
     name = Char(string=_("Album title"), required=True)
-    is_favorite = Boolean(string=_("Favorite"), default=False)
 
     # Relational fields
     album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Album artist"))
@@ -28,6 +27,18 @@ class Album(Model, ProcessImageMixin):
     track_ids = One2many(comodel_name='music_manager.track', inverse_name='album_id', string=_("Tracks"))
 
     # Computed fields
+    album_type = Selection(
+        string=_("Album type"),
+        selection=[
+            ('album', _("Album")),
+            ('compilation', _("Compilation")),
+            ('ep', _("EP")),
+            ('single', _("Single")),
+        ],
+        compute='_compute_album_type',
+        default='album',
+        store=True,
+    )
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', store=False)
     display_duration = Char(string=_("Duration (min)"), compute='_compute_display_duration', store=False, readonly=True)
     duration = Integer(string=_("Duration (sec)"), compute='_compute_disk_duration', store=False)
@@ -108,10 +119,48 @@ class Album(Model, ProcessImageMixin):
 
         return True
 
+    @api.depends('name', 'album_type', 'album_artist_id')
+    def _compute_display_name(self):
+        album_categories = dict(self._fields['album_type']._description_selection(self.env))
+
+        for album in self:
+            name = album.name
+            artist_name = album.album_artist_id.name if album.album_artist_id else ""
+            album_type_label = album_categories.get(album.album_type, "")
+
+            if album.album_type == 'album' or album.album_type == 'compilation':
+                album_type_label = ""
+
+            else:
+                album_type_label = f" ({album_type_label})"
+
+            artist_label = _(" · By %(artist_name)s", artist_name=artist_name) if artist_name else ""
+
+            album.display_name = f"{name}{album_type_label}{artist_label}"
+
     @api.depends('track_ids.owner')
     def _compute_album_owners(self) -> None:
         for album in self:
             album.owner_ids = album.track_ids.mapped('owner')
+
+    @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration')
+    def _compute_album_type(self) -> None:
+        for album in self:
+            trck_dur = album.track_ids.mapped('duration')
+            total_trck = album.track_amount
+            album_dur = album.duration
+
+            if any(album.track_ids.mapped('compilation')):
+                album.album_type = 'compilation'
+
+            elif (total_trck >= 7) or (total_trck < 7 and album_dur > 1800):
+                album.album_type = 'album'
+
+            elif (4 <= total_trck <= 6 and album_dur < 1800) or (1 <= total_trck <= 3 and any(map(lambda dur: dur > 600, trck_dur))):
+                album.album_type = 'ep'
+
+            elif (1 <= total_trck <= 3 and album_dur < 1800) or (any(map(lambda dur: dur > 600, trck_dur))):
+                album.album_type = 'single'
 
     @api.depends('track_ids')
     def _compute_all_track_ids(self) -> None:
@@ -174,10 +223,6 @@ class Album(Model, ProcessImageMixin):
     def _inverse_album_year(self) -> None:
         for album in self:
             album.track_ids.write({'year': album.year})
-
-    def set_favorite(self) -> None:
-        for album in self:
-            album.is_favorite = not album.is_favorite
 
     def update_songs(self):
         self.ensure_one()
