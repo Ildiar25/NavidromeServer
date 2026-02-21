@@ -21,5 +21,27 @@
                 </tree>
             </field>
         </record>
+
+        <record id="music_manager_import_queue_view_searchbar" model="ir.ui.view">
+            <field name="name">music_manager.music_import_queue.view.searchbar</field>
+            <field name="model">music_manager.music_import_queue</field>
+            <field name="arch" type="xml">
+                <search string="Music import queue searchbar view">
+                    <!-- Custom fields -->
+                    <field name="file_path" string="by file path"/>
+                    <field name="error_message" string="by error message"/>
+
+                    <!-- Custom filters -->
+                    <filter name="pending_state" string="Pending" domain="[('state', '=', 'pending')]"/>
+                    <filter name="processed_state" string="Processed" domain="[('state', '=', 'processed')]"/>
+                    <filter name="failed_state" string="Failed" domain="[('state', '=', 'error')]"/>
+
+                    <!-- Custom groups -->
+                    <group string="Group by" expand="1">
+                        <filter name="import_state" string="Import state" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
     </data>
 </odoo>

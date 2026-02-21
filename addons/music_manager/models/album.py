@@ -16,7 +16,7 @@ _logger = logging.getLogger(__name__)
 class Album(Model, ProcessImageMixin):
     _name = 'music_manager.album'
     _description = 'album_table'
-    _order = 'name'
+    _order = 'is_complete desc, name'
 
     # Basic fields
     name = Char(string=_("Album title"), required=True)
@@ -42,12 +42,16 @@ class Album(Model, ProcessImageMixin):
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', store=False)
     display_duration = Char(string=_("Duration (min)"), compute='_compute_display_duration', store=False, readonly=True)
     duration = Integer(string=_("Duration (sec)"), compute='_compute_disk_duration', store=False)
+    is_complete = Boolean(
+        string=_("Album complete"), compute='_compute_is_complete', store=True, readonly=True, default=False
+    )
     picture = Binary(
         string=_("Picture"),
         compute='_compute_album_picture',
         inverse='_inverse_album_picture',
         store=False,
     )
+    progress = Integer(string=_("Progress"), compute='_compute_album_progress', default=0, readonly=True, store=False)
     track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
     year = Selection(
         string=_("Debut year"),
@@ -119,11 +123,41 @@ class Album(Model, ProcessImageMixin):
 
         return True
 
+    @api.depends()
+    def _compute_album_progress(self) -> None:
+        for album in self:
+            if not album.track_ids:
+                album.progress = 0
+                continue
+
+            max_track_per_disk = {}
+
+            for track in album.track_ids:
+                disk_no = track.disk_no
+                total_track = track.total_track
+
+                if disk_no not in max_track_per_disk or total_track > max_track_per_disk[disk_no]:
+                    max_track_per_disk[disk_no] = total_track
+
+            total_album_tracks = sum(max_track_per_disk.values())
+            total_real = len(album.track_ids)
+
+            if total_album_tracks > 0:
+                percentage = (total_real / total_album_tracks) * 100
+                album.progress = min(int(percentage), 100)
+
+            else:
+                album.progress = 0
+
     @api.depends('name', 'album_type', 'album_artist_id')
     def _compute_display_name(self):
         album_categories = dict(self._fields['album_type']._description_selection(self.env))
 
         for album in self:
+            if not album.is_complete:
+                album.display_name = album.name
+                continue
+
             name = album.name
             artist_name = album.album_artist_id.name if album.album_artist_id else ""
             album_type_label = album_categories.get(album.album_type, "")
@@ -169,6 +203,32 @@ class Album(Model, ProcessImageMixin):
                 ('album_id', '=', album.id)
             ])
             album.all_track_ids = all_tracks
+
+    @api.depends(
+        'track_ids', 'track_ids.track_no', 'track_ids.disk_no', 'track_ids.total_track', 'track_ids.total_disk'
+    )
+    def _compute_is_complete(self) -> None:
+        for album in self:
+            if not album.track_ids:
+                album.is_complete = False
+                continue
+
+            total_expected_disks = max(album.track_ids.mapped('total_disk'))
+            max_track_per_disk = {}
+
+            for track in album.track_ids:
+                disk_no = track.disk_no
+                total_track = track.total_track
+
+                if disk_no not in max_track_per_disk or total_track > max_track_per_disk[disk_no]:
+                    max_track_per_disk[disk_no] = total_track
+
+            total_album_tracks = sum(max_track_per_disk.values())
+
+            has_all_disks = len(max_track_per_disk) == total_expected_disks
+            match_track_amount = len(album.track_ids) == total_album_tracks
+
+            album.is_complete = has_all_disks and match_track_amount
 
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:

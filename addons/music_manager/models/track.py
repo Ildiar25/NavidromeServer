@@ -21,6 +21,9 @@ class Track(Model, ProcessImageMixin):
     _name = 'music_manager.track'
     _description = 'track_table'
     _order = 'album_artist, album_name, disk_no, track_no'
+    _sql_constraints = [
+        ('unique_track_no', 'UNIQUE(album_id, disk_no, track_no)', _("This track number already exists in this disk.")),
+    ]
 
     # Basic fields
     picture = Binary(string=_("Picture"), attachment=True)
