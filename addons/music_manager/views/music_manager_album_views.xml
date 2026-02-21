@@ -22,11 +22,15 @@
             <field name="arch" type="xml">
                 <kanban srting="Album kanban view" create="False">
                     <field name="name"/>
+                    <field name="is_complete"/>
                     <template>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click d-flex flex-column h-100" t-att-title="record.name.value" style="overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                                 <div class="position-relative" style="width: 100%; overflow: hidden; background: #f8f9fa;">
                                     <field name="picture" string="" widget="image" class="oe_kanban_image" options="{'preview_image': 'picture'}"/>
+                                    <div class="position-absolute top-0 end-0 p-1" style="width: 42%">
+                                        <field name="progress" widget="progressbar" invisible="is_complete"/>
+                                    </div>
                                 </div>
                             </div>
                         </t>
@@ -40,7 +44,8 @@
             <field name="name">music_manager.album.view.tree</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <tree string="Album tree view" create="False">
+                <tree string="Album tree view" create="False" decoration-warning="not is_complete">
+                    <field name="is_complete" column_invisible="True"/>
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
                     <field name="name" string="Album title"/>
                     <field name="album_artist_id" string="Album artist"/>
@@ -52,6 +57,7 @@
                     <field name="owner_ids" string="Owners" optional="hide" widget="many2many_tags"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
+                    <field name="progress" widget="progressbar"/>
                 </tree>
             </field>
         </record>
@@ -80,6 +86,9 @@
                                     <field name="genre_id" string="Genre"/>
                                     <field name="owner_ids" string="Owners" widget="many2many_tags"/>
                                     <field name="display_duration" string="Total duration"/>
+                                </group>
+                                <group>
+                                    <field name="progress" widget="progressbar"/>
                                 </group>
                             </group>
                         </group>
