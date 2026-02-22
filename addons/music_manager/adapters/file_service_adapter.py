@@ -87,13 +87,14 @@ class FileServiceAdapter:
         self.file_extension = self._check_file_extension(new_extension)
         self._folder_manager = FolderManager(self.root_dir, self.file_extension)
 
-    def set_new_path(self, artist: str, album: str, track: str, title: str) -> str:
+    def set_new_path(self, artist: str, album: str, disk: str, track: str, title: str) -> str:
         cln_artist = clean_path_section(artist)
         cln_album = clean_path_section(album)
+        cln_disk = clean_path_section(disk)
         cln_track = clean_path_section(track).zfill(2)
         cln_title = clean_path_section(title)
 
-        return str(self._folder_manager.set_path(cln_artist, cln_album, cln_track, cln_title))
+        return str(self._folder_manager.set_path(cln_artist, cln_album, cln_disk, cln_track, cln_title))
 
     def set_new_root_dir(self, new_root_dir: str) -> None:
         self.root_dir = self._check_root_dir(new_root_dir)

@@ -22,7 +22,7 @@ class Track(Model, ProcessImageMixin):
     _description = 'track_table'
     _order = 'album_artist, album_name, disk_no, track_no'
     _sql_constraints = [
-        ('unique_track_no', 'UNIQUE(album_id, disk_no, track_no)', _("This track number already exists in this disk.")),
+        ('unique_track_no', 'UNIQUE(album_id, disk_no, track_no)', _("This track number already exists on this disk.")),
     ]
 
     # Basic fields
@@ -195,7 +195,7 @@ class Track(Model, ProcessImageMixin):
             else:
                 track.is_deleted = False
 
-    @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no')
+    @api.depends('name', 'album_artist_id.name', 'album_id.name', 'track_no', 'disk_no')
     def _compute_file_path(self) -> None:
         file_service = self._get_file_service_adapter()
 
@@ -203,6 +203,7 @@ class Track(Model, ProcessImageMixin):
             track.file_path = file_service.set_new_path(
                 artist=track.album_artist_id.name or '',
                 album=track.album_id.name or '',
+                disk=str(track.disk_no) or '',
                 track=str(track.track_no) or '',
                 title=track.name or '',
             )

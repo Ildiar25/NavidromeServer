@@ -69,6 +69,7 @@
             <field name="arch" type="xml">
                 <form string="Album form view" disable_autofocus="True" create="False">
                     <sheet class="form-bg-decoration">
+                        <field name="is_complete" invisible="True"/>
                         <header>
                             <h1> 💽 Editing album</h1>
                         </header>
@@ -76,7 +77,7 @@
                         <group class="flex-row justify-content-start">
                             <group style="border-right: 1px solid #ccc; height: auto; width: 250px">
                                 <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
-                                <field name="album_type" string="" class="text-primary fw-bold fst-italic"/>
+                                <field name="album_type" string="" class="text-primary fw-bold fst-italic" invisible="not is_complete"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>
