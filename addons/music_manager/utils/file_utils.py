@@ -49,10 +49,11 @@ def is_valid_path(path: str, root_dir: str) -> bool:
     artist = r'\w+'
     album = r'\w+'
     track_no = r'[0-9]{2}'
+    disk_no = r'[0-9]'
     title = r'\w+'
     extension = r'[a-zA-Z0-9]{3,4}'
 
-    pattern = fr'{re.escape(root_dir)}\/{artist}\/{album}\/{track_no}_{title}\.{extension}'
+    pattern = fr'{re.escape(root_dir)}\/{artist}\/{album}\/{disk_no}{track_no}_{title}\.{extension}'
 
     return bool(re.fullmatch(pattern, path))
 

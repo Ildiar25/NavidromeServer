@@ -85,7 +85,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         default='start'
     )
 
-    @api.depends('tmp_name', 'possible_album_artist_id', 'possible_album_id', 'tmp_track_no')
+    @api.depends('tmp_name', 'possible_album_artist_id', 'possible_album_id', 'tmp_track_no', 'tmp_track_no')
     def _compute_file_path(self) -> None:
         self.ensure_one()
         file_service = self._get_file_service_adapter()
@@ -93,6 +93,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         self.file_path = file_service.set_new_path(
             artist=self.possible_album_artist_id.name or '',
             album=self.possible_album_id.name or '',
+            disk=str(self.tmp_disk_no) or '',
             track=str(self.tmp_track_no) or '',
             title=self.tmp_name or '',
         )

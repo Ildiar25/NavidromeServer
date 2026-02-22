@@ -33,8 +33,8 @@ class FolderManager:
     def get_all_file_paths(self) -> List[Path]:
         return list(self._root_dir.rglob(f"*.{self.file_extension}"))
 
-    def set_path(self, artist: str, album: str, track: str, title: str) -> Path:
-        new_path = self._root_dir / artist / album / f'{track}_{title}'
+    def set_path(self, artist: str, album: str, disk: str, track: str, title: str) -> Path:
+        new_path = self._root_dir / artist / album / f'{disk}{track}_{title}'
         return new_path.with_suffix(f'.{self._file_extension.value}')
 
     def _clean_empty_dirs(self, path: Path) -> None:

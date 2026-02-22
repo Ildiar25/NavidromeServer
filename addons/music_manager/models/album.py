@@ -159,7 +159,6 @@ class Album(Model, ProcessImageMixin):
                 continue
 
             name = album.name
-            artist_name = album.album_artist_id.name if album.album_artist_id else ""
             album_type_label = album_categories.get(album.album_type, "")
 
             if album.album_type == 'album' or album.album_type == 'compilation':
@@ -168,6 +167,7 @@ class Album(Model, ProcessImageMixin):
             else:
                 album_type_label = f" ({album_type_label})"
 
+            artist_name = album.album_artist_id.name if album.album_artist_id else ""
             artist_label = _(" · By %(artist_name)s", artist_name=artist_name) if artist_name else ""
 
             album.display_name = f"{name}{album_type_label}{artist_label}"
