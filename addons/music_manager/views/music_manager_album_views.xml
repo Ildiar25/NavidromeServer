@@ -6,6 +6,7 @@
             <field name="res_model">music_manager.album</field>
             <field name="view_mode">kanban,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
+            <field name="domain">[('custom_owner_ids', 'in', [uid])]</field>
         </record>
 
         <record id="music_manager_album_view_action_admin" model="ir.actions.act_window">
@@ -13,6 +14,7 @@
             <field name="res_model">music_manager.album</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
+            <field name="limit">150</field>
         </record>
 
         <!-- Kanban view -->
@@ -45,7 +47,6 @@
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
                 <tree string="Album tree view" create="False" decoration-warning="not is_complete">
-                    <field name="is_complete" column_invisible="True"/>
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
                     <field name="name" string="Album title"/>
                     <field name="album_artist_id" string="Album artist"/>
@@ -54,10 +55,11 @@
                     <field name="disk_amount" string="Disk amount" optional="hide"/>
                     <field name="display_duration" string="Total duration"/>
                     <field name="year" string="Year"/>
-                    <field name="owner_ids" string="Owners" optional="hide" widget="many2many_tags"/>
+                    <field name="custom_owner_ids" string="Owners" optional="hide" widget="many2many_tags"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
                     <field name="progress" widget="progressbar"/>
+                    <field name="is_complete" column_invisible="True"/>
                 </tree>
             </field>
         </record>
@@ -85,7 +87,7 @@
                                     <field name="year" string="Year"/>
                                     <field name="album_artist_id" string="Album artist"/>
                                     <field name="genre_id" string="Genre"/>
-                                    <field name="owner_ids" string="Owners" widget="many2many_tags"/>
+                                    <field name="custom_owner_ids" string="Owners" widget="many2many_tags"/>
                                     <field name="display_duration" string="Total duration"/>
                                 </group>
                                 <group>
@@ -101,16 +103,18 @@
                         <notebook>
                             <page string="Track list">
                                 <field name="all_track_ids" readonly="True">
-                                <tree decoration-danger="is_deleted" decoration-warning="not is_saved" decoration-muted="owner != uid" decoration-it="owner != uid" decoration-bf="owner == uid">
+                                <tree decoration-danger="is_deleted" decoration-warning="not is_saved" decoration-muted="custom_owner_id != uid" decoration-it="custom_owner_id != uid" decoration-bf="custom_owner_id == uid">
                                     <field name="track_no" string="#" width="20px" decoration-bf="True"/>
                                     <field name="name" string="Title"/>
                                     <field name="display_artist_names" string="Track artist(s)"/>
-                                    <field name="album_artist_id" string="Album artist"/>
-                                    <field name="album_id" string="Album"/>
+                                    <field name="album_id" string="Album" optional="hide"/>
+                                    <field name="album_artist_id" string="Album artist" optional="hide"/>
                                     <field name="year" string="Year"/>
                                     <field name="genre_id" string="Genre"/>
-                                    <field name="owner" widget="many2one_avatar"/>
                                     <field name="display_duration" string="Duration"/>
+                                    <field name="custom_owner_id" widget="many2one_avatar"/>
+                                    <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                                    <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                                     <field name="is_saved" column_invisible="True"/>
                                     <field name="is_deleted" column_invisible="True"/>
                                 </tree>
@@ -131,11 +135,12 @@
                     <!-- Custom fields -->
                     <field name="name" string="by album title"/>
                     <field name="album_artist_id" string="by album artist"/>
-                    <field name="owner_ids" string="by owner's name" filter_domain="[('owner_ids.name', 'ilike', self)]" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="custom_owner_ids" string="by owner's name" filter_domain="[('custom_owner_ids.name', 'ilike', self)]" groups="music_manager.group_music_manager_user_admin"/>
 
                     <!-- Custom filters -->
-                    <filter name="my_contributions" string="My contributions" domain="[('track_ids.owner', '=', uid)]"/>
-                    <filter name="shared_albums" string="Shared albums" domain="[('owner_ids', 'in', [uid]), ('track_ids.owner', '!=', uid)]"/>
+                    <filter name="my_contributions" string="My contributions" domain="[('track_ids.custom_owner_id', '=', uid)]"/>
+                    <filter name="shared_albums" string="Shared albums" domain="[('custom_owner_ids', 'in', [uid]), ('track_ids.custom_owner_id', '!=', uid)]"/>
+                    <filter name="incomplete_albums" string="Incomplete albums" domain="[('is_complete', '!=', True)]"/>
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
