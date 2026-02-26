@@ -303,12 +303,23 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         track._update_metadata()
 
         return {
-            'name': _('New Track'),
-            'view_mode': 'form',
-            'res_model': 'music_manager.track',
-            'res_id': track.id,
-            'type': 'ir.actions.act_window',
-            'target': 'current',
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Music Manager says:"),
+                'message': _("Nice! Your new song '%s' has been added into the library.", track.name),
+                'type': 'success',
+                'sticky': False,
+                'next': {
+                    'type': 'ir.actions.act_window',
+                    'res_model': 'music_manager.track',
+                    'res_id': track.id,
+                    'name': _('New Track'),
+                    'view_mode': 'form',
+                    'views': [(False, 'form')],
+                    'target': 'current',
+                },
+            }
         }
 
     def _convert_to_mp3(self) -> None:
