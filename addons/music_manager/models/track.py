@@ -73,7 +73,7 @@ class Track(Model, ProcessImageMixin):
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
     is_saved = Boolean(string=_("Is saved"), default=False, readonly=True)
-    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+    custom_owner_id = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
     def create(self, list_vals):
@@ -241,7 +241,7 @@ class Track(Model, ProcessImageMixin):
 
         return [("id", "in", matching_ids)]
 
-    @api.constrains('name', 'track_artist_ids', 'owner')
+    @api.constrains('name', 'track_artist_ids', 'custom_owner_id')
     def _check_track_name(self) -> None:
         for current_track in self:  # type:ignore
             if not current_track.track_artist_ids:
@@ -250,7 +250,7 @@ class Track(Model, ProcessImageMixin):
             existing_tracks = self.search([
                 ('id', '!=', current_track.id),
                 ('name', '=', current_track.name),
-                ('owner', '=', current_track.owner.id)
+                ('custom_owner_id', '=', current_track.custom_owner_id.id)
             ])
 
             for track in existing_tracks:  # type:ignore
@@ -440,10 +440,10 @@ class Track(Model, ProcessImageMixin):
     def _sync_album_with_owner(self) -> None:
         self.ensure_one()
 
-        if not self.owner or not self.album_id:
+        if not self.custom_owner_id or not self.album_id:
             return
 
-        if self.owner in self.album_id.owner_ids:
+        if self.custom_owner_id in self.album_id.custom_owner_ids:
             return
 
         album_class = self.env['music_manager.album']

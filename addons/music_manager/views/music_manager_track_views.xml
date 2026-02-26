@@ -6,7 +6,7 @@
             <field name="res_model">music_manager.track</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
-            <field name="domain">[('owner', '=', uid)]</field>
+            <field name="domain">[('custom_owner_id', '=', uid)]</field>
         </record>
 
         <record id="music_manager_track_view_action_admin" model="ir.actions.act_window">
@@ -14,8 +14,8 @@
             <field name="res_model">music_manager.track</field>
             <field name="view_mode">tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
-            <field name="limit">1000</field>
-            <field name="context">{'group_by': 'owner'}</field>
+            <field name="limit">500</field>
+            <field name="context">{'group_by': 'custom_owner_id'}</field>
         </record>
 
         <!-- Tree view -->
@@ -30,18 +30,19 @@
                     <field name="name" string="Title"/>
                     <field name="display_artist_names" string="Artist(s)"/>
                     <field name="album_id" string="Album"/>
+                    <field name="album_artist_id" string="Album artist"/>
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
                     <field name="display_duration" string="Duration"/>
-                    <field name="has_valid_path" column_invisible="True"/>
-                    <field name="is_saved" column_invisible="True"/>
-                    <field name="is_deleted" column_invisible="True"/>
-                    <field name="owner" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="custom_owner_id" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="display_bitrate" string="Quality" optional="hide"/>
                     <field name="display_sample_rate" string="Frequency (kHz)" optional="hide"/>
                     <field name="file_path" string="Path" optional="hide"/>
+                    <field name="is_deleted" column_invisible="True"/>
+                    <field name="is_saved" column_invisible="True"/>
+                    <field name="has_valid_path" column_invisible="True"/>
                 </tree>
             </field>
         </record>
@@ -69,7 +70,7 @@
                                     <field name="album_id" string="Album"/>
                                     <field name="genre_id" string="Genre"/>
                                     <field name="compilation" string="Part of a compilation"/>
-                                    <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                    <field name="custom_owner_id" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                     <field name="has_valid_path" invisible="True"/>
                                 </group>
                                 <group>
@@ -134,13 +135,14 @@
                     <field name="album_id" string="by album title"/>
 
                     <!-- Custom filters -->
-                    <filter name="by_saved" string="Not saved" domain="[('is_saved', '=', False)]"/>
+                    <filter name="by_deleted" string="Deleted" domain="[('is_deleted', '=', True)]"/>
                     <filter name="by_path_type" string="Invalid path" domain="[('has_valid_path', '=', False)]" groups="music_manager.group_music_manager_user_admin"/>
                     <filter name="by_deleted_file" string="Deleted file" domain="[('is_deleted', '=', True)]" groups="music_manager.group_music_manager_user_admin"/>
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
-                        <filter name="owner" string="Owner" context="{'group_by': 'owner'}" groups="music_manager.group_music_manager_user_admin"/>
+                        <filter name="custom_owner_id" string="Owner" context="{'group_by': 'custom_owner_id'}" groups="music_manager.group_music_manager_user_admin"/>
+                        <filter name="album_id" string="Album" context="{'group_by': 'album_id'}"/>
                         <filter name="album_artist_id" string="Album artist" context="{'group_by': 'album_artist_id'}"/>
                         <filter name="year" string="Year" context="{'group_by': 'year'}"/>
                         <filter name="bitrate" string="Quality" context="{'group_by': 'bitrate'}"/>

@@ -58,7 +58,7 @@ class Artist(Model, ProcessImageMixin):
     country_code = Char(related='country_id.code', string=_("Country code"))
 
     # Technical fields
-    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+    custom_owner_id = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
     def create(self, list_vals: list[ArtistVals]):
@@ -70,7 +70,7 @@ class Artist(Model, ProcessImageMixin):
     def write(self, vals: ArtistVals):
         for artist in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if artist.owner != self.env.user:
+                if artist.custom_owner_id != self.env.user:
                     raise AccessError(_("\nCannot update this artist because you are not the owner. 🤷"))
 
         self._process_picture_image(vals)
@@ -80,7 +80,7 @@ class Artist(Model, ProcessImageMixin):
     def unlink(self):
         for artist in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if artist.owner != self.env.user:
+                if artist.custom_owner_id != self.env.user:
                     raise AccessError(_("\nCannot delete this artist because you are not the owner. 🤷"))
 
                 related_track = self.env['music_manager.track'].sudo().search(

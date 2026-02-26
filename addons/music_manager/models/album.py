@@ -62,7 +62,7 @@ class Album(Model, ProcessImageMixin):
     )
 
     # Techincal fields
-    owner_ids = Many2many(comodel_name='res.users', string=_("Owners"), compute='_compute_album_owners', store=True)
+    custom_owner_ids = Many2many(comodel_name='res.users', string=_("Owners"), compute='_compute_album_owners', store=True)
     all_track_ids = Many2many(comodel_name='music_manager.track', string=_("All tracks"), compute='_compute_all_track_ids')
 
     @api.model_create_multi
@@ -111,7 +111,7 @@ class Album(Model, ProcessImageMixin):
         if self.env.context.get('skip_album_sync'):
             return super().unlink()
 
-        tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.owner.id == self.env.user.id)
+        tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.custom_owner_id.id == self.env.user.id)
 
         if tracks_to_delete:
             tracks_to_delete.unlink()
@@ -172,10 +172,10 @@ class Album(Model, ProcessImageMixin):
 
             album.display_name = f"{name}{album_type_label}{artist_label}"
 
-    @api.depends('track_ids.owner')
+    @api.depends('track_ids.custom_owner_id')
     def _compute_album_owners(self) -> None:
         for album in self:
-            album.owner_ids = album.track_ids.mapped('owner')
+            album.custom_owner_ids = album.track_ids.mapped('custom_owner_id')
 
     @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration')
     def _compute_album_type(self) -> None:

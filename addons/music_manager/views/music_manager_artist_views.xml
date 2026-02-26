@@ -30,7 +30,7 @@
                                 <div class="o_kanban_record_title d-flex flex-row justify-content-between">
                                     <div class="d-flex flex-column">
                                         <field name="name"/>
-                                        <p class="text-muted"><small><em>by <field name="owner"/></em></small></p>
+                                        <p class="text-muted"><small><em>by <field name="custom_owner_id"/></em></small></p>
                                     </div>
                                     <img t-if="record.country_id.raw_value" t-attf-src="/base/static/img/country_flags/#{record.country_code.raw_value.toLowerCase()}.png" t-att-title="record.country_id.value" width="20" height="15" alt="Country flag"/>
                                 </div>
@@ -70,7 +70,7 @@
                     <field name="track_amount" string="Total tracks"/>
                     <field name="album_amount" string="Total albums"/>
                     <field name="country_id" string="Country"/>
-                    <field name="owner" string="Owner"/>
+                    <field name="custom_owner_id" string="Owner"/>
                     <field name="write_uid" string="Updated by"/>
                     <field name="create_date" string="Create date"/>
                     <field name="write_date" string="Last update"/>
@@ -96,12 +96,12 @@
                             <group class="flex-grow-1">
                                 <group>
                                     <field name="name" string="Group or artist name"/>
-                                    <field name="real_name" string="Real name"/>
+                                    <field name="is_group" string="Is group" widget="toggle"/>
+                                    <field name="real_name" string="Real name" invisible="is_group"/>
                                     <field name="start_year" string="Birth year" invisible="is_group"/>
                                     <field name="start_year" string="Debut year" invisible="not is_group"/>
-                                    <field name="is_group" string="Is group"/>
                                     <field name="website" string="Website" widget="url"/>
-                                    <field name="owner" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
+                                    <field name="custom_owner_id" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                 </group>
                                 <group>
                                     <field name="country_id" string="Country"/>
@@ -116,38 +116,40 @@
                             <button name="update_songs" string="Update metadata for all songs" class="btn-outline-primary w-50" type="object"/>
                         </div>
                         <notebook>
-                            <page string="Albums">
+                            <page string="Registered albums">
                                 <field name="album_ids" readonly="True">
-                                    <tree>
+                                    <tree decoration-warning="not is_complete">
                                         <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
-                                        <field name="name" string="Title"/>
+                                        <field name="name" string="Album title"/>
                                         <field name="album_artist_id" string="Album artist"/>
-                                        <field name="track_amount" string="Track amount"/>
-                                        <field name="disk_amount" string="Disk amount" optional="hide"/>
                                         <field name="genre_id" string="Genre"/>
-                                        <field name="year" string="Year"/>
+                                        <field name="track_amount" string="Track amount" optional="hide"/>
+                                        <field name="disk_amount" string="Disk amount" optional="hide"/>
                                         <field name="display_duration" string="Total duration"/>
-                                        <field name="owner_ids" string="Owner(s)" widget="many2many_tags"/>
+                                        <field name="year" string="Year"/>
+                                        <field name="custom_owner_ids" string="Owner(s)" widget="many2many_tags"/>
                                         <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="is_complete" column_invisible="True"/>
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Tracks">
+                            <page string="Registered tracks">
                                 <field name="track_ids" readonly="True">
                                     <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
                                         <field name="track_no" string="Track no" optional="hide"/>
                                         <field name="name" string="Title"/>
-                                        <field name="album_artist_id" string="Album artist"/>
+                                        <field name="display_artist_names" string="Track artist(s)"/>
                                         <field name="album_id" string="Album"/>
+                                        <field name="album_artist_id" string="Album artist"/>
                                         <field name="year" string="Year"/>
                                         <field name="genre_id" string="Genre"/>
-                                        <field name="is_saved" column_invisible="True"/>
-                                        <field name="is_deleted" column_invisible="True"/>
                                         <field name="display_duration" string="Duration"/>
-                                        <field name="owner" widget="many2one_avatar" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="custom_owner_id" widget="many2one_avatar"/>
                                         <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                                         <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="is_saved" column_invisible="True"/>
+                                        <field name="is_deleted" column_invisible="True"/>
                                     </tree>
                                 </field>
                             </page>
@@ -164,18 +166,18 @@
             <field name="arch" type="xml">
                 <search string="Artist searchbar view">
                     <!-- Custom fields -->
-                    <field name="name" string="by artist name"/>
+                    <field name="name" string="by name"/>
 
                     <!-- Custom filters -->
                     <filter name="by_group" string="Is group" domain="[('is_group', '=', True)]"/>
                     <filter name="by_artist" string="Is artist" domain="[('is_group', '=', False)]"/>
-                    <filter name="my_contributions" string="My contributions" domain="[('owner', '=', uid)]"/>
+                    <filter name="my_contributions" string="My contributions" domain="[('custom_owner_id', '=', uid)]"/>
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
-                        <filter name="owner" string="Owner" context="{'group_by': 'owner'}" groups="music_manager.group_music_manager_user_admin"/>
                         <filter name="start_year" string="Year" context="{'group_by': 'start_year'}"/>
                         <filter name="country_id" string="Country" context="{'group_by': 'country_id'}"/>
+                        <filter name="custom_owner_id" string="Owner" context="{'group_by': 'custom_owner_id'}" groups="music_manager.group_music_manager_user_admin"/>
                     </group>
                 </search>
             </field>

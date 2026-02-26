@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-<!--        <record id="action_change_owner_id_album" model="ir.actions.act_window">-->
-<!--            <field name="name">&#128100; Change owner</field>-->
-<!--            <field name="res_model">music_manager.change_owner_wizard</field>-->
-<!--            <field name="view_mode">form</field>-->
-<!--            <field name="target">new</field>-->
-<!--            <field name="binding_model_id" ref="model_music_manager_album"/>-->
-<!--        </record>-->
-
         <record id="action_change_owner_id_artist" model="ir.actions.act_window">
             <field name="name">&#128100; Change owner</field>
             <field name="res_model">music_manager.change_owner_wizard</field>
@@ -40,6 +32,7 @@
             <field name="arch" type="xml">
                 <form string="Change owner form view">
                     <group>
+                        <field name="current_owner_ids" string="Current owner(s)" widget="many2many_tags" readonly="True"/>
                         <field name="new_owner_id" string="New owner"/>
                     </group>
                     <footer>

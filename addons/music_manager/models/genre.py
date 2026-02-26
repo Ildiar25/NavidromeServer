@@ -31,12 +31,12 @@ class Genre(Model, ProcessImageMixin):
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
 
     # Technical fields
-    owner = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+    custom_owner_id = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
 
     def write(self, vals: GenreVals):
         for genre in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if genre.owner != self.env.user:
+                if genre.custom_owner_id != self.env.user:
                     raise UserError(_("\nCannot update this genre because you are not the owner. 🤷"))
 
         return super().write(vals)
@@ -44,7 +44,7 @@ class Genre(Model, ProcessImageMixin):
     def unlink(self):
         for genre in self:  # type:ignore
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
-                if genre.owner != self.env.user:
+                if genre.custom_owner_id != self.env.user:
                     raise UserError(_("\nCannot delete this genre because you are not the owner. 🤷"))
 
                 related_tracks = self.env['music_manager.track'].sudo().search(
