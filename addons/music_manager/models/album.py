@@ -30,13 +30,14 @@ class Album(Model, ProcessImageMixin):
     album_type = Selection(
         string=_("Album type"),
         selection=[
+            ('uncategorized', _("Uncategorized")),
             ('album', _("Album")),
             ('compilation', _("Compilation")),
             ('ep', _("EP")),
             ('single', _("Single")),
         ],
         compute='_compute_album_type',
-        default='album',
+        default='uncategorized',
         store=True,
     )
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', store=False)
@@ -151,6 +152,7 @@ class Album(Model, ProcessImageMixin):
 
     @api.depends('name', 'album_type', 'album_artist_id')
     def _compute_display_name(self):
+        # noinspection PyProtectedMember
         album_categories = dict(self._fields['album_type']._description_selection(self.env))
 
         for album in self:
@@ -177,14 +179,17 @@ class Album(Model, ProcessImageMixin):
         for album in self:
             album.custom_owner_ids = album.track_ids.mapped('custom_owner_id')
 
-    @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration')
+    @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration', 'is_complete')
     def _compute_album_type(self) -> None:
         for album in self:
             trck_dur = album.track_ids.mapped('duration')
             total_trck = album.track_amount
             album_dur = album.duration
 
-            if any(album.track_ids.mapped('compilation')):
+            if not album.is_complete:
+                album.album_type = 'uncategorized'
+
+            elif any(album.track_ids.mapped('compilation')):
                 album.album_type = 'compilation'
 
             elif (total_trck >= 7) or (total_trck < 7 and album_dur > 1800):

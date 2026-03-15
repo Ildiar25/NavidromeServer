@@ -85,7 +85,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         default='start'
     )
 
-    @api.depends('tmp_name', 'possible_album_artist_id', 'possible_album_id', 'tmp_track_no', 'tmp_track_no')
+    @api.depends('tmp_name', 'possible_album_artist_id', 'possible_album_id', 'tmp_track_no', 'tmp_disk_no')
     def _compute_file_path(self) -> None:
         self.ensure_one()
         file_service = self._get_file_service_adapter()
@@ -137,13 +137,12 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     def _compute_inverse_compilation_value(self) -> None:
         self.ensure_one()
         if self.tmp_compilation:
-            self.possible_album_artist_id = self._find_or_create_single_artist(
-                "Various Artists", []
-            )
+            self.possible_album_artist_id = self._find_or_create_single_artist("Various Artists", [])
 
         else:
+            current_name = self.possible_album_artist_id.name or self.possible_original_artist_id.name
             self.possible_album_artist_id = self._find_or_create_single_artist(
-                self.possible_original_artist_id.name, self.possible_artist_ids.ids
+                current_name, self.possible_artist_ids.ids
             )
 
     @api.onchange('file')
@@ -253,7 +252,11 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         song = base64_decode(self.file)
 
         try:
+            self._check_already_exists()
             file_service.save_file(self.file_path, song)
+
+            # ⬇️ HERE creates a new TRACK record ⬇️
+            track_info = self._create_new_track_record()
 
         except InvalidPathError as invalid_path:
             _logger.error(f"There was an issue with file path: {invalid_path}")
@@ -272,48 +275,21 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 _("\nDamn! Something went wrong while saving the file.\nPlease, contact with your Admin.")
             )
 
-        # ⬇️ HERE creates a new TRACK record ⬇️
-
-        track = self.env['music_manager.track'].create({
-            'picture': self.picture,
-            'disk_no': self.tmp_disk_no,
-            'name': self.tmp_name,
-            'total_disk': self.tmp_total_disk,
-            'total_track': self.tmp_total_track,
-            'track_no': self.tmp_track_no,
-            'year': self.year,
-            'album_artist_id': self.possible_album_artist_id.id,
-            'album_id': self.possible_album_id.id,
-            'genre_id': self.possible_genre_id.id,
-            'original_artist_id': self.possible_original_artist_id.id,
-            'track_artist_ids': [(6, 0, self.possible_artist_ids.ids)],
-            'compilation': self.tmp_compilation,
-            'file_path': self.file_path,
-            'old_path': self.file_path,
-            'is_saved': True,
-            'bitrate': self.bitrate,
-            'channels': self.channels,
-            'codec': self.codec,
-            'duration': self.duration,
-            'mime_type': self.mime_type,
-            'sample_rate': self.sample_rate,
-        })
-
-        # noinspection PyProtectedMember
-        track._update_metadata()
+        if not track_info:
+            return None
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _("Music Manager says:"),
-                'message': _("Nice! Your new song '%s' has been added into the library.", track.name),
+                'message': _("Nice! Your new song '%s' has been added into the library.", track_info['name']),
                 'type': 'success',
                 'sticky': False,
                 'next': {
                     'type': 'ir.actions.act_window',
                     'res_model': 'music_manager.track',
-                    'res_id': track.id,
+                    'res_id': track_info['id'],
                     'name': _('New Track'),
                     'view_mode': 'form',
                     'views': [(False, 'form')],
@@ -358,6 +334,55 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 _("\nDamn! Something went wrong while validating URL.\nPlease, contact with your Admin.")
             )
 
+    def _create_new_track_record(self):
+        self.ensure_one()
+
+        track = self.env['music_manager.track'].create({
+            'picture': self.picture,
+            'disk_no': self.tmp_disk_no,
+            'name': self.tmp_name,
+            'total_disk': self.tmp_total_disk,
+            'total_track': self.tmp_total_track,
+            'track_no': self.tmp_track_no,
+            'year': self.year,
+            'album_artist_id': self.possible_album_artist_id.id,
+            'album_id': self.possible_album_id.id,
+            'genre_id': self.possible_genre_id.id,
+            'original_artist_id': self.possible_original_artist_id.id,
+            'track_artist_ids': [(6, 0, self.possible_artist_ids.ids)],
+            'compilation': self.tmp_compilation,
+            'file_path': self.file_path,
+            'old_path': self.file_path,
+            'is_saved': True,
+            'bitrate': self.bitrate,
+            'channels': self.channels,
+            'codec': self.codec,
+            'duration': self.duration,
+            'mime_type': self.mime_type,
+            'sample_rate': self.sample_rate,
+        })
+
+        # noinspection PyProtectedMember
+        track._update_metadata()
+
+        return {'id': track.id, 'name': track.name} if track else None
+
+    def _check_already_exists(self) -> None:
+        self.ensure_one()
+
+        if not self.possible_album_id or not self.possible_album_artist_id:
+            return
+
+        domain = [
+            ('album_id', '=', self.possible_album_id.id),
+            ('album_artist_id', '=', self.possible_album_artist_id.id),
+            ('track_no', '=', self.tmp_track_no),
+            ('disk_no', '=', self.tmp_disk_no),
+        ]
+
+        if self.env['music_manager.track'].search_count(domain) > 0:
+            raise ValidationError(_("\nThis track number already exists on this disk."))
+
     def _ensure_optional_fields(self):
         self.ensure_one()
 
@@ -377,21 +402,19 @@ class TrackWizard(TransientModel, ProcessImageMixin):
                 )
 
     def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]):
+        if not artist_name or artist_name.lower() == 'unknown':
+            if fallback_ids:
+                return fallback_ids[0]
+
+            return False
+
         artists = self.env['music_manager.artist']
+        artist = artists.search([('name', '=', artist_name)], limit=1)
 
-        if artist_name and artist_name.lower() != 'unknown':
-            artist = artists.search([('name', '=', artist_name)], limit=1)
+        if artist:
+            return artist.id
 
-            if artist:
-                return artist.id
-
-            else:
-                return artists.create([{'name': artist_name}]).id
-
-        elif fallback_ids:
-            return fallback_ids[0]
-
-        return False
+        return artists.create([{'name': artist_name}]).id
 
     def _get_download_service_adapter(self, video_url: str):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
