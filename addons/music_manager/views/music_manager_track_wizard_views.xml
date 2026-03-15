@@ -186,7 +186,7 @@
                             </group>
                         </group>
                         <separator/>
-                        <div class="d-flex flex-column align-items-center" invisible="has_valid_path">
+                        <div class="alert alert-danger" invisible="has_valid_path" role="alert">
                             <h4>My gosh! 🙄</h4>
                             <p>
                                 <em>There are some fields you need to check before save file!</em>
@@ -208,7 +208,7 @@
                         <button string="Cancel" class="btn-default" special="cancel"/>
                         <div class="ms-auto d-flex gap-2">
                             <button string="Back" type="object" name="action_back" class="btn btn-outline-primary" invisible="state == 'start'"/>
-                            <button string="Next" type="object" name="action_next" class="btn btn-primary" invisible="state == 'done'"/>
+                            <button string="Next" type="object" name="action_next" default_focus="1" class="btn btn-primary" invisible="state == 'done'"/>
                         </div>
                     </footer>
                 </sheet>
