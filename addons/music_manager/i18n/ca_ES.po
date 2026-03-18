@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0-20260209\n"
+"Project-Id-Version: Odoo Server 17.0-20260305\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 08:29+0000\n"
-"PO-Revision-Date: 2026-03-12 09:31+0100\n"
+"POT-Creation-Date: 2026-03-18 10:40+0000\n"
+"PO-Revision-Date: 2026-03-18 11:43+0100\n"
 "Last-Translator: Joan <j.pastor1591@gmail.com>\n"
 "Language-Team: \n"
 "Language: ca_ES\n"
@@ -612,7 +612,6 @@ msgstr "Nombre d'àlbums"
 #. odoo-python
 #: code:addons/music_manager/models/album.py:0 code:addons/music_manager/models/track.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_album__album_artist_id
-#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_artist
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_artist_id
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
@@ -634,6 +633,11 @@ msgstr "Artista de l'àlbum"
 #, python-format
 msgid "Album artist found"
 msgstr "Artista de l'àlbum trobat"
+
+#. module: music_manager
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_artist
+msgid "Album artist name"
+msgstr "Nom de l'artista de l'àlbum"
 
 #. module: music_manager
 #. odoo-python
@@ -1634,6 +1638,13 @@ msgstr "Artista original coincident"
 #, python-format
 msgid "Members"
 msgstr "Membres"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/music_import_queue.py:0
+#, python-format
+msgid "Message: %s"
+msgstr "Missatge: %s"
 
 #. module: music_manager
 #. odoo-python
