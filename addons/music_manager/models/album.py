@@ -71,10 +71,9 @@ class Album(Model, ProcessImageMixin):
         for vals in list_vals:
             self._process_picture_image(vals)
 
-        # noinspection PyNoneFunctionAssignment
         albums = super().create(list_vals)
 
-        for album in albums:  # type:ignore
+        for album in albums:
             if album.track_ids:
                 update_vals = {}
 
@@ -92,9 +91,9 @@ class Album(Model, ProcessImageMixin):
     def write(self, vals):
         self._process_picture_image(vals)
 
-        res = super().write(vals)
+        res = super().write(vals)  # type: ignore[arg-type]
 
-        for album in self:  # type: ignore
+        for album in self:
             update_vals = {}
 
             if 'genre_id' in vals:
@@ -112,7 +111,11 @@ class Album(Model, ProcessImageMixin):
         if self.env.context.get('skip_album_sync'):
             return super().unlink()
 
-        tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.custom_owner_id.id == self.env.user.id)
+        if self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+            tracks_to_delete = self.mapped('track_ids')
+
+        else:
+            tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.custom_owner_id.id == self.env.user.id)
 
         if tracks_to_delete:
             tracks_to_delete.unlink()

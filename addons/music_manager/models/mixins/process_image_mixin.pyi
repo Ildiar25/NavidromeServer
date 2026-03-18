@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Dict, Final, Iterable, Self
+from typing import Any, Dict, Final, Self
 
+from ...adapters import ImageServiceAdapter
 from ...utils.custom_types import CustomWarningMessage
 
 
@@ -13,11 +14,16 @@ class ProcessImageMixin:
     _name: Final[str]
     _description: str | None
 
-
-    def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
+    def _validate_picture_image(self: Self) -> CustomWarningMessage | None:
         """Checks picture image format. If image format does not in allowed formats, clears the field `picture`
         and returns a warning message.
         :return: Warning Message (dict) | None
+        """
+
+    def _get_image_service_adapter(self: Self, image: str) -> ImageServiceAdapter:
+        """Ensure image service adapter has its settings updated
+        :param image: Image bytes in string format
+        :return: ImageServiceAdapter with updated settings
         """
 
     @staticmethod

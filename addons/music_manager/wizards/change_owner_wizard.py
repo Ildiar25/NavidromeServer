@@ -14,8 +14,8 @@ class ChangeOwnerWizard(TransientModel):
     _description = "change_owner_wizard_table"
 
     # Relational fields
-    new_owner_id = Many2one(comodel_name='res.users', string=_("New owner"), required=True)
     current_owner_ids = Many2many(comodel_name='res.users', string=_("Current owners"))
+    new_owner_id = Many2one(comodel_name='res.users', string=_("New owner"), required=True)
 
     def default_get(self, fields_list):
         result = super(ChangeOwnerWizard, self).default_get(fields_list) or {}

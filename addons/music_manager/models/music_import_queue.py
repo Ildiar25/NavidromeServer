@@ -2,7 +2,6 @@
 import logging
 import traceback
 from datetime import timedelta
-from typing import Dict
 
 # noinspection PyProtectedMember
 from odoo import _, api
@@ -62,99 +61,105 @@ class MusicImportQueue(Model):
                 _logger.error(traceback_error)
 
                 self.env.cr.rollback()
-                music_file.write({'state': 'error', 'error_message': f"Message: {str(unknown_error)}"})
+                music_file.write({
+                    'state': 'error',
+                    'error_message': _("Message: %s", str(unknown_error))
+                })
 
     @api.model
     def _cron_garbage_collector(self) -> None:
         limit = Datetime.now() - timedelta(hours=24)
-        records_to_delete = self.search(
-            [('state', '=', 'processed'), ('write_date', '<', limit)]
-            , limit=1)
+        records_to_delete = self.search([('state', '=', 'processed'), ('write_date', '<', limit)])
 
         if records_to_delete:
             records_to_delete.unlink()
 
-    def create_track_from_scan(self, file_path: str, data: Dict[str, str | int | None]) -> None:
-        album_artist_id = self._match_artist_id(data['tmp_album_artist'])
+    def create_track_from_scan(self, file_path, data) -> None:
+        track_model = self.env['music_manager.track']
 
-        self.env['music_manager.track'].create({
-            'picture': data['picture'],
-            'disk_no': data['tmp_disk_no'],
-            'name': data['tmp_name'],
-            'total_disk': data['tmp_total_disk'],
-            'total_track': data['tmp_total_track'],
-            'track_no': data['tmp_track_no'],
-            'year': self._match_track_year(data['tmp_year']),
-            'album_artist_id': album_artist_id,
-            'album_id': self._match_album_id(data['tmp_album'], album_artist_id),
-            'genre_id': self._match_genre_id(data['tmp_genre']),
-            'original_artist_id': self._match_artist_id(data['tmp_original_artist']),
-            'track_artist_ids': [(6, 0, self._match_various_artists_ids(data['tmp_artists']))],
-            'compilation': data['tmp_compilation'],
+        found_year = self._match_track_year(data.get('tmp_year', ""))
+        album_artist_id = self._match_artist_id(data.get('tmp_album_artist', "Unknown"))
+        album_id = self._match_album_id(data.get('tmp_album', "Unknown"), album_artist_id)
+        genre_id = self._match_genre_id(data.get('tmp_genre', "Unknown"))
+        original_artist_id = self._match_artist_id(data.get('tmp_original_artist', "Unknown"))
+        artist_ids = self._match_various_artists_ids(data.get('tmp_artists', "Unknown"))
+
+        track_vals = {
+            'picture': data.get('picture', False),
+            'disk_no': data.get('tmp_disk_no', 1),
+            'name': data.get('tmp_name', "Unknown"),
+            'total_disk': data.get('tmp_total_disk', 1),
+            'total_track': data.get('tmp_total_track', 1),
+            'track_no': data.get('tmp_track_no', 1),
+            'year': found_year,
+            'album_artist_id': album_artist_id.id,
+            'album_id': album_id.id,
+            'genre_id': genre_id.id,
+            'original_artist_id': original_artist_id.id,
+            'track_artist_ids': getattr(artist_ids, 'ids', []),
+            'compilation': data.get('tmp_compilation', False),
             'file_path': file_path,
             'old_path': file_path,
             'is_saved': True,
-            'bitrate': data['bitrate'],
-            'channels': data['channels'],
-            'codec': data['codec'],
-            'duration': data['duration'],
-            'mime_type': data['mime_type'],
-            'sample_rate': data['sample_rate'],
-        })
+            'bitrate': data.get('bitrate', 0),
+            'channels': data.get('channels', "Stereo"),
+            'codec': data.get('codec', "Unknown"),
+            'duration': data.get('duration', 0),
+            'mime_type': data.get('mime_type', "Unknown"),
+            'sample_rate': data.get('sample_rate', 0),
+        }
 
-    def _match_album_id(self, album_name: str, album_artist_id: int):
-        album_id = self.env['music_manager.album'].search(
-            [('name', '=', album_name), ('album_artist_id', '=', album_artist_id)],
-            limit=1
-        )
+        # ⬇️ HERE creates a new TRACK record ⬇️
+        track_model.create(track_vals)
 
-        if not album_id:
-            album_id = self.env['music_manager.album'].create({
-                'name': album_name,
-                'album_artist_id': album_artist_id,
-            })
+    def _match_album_id(self, album_name, album_artist):
+        album_model = self.env['music_manager.album']
+        found = album_model.search([('name', '=', album_name), ('album_artist_id', '=', album_artist.id)], limit=1)
 
-        return album_id.id
+        if not found:
+            new_album = album_model.create({'name': album_name, 'album_artist_id': album_artist.id})
+            return new_album
 
-    def _match_artist_id(self, artist_name: str):
+        return found
 
-        artist_id = self.env['music_manager.artist'].search([('name', '=', artist_name)], limit=1)
+    def _match_artist_id(self, artist_name):
+        artist_model = self.env['music_manager.artist']
+        found = artist_model.search([('name', '=', artist_name)], limit=1)
 
-        if not artist_id:
-            artist_id = self.env['music_manager.artist'].create({
-                'name': artist_name,
-            })
+        if not found:
+            new_artist = artist_model.create({'name': artist_name})
+            return new_artist
 
-        return artist_id.id
+        return found
 
-    def _match_various_artists_ids(self, artist_names: str):
+    def _match_various_artists_ids(self, artist_names):
+        artist_model = self.env['music_manager.artist']
+
         names = [name.strip() for name in artist_names.split(",")]
         artist_ids = []
 
         for name in names:
-            found = self.env['music_manager.artist'].search([('name', '=', name)], limit=1)
+            found = artist_model.search([('name', '=', name)], limit=1)
 
             if not found:
-                new_artist = self.env['music_manager.artist'].create({
-                    'name': name,
-                })
+                new_artist = artist_model.create({'name': name,})
                 artist_ids.append(new_artist.id)
 
                 continue
 
             artist_ids.append(found.id)
 
-        return artist_ids
+        return artist_model.browse(artist_ids)
 
-    def _match_genre_id(self, genre_name: str):
-        genre_id = self.env['music_manager.genre'].search([('name', '=', genre_name)], limit=1)
+    def _match_genre_id(self, genre_name):
+        genre_model = self.env['music_manager.genre']
+        found = genre_model.search([('name', '=', genre_name)], limit=1)
 
-        if not genre_id:
-            genre_id = self.env['music_manager.genre'].create({
-                'name': genre_name,
-            })
+        if not found:
+            new_genre = genre_model.create({'name': genre_name})
+            return new_genre
 
-        return genre_id.id
+        return found
 
     @staticmethod
     def _match_track_year(year: str):

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from typing import Any, Dict
 
 # noinspection PyProtectedMember
 from odoo import _, api
@@ -13,6 +12,7 @@ from ...utils.custom_types import CustomWarningMessage
 from ...utils.exceptions import (
     InvalidFileFormatError, InvalidImageFormatError, ImagePersistenceError, MusicManagerError
 )
+from ...utils.data_encoding import base64_encode
 from ...utils.file_utils import validate_allowed_mimes
 
 
@@ -24,7 +24,7 @@ class ProcessImageMixin(AbstractModel):
     _description = 'shared_process_image_method'
 
     @api.onchange('picture')
-    def _validate_picture_image(self) -> CustomWarningMessage | None:
+    def _validate_picture_image(self):
         for record in self:
             if not record.picture and not isinstance(record.picture, bytes):
                 continue
@@ -46,7 +46,7 @@ class ProcessImageMixin(AbstractModel):
 
         return None
 
-    def _get_image_service_adapter(self, image: str):
+    def _get_image_service_adapter(self, image):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
 
         image_format = settings.image_format if settings else 'png'
@@ -54,12 +54,8 @@ class ProcessImageMixin(AbstractModel):
 
         return ImageServiceAdapter(image, image_type=image_format, square_size=image_size)
 
-    def _process_picture_image(self, values: Dict[str, Any]) -> None:
+    def _process_picture_image(self, values) -> None:
         if not 'picture' in values or not values['picture']:
-            return
-
-        if not isinstance(values['picture'], str):
-            _logger.warning(f"Image is not an encoded string. Will be ignored: {type(values['picture'])}.")
             return
 
         try:
