@@ -30,13 +30,14 @@ class Album(Model, ProcessImageMixin):
     album_type = Selection(
         string=_("Album type"),
         selection=[
+            ('uncategorized', _("Uncategorized")),
             ('album', _("Album")),
             ('compilation', _("Compilation")),
             ('ep', _("EP")),
             ('single', _("Single")),
         ],
         compute='_compute_album_type',
-        default='album',
+        default='uncategorized',
         store=True,
     )
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', store=False)
@@ -70,10 +71,9 @@ class Album(Model, ProcessImageMixin):
         for vals in list_vals:
             self._process_picture_image(vals)
 
-        # noinspection PyNoneFunctionAssignment
         albums = super().create(list_vals)
 
-        for album in albums:  # type:ignore
+        for album in albums:
             if album.track_ids:
                 update_vals = {}
 
@@ -91,9 +91,9 @@ class Album(Model, ProcessImageMixin):
     def write(self, vals):
         self._process_picture_image(vals)
 
-        res = super().write(vals)
+        res = super().write(vals)  # type: ignore[arg-type]
 
-        for album in self:  # type: ignore
+        for album in self:
             update_vals = {}
 
             if 'genre_id' in vals:
@@ -111,7 +111,11 @@ class Album(Model, ProcessImageMixin):
         if self.env.context.get('skip_album_sync'):
             return super().unlink()
 
-        tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.custom_owner_id.id == self.env.user.id)
+        if self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+            tracks_to_delete = self.mapped('track_ids')
+
+        else:
+            tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.custom_owner_id.id == self.env.user.id)
 
         if tracks_to_delete:
             tracks_to_delete.unlink()
@@ -151,6 +155,7 @@ class Album(Model, ProcessImageMixin):
 
     @api.depends('name', 'album_type', 'album_artist_id')
     def _compute_display_name(self):
+        # noinspection PyProtectedMember
         album_categories = dict(self._fields['album_type']._description_selection(self.env))
 
         for album in self:
@@ -177,14 +182,17 @@ class Album(Model, ProcessImageMixin):
         for album in self:
             album.custom_owner_ids = album.track_ids.mapped('custom_owner_id')
 
-    @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration')
+    @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration', 'is_complete')
     def _compute_album_type(self) -> None:
         for album in self:
             trck_dur = album.track_ids.mapped('duration')
             total_trck = album.track_amount
             album_dur = album.duration
 
-            if any(album.track_ids.mapped('compilation')):
+            if not album.is_complete:
+                album.album_type = 'uncategorized'
+
+            elif any(album.track_ids.mapped('compilation')):
                 album.album_type = 'compilation'
 
             elif (total_trck >= 7) or (total_trck < 7 and album_dur > 1800):

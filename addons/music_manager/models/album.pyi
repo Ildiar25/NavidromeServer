@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from collections.abc import Callable, Iterable, Sequence
-from typing import Final, Literal, Optional, Self
+from collections.abc import Callable, Sequence
+from typing import Final, Literal, Self
 
 from odoo.addons.base.models.res_users import Users
+from odoo.api import Environment
 
 from .artist import Artist
 from .genre import Genre
 from .track import Track
-from ..utils.custom_types import AlbumVals, CustomWarningMessage, DisplayNotification
+from ..utils.custom_types import AlbumVals, CustomWarningMessage, DisplayNotification, YearValue
 
 
 class Album:
@@ -19,88 +20,138 @@ class Album:
     _name: Final[str]
     _description: str | None
     _order: str | None
+
+    # Base model fields necessaries for context
     id: int
+    env: Environment
     ensure_one: Callable[[], Self]
+    exists: Callable[[], bool | Self]
 
+    # Custom fields
     name: str
-    is_favorite: bool
-    album_artist_id: Optional[Artist]
-    genre_id: Optional[Genre]
-    track_ids: Sequence[Track]
-    picture: bytes | None
+    album_artist_id: Artist | int | Literal[False]
+    genre_id: Genre | int | Literal[False]
+    track_ids: Sequence[Track] | Sequence[int]
+    album_type: Literal['uncategorized', 'album', 'compilation', 'ep', 'single']
     disk_amount: int
+    display_duration: str | Literal[False]
+    duration: int
+    is_complete: bool
+    picture: bytes | Literal[False]
+    progress: int
     track_amount: int
-    year: str | None
-    owner: Users
+    year: YearValue | Literal[False]
+    custom_owner_ids: Sequence[Users] | Sequence[int]
+    all_track_ids: Sequence[Track] | Sequence[int]
 
-    def create(self, list_vals: list[dict]) -> Self:
+    def create(self, list_vals: list[AlbumVals]) -> Self:
         """Overrides 'create' method to process cover album & propagate to linked tracks, genre or artist records.
         :param list_vals: Dictionary list with album information to create new records.
         :return: Created album records.
         """
 
-    # def write(self, vals: AlbumVals) -> Literal[True]:
-    #     """Overrides 'write' method to update cover album & propagate to linked tracks, genre, or artist records.
-    #     :param vals: Dictionary with album values to update.
-    #     :return: Confirms updated album record.
-    #     """
+    def write(self: Self, vals: AlbumVals) -> Literal[True]:
+        """Overrides 'write' method to update cover album & propagate to linked tracks, genre, or artist records.
+        :param vals: Dictionary with album values to update.
+        :return: Confirms updated album record.
+        """
 
-    # def unlink(self: Iterable[Self]) -> Self:
-    #     """Overrides 'unlink' method to delete all linked tracks before delete itself.
-    #     :return: Deleted records.
-    #     """
+    def unlink(self: Self) -> Literal[True]:
+        """Overrides 'unlink' method to delete all linked tracks before delete itself.
+        :return: Deleted records.
+        """
 
-    def _compute_track_amount(self: Iterable[Self]) -> None:
+    def _compute_album_progress(self: Self) -> None:
+        """Calculates album complete progress
+        :return: None
+        """
+
+    def _compute_display_name(self: Self) -> None:
+        """Calculates the display name. It shows context info like artist's name or album type.
+        :return: None
+        """
+
+    def _compute_album_owners(self: Self) -> None:
+        """Calculates album owners.
+        :return: None
+        """
+
+    def _compute_album_type(self: Self) -> None:
+        """Calculates album type according to track amount & time duration.
+        :return: None
+        """
+
+    def _compute_all_track_ids(self: Self) -> None:
+        """Calculates all track ids.
+        :return: None
+        """
+
+    def _compute_is_complete(self: Self) -> None:
+        """Calculates if an album is complete or not
+        :return: None
+        """
+
+    def _compute_track_amount(self: Self) -> None:
         """Calculates track amount linked to this album record.
         Result is saved into `track_amount` field.
         :return: None
         """
 
-    def _compute_disk_amount(self: Iterable[Self]) -> None:
+    def _compute_disk_amount(self: Self) -> None:
         """Calculates disk amount linked to itself according to track metadata.
         Result is saved into `disk_amount` field.
         :return: None
         """
 
-    def _compute_album_picture(self: Iterable[Self]) -> None:
+    def _compute_disk_duration(self: Self) -> None:
+        """Calculates album total duration in minutes according to all track durations.
+        :return: None
+        """
+
+    def _compute_display_duration(self: Self) -> None:
+        """Calculates displayed album total duration according to disk duration.
+        :return: None
+        """
+
+    def _compute_album_picture(self: Self) -> None:
         """Calculates album cover. If cover image is not available for the album, it falls back to the cover
         of the first track with an available cover.
         :return: None
         """
 
-    def _inverse_album_picture(self: Iterable[Self]) -> None:
+    def _inverse_album_picture(self: Self) -> None:
         """Propagates the album cover to all linked tracks. If the album cover is not set, it clears
         the cover of the tracks.
         :return: None
         """
 
-    def _compute_album_year(self: Iterable[Self]) -> None:
+    def _compute_album_year(self: Self) -> None:
         """Computes album year. If year is not available for the album, it falls back to the `year` field
         of the first track with an available year.
         :return: None
         """
 
-    def _inverse_album_year(self: Iterable[Self]) -> None:
+    def _inverse_album_year(self: Self) -> None:
         """Propagates the album year to all linked tracks. If the album year is not set, it clears
         the year of the tracks.
         :return: None
         """
 
-    def set_favorite(self: Iterable[Self]) -> None:
-        """Toggles the 'is_favorite' field for each album.
-        :return: None
+    def update_songs(self: Self) -> DisplayNotification | None:
+        """Update track metadata linked to this album. It calls to the `save_changes()` method for each track.
+        :return: None | Dictionary with UI information
         """
 
-    # def update_songs(self) -> DisplayNotification | None:
-    #     """Update track metadata linked to this album. It calls to the `save_changes()` method for each track.
-    #     :return: None | Dictionary with UI information
-    #     """
+    def _get_years_list(self: Self) -> list[YearValue]:
+        """Calls 'get_years_list' method from file_utils.py to get a years list.
+        :return: Complete years list
+        """
 
-    def _validate_picture_image(self: Iterable[Self]) -> CustomWarningMessage | None:
+    def _validate_picture_image(self: Self) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.
         """
 
-    def _process_picture_image(self, vals: dict) -> None:
+    def _process_picture_image(self, vals: AlbumVals) -> None:
         """MIXIN: See process_image_mixin documentation.
         :param vals: Dictionary with vals to write
         :return: None

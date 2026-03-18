@@ -3,10 +3,9 @@
 from odoo import _, api
 from odoo.exceptions import UserError
 from odoo.models import Model
-from odoo.fields import Binary, Char, Html, Integer, Many2one, One2many, Many2many
+from odoo.fields import Binary, Char, Html, Integer, Many2one, One2many
 
 from .mixins.process_image_mixin import ProcessImageMixin
-from ..utils.custom_types import GenreVals
 
 
 class Genre(Model, ProcessImageMixin):
@@ -31,18 +30,30 @@ class Genre(Model, ProcessImageMixin):
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
 
     # Technical fields
-    custom_owner_id = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+    custom_owner_id = Many2one(
+        comodel_name='res.users',
+        string="Owner",
+        default=lambda self: self.env.user,
+        required=True
+    )
 
-    def write(self, vals: GenreVals):
-        for genre in self:  # type:ignore
+    @api.model_create_multi
+    def create(self, list_vals):
+        for vals in list_vals:
+            self._process_picture_image(vals)
+
+        return super().create(list_vals)
+
+    def write(self, vals):
+        for genre in self:
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if genre.custom_owner_id != self.env.user:
                     raise UserError(_("\nCannot update this genre because you are not the owner. 🤷"))
 
-        return super().write(vals)
+        return super().write(vals)  # type: ignore[arg-type]
 
     def unlink(self):
-        for genre in self:  # type:ignore
+        for genre in self:
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if genre.custom_owner_id != self.env.user:
                     raise UserError(_("\nCannot delete this genre because you are not the owner. 🤷"))
@@ -88,6 +99,7 @@ class Genre(Model, ProcessImageMixin):
         total_failure_messages = []
 
         for track in self.track_ids:
+            # noinspection PyProtectedMember
             results = track._perform_save_changes()
             total_success_count += results['success']
 

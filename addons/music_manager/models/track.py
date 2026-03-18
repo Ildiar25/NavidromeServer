@@ -22,7 +22,7 @@ class Track(Model, ProcessImageMixin):
     _description = 'track_table'
     _order = 'album_artist, album_name, disk_no, track_no'
     _sql_constraints = [
-        ('unique_track_no', 'UNIQUE(album_id, disk_no, track_no)', _("This track number already exists on this disk.")),
+        ('unique_track_no', 'UNIQUE(album_id, disk_no, track_no)', _("\nThis track number already exists on this disk.")),
     ]
 
     # Basic fields
@@ -68,7 +68,7 @@ class Track(Model, ProcessImageMixin):
 
     # Related fields
     album_name = Char(string="Album name", related='album_id.name', store=True)
-    album_artist = Char(string="Album artist", related='album_artist_id.name', store=True)
+    album_artist = Char(string="Album artist name", related='album_artist_id.name', store=True)
 
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
@@ -93,7 +93,7 @@ class Track(Model, ProcessImageMixin):
     def write(self, vals):
         self._process_picture_image(vals)
 
-        res = super().write(vals)
+        res = super().write(vals)  # type: ignore[arg-type]
 
         for track in self:
             if track.is_deleted:
@@ -171,18 +171,18 @@ class Track(Model, ProcessImageMixin):
             track.display_artist_names = ", ".join(artist_names) if artist_names else ""
 
     @api.depends('bitrate')
-    def _compute_display_bitrate(self):
+    def _compute_display_bitrate(self) -> None:
         for track in self:
             track.display_bitrate = f"{track.bitrate} kbps"
 
     @api.depends('duration')
-    def _compute_display_duration(self):
+    def _compute_display_duration(self) -> None:
         for track in self:
             minutes, seconds = divmod(track.duration, 60)
             track.display_duration = f"{minutes:02}:{seconds:02}"
 
     @api.depends('sample_rate')
-    def _compute_display_sample_rate(self):
+    def _compute_display_sample_rate(self) -> None:
         for track in self:
             track.display_sample_rate = f"{track.sample_rate} kHz"
 
@@ -220,14 +220,15 @@ class Track(Model, ProcessImageMixin):
     def _inverse_compilation_value(self) -> None:
         for track in self:
             if track.compilation:
-                # noinspection PyProtectedMember
-                track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
+                target_name = "Various Artists"
+                fallback_artists = self.env['music_manager.artist']
 
             else:
-                # noinspection PyProtectedMember
-                track.album_artist_id = track._find_or_create_single_artist(
-                    track.original_artist_id.name, track.track_artist_ids
-                )
+                target_name = track.original_artist_id.name if track.original_artist_id else ""
+                fallback_artists = track.track_artist_ids
+
+            # noinspection PyProtectedMember
+            track.album_artist_id = track._find_or_create_single_artist(target_name, fallback_artists)
 
     def _search_is_deleted(self, operator, value):
         matching_ids = []
@@ -241,19 +242,20 @@ class Track(Model, ProcessImageMixin):
 
         return [("id", "in", matching_ids)]
 
-    @api.constrains('name', 'track_artist_ids', 'custom_owner_id')
+    @api.constrains('track_artist_ids', 'name', 'album_id', 'custom_owner_id')
     def _check_track_name(self) -> None:
-        for current_track in self:  # type:ignore
+        for current_track in self:
             if not current_track.track_artist_ids:
                 continue
 
             existing_tracks = self.search([
                 ('id', '!=', current_track.id),
                 ('name', '=', current_track.name),
+                ('album_id', '=', current_track.album_id.id),
                 ('custom_owner_id', '=', current_track.custom_owner_id.id)
             ])
 
-            for track in existing_tracks:  # type:ignore
+            for track in existing_tracks:
                 if set(current_track.track_artist_ids.ids) == set(track.track_artist_ids.ids):
                     raise ValidationError(
                         _("\nThe track '%s' already exists with the same artist(s).", current_track.name)
@@ -272,16 +274,7 @@ class Track(Model, ProcessImageMixin):
 
     @api.onchange('compilation')
     def _display_album_artist_changes(self) -> None:
-        for track in self:
-            if track.compilation:
-                # noinspection PyProtectedMember
-                track.album_artist_id = track._find_or_create_single_artist("Various Artists", [])
-
-            else:
-                # noinspection PyProtectedMember
-                track.album_artist_id = track._find_or_create_single_artist(
-                    track.original_artist_id.name, track.track_artist_ids
-                )
+        self._inverse_compilation_value()
 
     def save_changes(self):
         track = self.ensure_one()
@@ -316,24 +309,19 @@ class Track(Model, ProcessImageMixin):
             }
         }
 
-    def _find_or_create_single_artist(self, artist_name: str, fallback_ids: list[int]):
+    def _find_or_create_single_artist(self, artist_name, fallback_ids):
+        if not artist_name or artist_name.lower() == 'unknown':
+            return fallback_ids[:1]
+
         artists = self.env['music_manager.artist']
+        artist = artists.search([('name', '=', artist_name)], limit=1)
 
-        if artist_name and artist_name.lower() != 'unknown':
-            artist = artists.search([('name', '=', artist_name)], limit=1)
+        if artist:
+            return artist
 
-            if artist:
-                return artist.id
+        return artists.create({'name': artist_name})
 
-            else:
-                return artists.create([{'name': artist_name}]).id
-
-        elif fallback_ids:
-            return fallback_ids[0]
-
-        return False
-
-    def _get_file_service_adapter(self) -> FileServiceAdapter:
+    def _get_file_service_adapter(self):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
 
         root = settings.root_dir if settings else '/music'
@@ -348,7 +336,7 @@ class Track(Model, ProcessImageMixin):
 
         return TrackServiceAdapter(file_type=file_extension)
 
-    def _ensure_optional_fields(self):
+    def _ensure_optional_fields(self) -> None:
         self.ensure_one()
 
         protected_fields = [

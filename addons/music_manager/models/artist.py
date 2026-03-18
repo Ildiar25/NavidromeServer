@@ -5,10 +5,9 @@ import logging
 from odoo import _, api
 from odoo.exceptions import AccessError, UserError
 from odoo.models import Model
-from odoo.fields import Binary, Boolean, Char, Date, Html, Integer, Many2many, Many2one, One2many, Selection, Text
+from odoo.fields import Binary, Boolean, Char, Html, Integer, Many2many, Many2one, One2many, Selection
 
 from .mixins.process_image_mixin import ProcessImageMixin
-from ..utils.custom_types import ArtistVals
 from ..utils.file_utils import get_years_list
 
 
@@ -61,24 +60,24 @@ class Artist(Model, ProcessImageMixin):
     custom_owner_id = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
 
     @api.model_create_multi
-    def create(self, list_vals: list[ArtistVals]):
+    def create(self, list_vals):
         for vals in list_vals:
             self._process_picture_image(vals)
 
         return super().create(list_vals)
 
-    def write(self, vals: ArtistVals):
-        for artist in self:  # type:ignore
+    def write(self, vals):
+        for artist in self:
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if artist.custom_owner_id != self.env.user:
                     raise AccessError(_("\nCannot update this artist because you are not the owner. 🤷"))
 
         self._process_picture_image(vals)
 
-        return super().write(vals)
+        return super().write(vals)  # type: ignore[arg-type]
 
     def unlink(self):
-        for artist in self:  # type:ignore
+        for artist in self:
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if artist.custom_owner_id != self.env.user:
                     raise AccessError(_("\nCannot delete this artist because you are not the owner. 🤷"))
@@ -96,7 +95,7 @@ class Artist(Model, ProcessImageMixin):
         return super().unlink()
 
     @api.depends('name', 'start_year', 'country_id')
-    def _compute_display_name(self):
+    def _compute_display_name(self) -> None:
         for artist in self:
             name = artist.name
             data = []

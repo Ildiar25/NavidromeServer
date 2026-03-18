@@ -46,7 +46,7 @@
             <field name="name">music_manager.album.view.tree</field>
             <field name="model">music_manager.album</field>
             <field name="arch" type="xml">
-                <tree string="Album tree view" create="False" decoration-warning="not is_complete">
+                <tree string="Album tree view" create="False" decoration-warning="not is_complete" decoration-danger="track_amount == 0">
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
                     <field name="name" string="Album title"/>
                     <field name="album_artist_id" string="Album artist"/>
@@ -103,22 +103,22 @@
                         <notebook>
                             <page string="Track list">
                                 <field name="all_track_ids" readonly="True">
-                                <tree decoration-danger="is_deleted" decoration-warning="not is_saved" decoration-muted="custom_owner_id != uid" decoration-it="custom_owner_id != uid" decoration-bf="custom_owner_id == uid">
-                                    <field name="track_no" string="#" width="20px" decoration-bf="True"/>
-                                    <field name="name" string="Title"/>
-                                    <field name="display_artist_names" string="Track artist(s)"/>
-                                    <field name="album_id" string="Album" optional="hide"/>
-                                    <field name="album_artist_id" string="Album artist" optional="hide"/>
-                                    <field name="year" string="Year"/>
-                                    <field name="genre_id" string="Genre"/>
-                                    <field name="display_duration" string="Duration"/>
-                                    <field name="custom_owner_id" widget="many2one_avatar"/>
-                                    <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
-                                    <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
-                                    <field name="is_saved" column_invisible="True"/>
-                                    <field name="is_deleted" column_invisible="True"/>
-                                </tree>
-                            </field>
+                                    <tree decoration-danger="is_deleted" decoration-warning="not is_saved" decoration-muted="custom_owner_id != uid" decoration-it="custom_owner_id != uid" decoration-bf="custom_owner_id == uid">
+                                        <field name="track_no" string="#" width="20px" decoration-bf="True"/>
+                                        <field name="name" string="Title"/>
+                                        <field name="display_artist_names" string="Track artist(s)"/>
+                                        <field name="album_id" string="Album" optional="hide"/>
+                                        <field name="album_artist_id" string="Album artist" optional="hide"/>
+                                        <field name="year" string="Year"/>
+                                        <field name="genre_id" string="Genre"/>
+                                        <field name="display_duration" string="Duration"/>
+                                        <field name="custom_owner_id" widget="many2one_avatar"/>
+                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
+                                        <field name="is_saved" column_invisible="True"/>
+                                        <field name="is_deleted" column_invisible="True"/>
+                                    </tree>
+                                </field>
                             </page>
                         </notebook>
                     </sheet>
@@ -141,6 +141,7 @@
                     <filter name="my_contributions" string="My contributions" domain="[('track_ids.custom_owner_id', '=', uid)]"/>
                     <filter name="shared_albums" string="Shared albums" domain="[('custom_owner_ids', 'in', [uid]), ('track_ids.custom_owner_id', '!=', uid)]"/>
                     <filter name="incomplete_albums" string="Incomplete albums" domain="[('is_complete', '!=', True)]"/>
+                    <filter name="empty_albums" string="Empty albums" domain="[('track_ids', '=', False)]"/>
 
                     <!-- Custom groups -->
                     <group string="Group by" expand="1">
