@@ -219,16 +219,21 @@ class Track(Model, ProcessImageMixin):
 
     def _inverse_compilation_value(self) -> None:
         for track in self:
+
+            current_name = track.album_artist_id.name.lower() if track.album_artist_id else ""
+            target_name = None
+            fallback_artists = self.env['music_manager.artist']
+
             if track.compilation:
                 target_name = "Various Artists"
-                fallback_artists = self.env['music_manager.artist']
 
-            else:
+            elif current_name == 'various artists' or not track.album_artist_id:
                 target_name = track.original_artist_id.name if track.original_artist_id else ""
                 fallback_artists = track.track_artist_ids
 
-            # noinspection PyProtectedMember
-            track.album_artist_id = track._find_or_create_single_artist(target_name, fallback_artists)
+            if target_name is not None:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist(target_name, fallback_artists)
 
     def _search_is_deleted(self, operator, value):
         matching_ids = []
