@@ -406,13 +406,13 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         if not artist_name or artist_name.lower() == 'unknown':
             return fallback_artists[:1]
 
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
         artist = artist_model.search([('name', '=', artist_name)], limit=1)
 
         if artist:
             return artist
 
-        return artist_model.create({'name': artist_name})
+        return self.env['music_manager.artist'].create({'name': artist_name})
 
     def _get_download_service_adapter(self, video_url):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
@@ -442,7 +442,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_album_id(self) -> None:
         self.ensure_one()
-        album_model = self.env['music_manager.album']
+        album_model = self.env['music_manager.album'].sudo()
 
         self.possible_album_id = False
 
@@ -455,7 +455,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_album_artist_id(self) -> None:
         self.ensure_one()
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
 
         self.possible_album_artist_id = False
 
@@ -468,7 +468,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_artist_ids(self) -> None:
         self.ensure_one()
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
 
         self.possible_artist_ids = artist_model.browse()
 
@@ -483,7 +483,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_genre_id(self) -> None:
         self.ensure_one()
-        genre_model = self.env['music_manager.genre']
+        genre_model = self.env['music_manager.genre'].sudo()
 
         self.possible_genre_id = False
 
@@ -495,7 +495,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_original_artist_id(self) -> None:
         self.ensure_one()
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
 
         self.possible_original_artist_id = False
 

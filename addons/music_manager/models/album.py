@@ -3,6 +3,7 @@ import logging
 
 # noinspection PyProtectedMember
 from odoo import _, api
+from odoo.exceptions import AccessError
 from odoo.models import Model
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, One2many, Selection
 
@@ -89,8 +90,12 @@ class Album(Model, ProcessImageMixin):
         return albums
 
     def write(self, vals):
-        self._process_picture_image(vals)
+        for album in self:
+            if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+                if self.env.user not in album.custom_owner_ids:
+                    raise AccessError(_("\nCannot update this album because you are not the owner. 🤷"))
 
+        self._process_picture_image(vals)
         res = super().write(vals)  # type: ignore[arg-type]
 
         for album in self:
@@ -108,6 +113,11 @@ class Album(Model, ProcessImageMixin):
         return res
 
     def unlink(self):
+        for album in self:
+            if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+                if self.env.user not in album.custom_owner_ids:
+                    raise AccessError(_("\nCannot delete this album because you are not the owner. 🤷"))
+
         if self.env.context.get('skip_album_sync'):
             return super().unlink()
 
@@ -118,12 +128,15 @@ class Album(Model, ProcessImageMixin):
             tracks_to_delete = self.mapped('track_ids').filtered(lambda track: track.custom_owner_id.id == self.env.user.id)
 
         if tracks_to_delete:
-            tracks_to_delete.unlink()
+            tracks_to_delete.with_context(skip_album_sync=True).unlink()
 
-        empty_albums = self.exists().filtered(lambda act_album: not act_album.track_ids)
+        track_model = self.env['music_manager.track'].sudo()
+        empty_albums = self.exists().filtered(
+            lambda albums: track_model.search_count([('album_id', '=', albums.id)]) == 0
+        )
 
         if empty_albums:
-            return super(Album, empty_albums.with_context(skip_album_sync=True)).sudo().unlink()
+            return super(Album, empty_albums.sudo().with_context(skip_album_sync=True)).unlink()
 
         return True
 
@@ -291,6 +304,17 @@ class Album(Model, ProcessImageMixin):
     def _inverse_album_year(self) -> None:
         for album in self:
             album.track_ids.write({'year': album.year})
+
+    def action_view_album_content(self):
+        self.ensure_one()
+        return {
+            'name': _("Tracks of %s", self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'music_manager.track',
+            'view_mode': 'tree,form',
+            'domain': [('album_id', '=', self.id)],
+            # 'context': {'search_default_disk_no': 1},
+        }
 
     def update_songs(self):
         self.ensure_one()

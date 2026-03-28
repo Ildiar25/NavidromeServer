@@ -80,17 +80,21 @@ class Artist(Model, ProcessImageMixin):
         for artist in self:
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if artist.custom_owner_id != self.env.user:
-                    raise AccessError(_("\nCannot delete this artist because you are not the owner. 🤷"))
+                    raise AccessError(_("\nCannot delete '%s' artist because you are not the owner. 🤷", artist.name))
 
-                related_track = self.env['music_manager.track'].sudo().search(
-                    [('original_artist_id', '=', artist.id)], limit=1
-                )
-                related_album = self.env['music_manager.album'].sudo().search(
-                    [('album_artist_id', '=', artist.id)], limit=1
-                )
+        track_model = self.env['music_manager.track'].sudo()
+        album_model = self.env['music_manager.album'].sudo()
 
-                if related_track or related_album:
-                    raise UserError(_("\nCannot delete this artist because it is in use by other users. 🤷"))
+        related_tracks = track_model.search_count([
+                '|', '|',
+                ('original_artist_id', 'in', self.ids),
+                ('album_artist_id', 'in', self.ids),
+                ('track_artist_ids', 'in', self.ids)
+            ], limit=1)
+        related_albums = album_model.search_count([('album_artist_id', 'in', self.ids)], limit=1)
+
+        if related_tracks > 0 or related_albums > 0:
+            raise UserError(_("\nArtist(s) cannot be deleted as they are still in use. 🤷"))
 
         return super().unlink()
 
@@ -111,8 +115,20 @@ class Artist(Model, ProcessImageMixin):
 
     @api.depends('album_ids')
     def _compute_album_amount(self) -> None:
+        album_model = self.env['music_manager.album']
+
+        total_albums = album_model.read_group(
+            domain=[('album_artist_id', 'in', self.ids)],
+            fields=['album_artist_id'],
+            groupby=['album_artist_id'],
+        )
+
+        mapped_data = {
+            result['album_artist_id'][0]: result['album_artist_id_count'] for result in total_albums if result.get('album_artist_id')
+        }
+
         for artist in self:
-            artist.album_amount = len(artist.album_ids) if artist.album_ids else 0
+            artist.album_amount = mapped_data.get(artist.id, 0)
 
     @api.depends('name')
     def _compute_display_title_form(self) -> None:
@@ -125,8 +141,48 @@ class Artist(Model, ProcessImageMixin):
 
     @api.depends('track_ids')
     def _compute_track_amount(self) -> None:
+        # noinspection PyProtectedMember
+        track_field = self.env['music_manager.track']._fields['track_artist_ids']
+
+        m2m_table = track_field.relation
+        col_track = track_field.column1
+        col_artist = track_field.column2
+
+        query = f"""
+            SELECT {col_artist}, COUNT({col_track})
+            FROM {m2m_table}
+            WHERE {col_artist} IN %s
+            GROUP BY {col_artist}
+        """
+
+        self.env.cr.execute(query, (tuple(self.ids), ))
+
+        mapped_data = dict(self.env.cr.fetchall())
+
         for artist in self:
-            artist.track_amount = len(artist.track_ids) if artist.track_ids else 0
+            artist.track_amount = mapped_data.get(artist.id, 0)
+
+    def action_view_artist_tracks(self):
+        self.ensure_one()
+        return {
+            'name': _("Tracks of %s", self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'music_manager.track',
+            'view_mode': 'tree,form',
+            'domain': ['|', ('original_artist_id', '=', self.id), ('track_artist_ids', 'in', self.ids)],
+            'context': {'default_original_artist_id': self.id},
+        }
+
+    def action_view_artist_albums(self):
+        self.ensure_one()
+        return {
+            'name': _("Albums of %s", self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'music_manager.album',
+            'view_mode': 'tree,form',
+            'domain': [('album_artist_id', '=', self.id)],
+            'context': {'default_album_artist_id': self.id},
+        }
 
     def update_songs(self):
         self.ensure_one()
