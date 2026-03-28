@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # noinspection PyProtectedMember
 from odoo import _, api
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.models import Model
 from odoo.fields import Binary, Char, Html, Integer, Many2one, One2many
 
@@ -11,7 +11,10 @@ from .mixins.process_image_mixin import ProcessImageMixin
 class Genre(Model, ProcessImageMixin):
     _name = 'music_manager.genre'
     _description = 'genre_table'
-    _order = 'name'
+    _parent_name = "parent_id"
+    _parent_store = True
+    _order = 'complete_name'
+    _rec_name = 'complete_name'
     _sql_constraints = [
         ('check_genre_name', 'UNIQUE(name)', _("Genre name must be unique.")),
     ]
@@ -19,15 +22,18 @@ class Genre(Model, ProcessImageMixin):
     # Default fields
     name = Char(string=_("Name"), required=True)
     description = Html(string=_("Description"))
+    parent_path = Char(index=True, unaccent=False)
     picture = Binary(string=_("Picture"))
 
     # Relationships
-    track_ids = One2many(comodel_name='music_manager.track', inverse_name='genre_id', string=_("Track(s)"))
     album_ids = One2many(comodel_name='music_manager.album', inverse_name='genre_id', string=_("Album(s)"))
+    parent_id = Many2one(comodel_name='music_manager.genre', string=_("Parent genre"), index=True, ondelete='cascade')
+    track_ids = One2many(comodel_name='music_manager.track', inverse_name='genre_id', string=_("Track(s)"))
 
     # Computed fields
-    track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
+    complete_name = Char(string=_("Full hierarchy"), compute='_compute_complete_name', recursive=True, store=True)
     disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', default=0)
+    track_amount = Integer(string=_("Track amount"), compute='_compute_track_amount', default=0)
 
     # Technical fields
     custom_owner_id = Many2one(
@@ -48,7 +54,9 @@ class Genre(Model, ProcessImageMixin):
         for genre in self:
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if genre.custom_owner_id != self.env.user:
-                    raise UserError(_("\nCannot update this genre because you are not the owner. 🤷"))
+                    raise AccessError(_("\nCannot update this genre because you are not the owner. 🤷"))
+
+        self._process_picture_image(vals)
 
         return super().write(vals)  # type: ignore[arg-type]
 
@@ -56,29 +64,83 @@ class Genre(Model, ProcessImageMixin):
         for genre in self:
             if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
                 if genre.custom_owner_id != self.env.user:
-                    raise UserError(_("\nCannot delete this genre because you are not the owner. 🤷"))
+                    raise AccessError(_("\nCannot delete '%s' genre because you are not the owner. 🤷", genre.name))
 
-                related_tracks = self.env['music_manager.track'].sudo().search(
-                    [('genre_id', '=', genre.id)], limit=1
-                )
-                related_albums = self.env['music_manager.album'].sudo().search(
-                    [('genre_id', '=', genre.id)], limit=1
-                )
+        track_model = self.env['music_manager.track'].sudo()
+        album_model = self.env['music_manager.album'].sudo()
 
-                if related_tracks or related_albums:
-                    raise UserError(_("\nCannot delete this genre because it is in use by other users. 🤷"))
+        related_tracks = track_model.search_count([('genre_id', 'in', self.ids)], limit=1)
+        related_albums = album_model.search_count([('genre_id', 'in', self.ids)], limit=1)
+
+        if related_tracks > 0 or related_albums > 0:
+            raise UserError(_("\nGenre(s) cannot be deleted as they are still in use. 🤷"))
 
         return super().unlink()
 
-    @api.depends('track_ids')
-    def _compute_track_amount(self) -> None:
+    @api.depends('name', 'parent_id.complete_name')
+    def _compute_complete_name(self) -> None:
         for genre in self:
-            genre.track_amount = len(genre.track_ids) if genre.track_ids else 0
+            if genre.parent_id:
+                genre.complete_name = f"{genre.parent_id.complete_name} · {genre.name}"
+
+            else:
+                genre.complete_name = genre.name
 
     @api.depends('album_ids')
     def _compute_disk_amount(self) -> None:
+        album_model = self.env['music_manager.album']
+
+        total_albums = album_model.read_group(
+            domain=[('genre_id', 'in', self.ids)],
+            fields=['genre_id'],
+            groupby=['genre_id'],
+        )
+
+        mapped_data = {
+            result['genre_id'][0]: result['genre_id_count'] for result in total_albums if result.get('genre_id')
+        }
+
         for genre in self:
-            genre.disk_amount = len(genre.album_ids) if genre.album_ids else 0
+            genre.disk_amount = mapped_data.get(genre.id, 0)
+
+    @api.depends('track_ids')
+    def _compute_track_amount(self) -> None:
+        track_model = self.env['music_manager.track']
+
+        total_tracks = track_model.read_group(
+            domain=[('genre_id', 'in', self.ids)],
+            fields=['genre_id'],
+            groupby=['genre_id'],
+        )
+
+        mapped_data = {
+            result['genre_id'][0]: result['genre_id_count'] for result in total_tracks if result.get('genre_id')
+        }
+
+        for genre in self:
+            genre.track_amount = mapped_data.get(genre.id, 0)
+
+    def action_view_genre_tracks(self):
+        self.ensure_one()
+        return {
+            'name': _("Tracks of %s", self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'music_manager.track',
+            'view_mode': 'tree,form',
+            'domain': [('genre_id', 'child_of', self.id)],
+            'context': {'default_genre_id': self.id},
+        }
+
+    def action_view_genre_albums(self):
+        self.ensure_one()
+        return {
+            'name': _("Albums of %s", self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'music_manager.album',
+            'view_mode': 'tree,form',
+            'domain': [('genre_id', 'child_of', self.id)],
+            'context': {'default_genre_id': self.id},
+        }
 
     def update_songs(self):
         self.ensure_one()
