@@ -29,28 +29,80 @@
 
         <!-- Music manager model rules: USER -->
         <record id="rule_music_manager_own_tracks" model="ir.rule">
-            <field name="name">Music Manager | Own Tracks</field>
+            <field name="name">Music Manager · See Own Tracks</field>
             <field name="model_id" ref="music_manager.model_music_manager_track"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
         </record>
 
-        <record id="rule_music_manager_shared_albums" model="ir.rule">
-            <field name="name">Music Manager | Shared Albums</field>
+        <record id="rule_music_manager_write_own_tracks" model="ir.rule">
+            <field name="name">Music Manager · Edit Own Tracks</field>
+            <field name="model_id" ref="music_manager.model_music_manager_track"/>
+            <field name="domain_force">[('custom_owner_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="rule_music_manager_own_albums" model="ir.rule">
+            <field name="name">Music Manager · See Own Albums</field>
             <field name="model_id" ref="music_manager.model_music_manager_album"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_music_manager_write_own_albums" model="ir.rule">
+            <field name="name">Music Manager · Edit Own and Shared Albums</field>
+            <field name="model_id" ref="music_manager.model_music_manager_album"/>
+            <field name="domain_force">[('custom_owner_ids', 'in', [user.id])]</field>
+            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="rule_music_manager_write_own_artists" model="ir.rule">
+            <field name="name">Music Manager · Edit Own Artists</field>
+            <field name="model_id" ref="music_manager.model_music_manager_artist"/>
+            <field name="domain_force">[('custom_owner_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="rule_music_manager_write_own_genres" model="ir.rule">
+            <field name="name">Music Manager · Edit Own Genres</field>
+            <field name="model_id" ref="music_manager.model_music_manager_genre"/>
+            <field name="domain_force">[('custom_owner_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
         </record>
 
         <record id="rule_music_manager_all_artists" model="ir.rule">
-            <field name="name">Music Manager | All Artists</field>
+            <field name="name">Music Manager · All Artists</field>
             <field name="model_id" ref="music_manager.model_music_manager_artist"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
         </record>
 
         <record id="rule_music_manager_all_genres" model="ir.rule">
-            <field name="name">Music Manager | All Genres</field>
+            <field name="name">Music Manager · All Genres</field>
             <field name="model_id" ref="music_manager.model_music_manager_genre"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_general'))]"/>
@@ -58,14 +110,14 @@
 
         <!-- Music manager model rules: ADMIN -->
         <record id="rule_music_manager_all_tracks" model="ir.rule">
-            <field name="name">Music Manager | All Tracks</field>
+            <field name="name">Music Manager · All Tracks</field>
             <field name="model_id" ref="music_manager.model_music_manager_track"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_admin'))]"/>
         </record>
 
         <record id="rule_music_manager_all_albums" model="ir.rule">
-            <field name="name">Music Manager | All Albums</field>
+            <field name="name">Music Manager · All Albums</field>
             <field name="model_id" ref="music_manager.model_music_manager_album"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('music_manager.group_music_manager_user_admin'))]"/>
