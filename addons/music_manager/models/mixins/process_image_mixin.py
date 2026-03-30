@@ -8,11 +8,12 @@ from odoo.models import AbstractModel
 
 from ...adapters import ImageServiceAdapter
 from ...utils.constants import ALLOWED_IMAGE_FORMAT
-from ...utils.custom_types import CustomWarningMessage
 from ...utils.exceptions import (
-    InvalidFileFormatError, InvalidImageFormatError, ImagePersistenceError, MusicManagerError
+    InvalidFileFormatError,
+    InvalidImageFormatError,
+    ImagePersistenceError,
+    MusicManagerError
 )
-from ...utils.data_encoding import base64_encode
 from ...utils.file_utils import validate_allowed_mimes
 
 

@@ -49,7 +49,7 @@ class ChangeOwnerWizard(TransientModel):
             'tag': 'display_notification',
             'params': {
                 'title': _("Music Manager says:"),
-                'message': _("Nice! Now, all selected records belong to %s.", self.new_owner_id.name),
+                'message': _("Nice! Now, selected record(s) belongs to %s.", self.new_owner_id.name),
                 'type': 'info',
                 'sticky': False,
                 'next': {'type': 'ir.actions.act_window_close'},
