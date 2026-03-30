@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0-20260305\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-18 10:40+0000\n"
-"PO-Revision-Date: 2026-03-18 11:43+0100\n"
+"POT-Creation-Date: 2026-03-30 11:31+0000\n"
+"PO-Revision-Date: 2026-03-30 13:54+0200\n"
 "Last-Translator: Joan <j.pastor1591@gmail.com>\n"
 "Language-Team: \n"
 "Language: ca_ES\n"
@@ -141,10 +141,10 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"Cannot delete this artist because it is in use by other users. 🤷"
+"Artist(s) cannot be deleted as they are still in use. 🤷"
 msgstr ""
 "\n"
-"No pots suprimir aquest artista perquè està en ús per altres usuaris. 🤷"
+"No pots suprimir el/s artista/es perquè estan en ús. 🤷"
 
 #. module: music_manager
 #. odoo-python
@@ -152,10 +152,10 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"Cannot delete this artist because you are not the owner. 🤷"
+"Cannot delete '%s' artist because you are not the owner. 🤷"
 msgstr ""
 "\n"
-"No pots suprimir aquest artista perquè no ets el/la seu/va propietari/ària. 🤷"
+"No pots suprimir l'artista '%s' perquè no ets el/la seu/va propietari/ària. 🤷"
 
 #. module: music_manager
 #. odoo-python
@@ -163,21 +163,43 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"Cannot delete this genre because it is in use by other users. 🤷"
+"Cannot delete '%s' genre because you are not the owner. 🤷"
 msgstr ""
 "\n"
-"No pots suprimir aquest gènere perquè està en ús per altres usuaris. 🤷"
+"No pots suprimir el gènere '%s' perquè no ets el/la seu/va propietari/ària. 🤷"
 
 #. module: music_manager
 #. odoo-python
-#: code:addons/music_manager/models/genre.py:0
+#: code:addons/music_manager/models/album.py:0
 #, python-format
 msgid ""
 "\n"
-"Cannot delete this genre because you are not the owner. 🤷"
+"Cannot delete this album because you are not the owner. 🤷"
 msgstr ""
 "\n"
-"No pots suprimir aquest gènere perquè no ets el/la seu/va propietari/ària. 🤷"
+"No pots suprimir aquest àlbum perquè no ets el/la seu/va propietari/ària. 🤷"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Cannot delete this track because you are not the owner. 🤷"
+msgstr ""
+"\n"
+"No pots suprimir aquesta cançó perquè no ets el/la seu/va propietari/ària. 🤷"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0
+#, python-format
+msgid ""
+"\n"
+"Cannot update this album because you are not the owner. 🤷"
+msgstr ""
+"\n"
+"No pots actualitzar aquest àlbum perquè no ets el/la seu/va propietari/ària. 🤷"
 
 #. module: music_manager
 #. odoo-python
@@ -200,6 +222,17 @@ msgid ""
 msgstr ""
 "\n"
 "No pots actualitzar aquest gènere perquè no ets el/la seu/va propietari/ària. 🤷"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/track.py:0
+#, python-format
+msgid ""
+"\n"
+"Cannot update this track because you are not the owner. 🤷"
+msgstr ""
+"\n"
+"No pots actualitzar aquesta cançó perquè no ets el/la seu/va propietari/ària. 🤷"
 
 #. module: music_manager
 #. odoo-python
@@ -278,6 +311,17 @@ msgstr ""
 "\n"
 "Ep! Hi ha hagut un problema mentre se validava l'URL.\n"
 "Si us plau, contacta l'administrador/a."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/genre.py:0
+#, python-format
+msgid ""
+"\n"
+"Genre(s) cannot be deleted as they are still in use. 🤷"
+msgstr ""
+"\n"
+"No pots suprimir el/s gènere/ perquè estan en ús. 🤷"
 
 #. module: music_manager
 #. odoo-python
@@ -550,6 +594,11 @@ msgid "<i class=\"fa fa-dot-circle-o me-2\" title=\"Disk icon\"/>"
 msgstr "<i class=\"fa fa-dot-circle-o me-2\" title=\"Icona de disc\"/>"
 
 #. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_kanban
+msgid "<i class=\"fa fa-dot-circle-o\" role=\"img\" aria-label=\"Albums\" title=\"Albums\"/>"
+msgstr "<i class=\"fa fa-dot-circle-o\" role=\"img\" aria-label=\"Àlbums\" title=\"Àlbums\"/>"
+
+#. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
 msgid "<i class=\"fa fa-globe me-2\" title=\"Globe icon\"/>"
 msgstr "<i class=\"fa fa-globe me-2\" title=\"Icona de globus terraqüi\"/>"
@@ -558,6 +607,11 @@ msgstr "<i class=\"fa fa-globe me-2\" title=\"Icona de globus terraqüi\"/>"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
 msgid "<i class=\"fa fa-music me-2\" title=\"Music icon\"/>"
 msgstr "<i class=\"fa fa-music me-2\" title=\"Icona de música\"/>"
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_kanban
+msgid "<i class=\"fa fa-music\" role=\"img\" aria-label=\"Tracks\" title=\"Tracks\"/>"
+msgstr "<i class=\"fa fa-music\" role=\"img\" aria-label=\"Cançons\" title=\"Cançons\"/>"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_kanban
@@ -589,9 +643,6 @@ msgstr "Usuaris administratius del mòdul Music Manager (poden veure tots els re
 #: code:addons/music_manager/models/album.py:0 code:addons/music_manager/models/track.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__album_id
 #: model:ir.model.fields.selection,name:music_manager.selection__music_manager_album__album_type__album
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
@@ -616,8 +667,6 @@ msgstr "Nombre d'àlbums"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
@@ -686,8 +735,6 @@ msgstr "Vista del quadre de cerca per a àlbum"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_album__name
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #, python-format
 msgid "Album title"
 msgstr "Títol de l'àlbum"
@@ -717,8 +764,17 @@ msgstr "Àlbum/s"
 
 #. module: music_manager
 #: model:ir.ui.menu,name:music_manager.music_manager_music_menu_album_action_general
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 msgid "Albums"
 msgstr "Àlbums"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/artist.py:0 code:addons/music_manager/models/genre.py:0
+#, python-format
+msgid "Albums of %s"
+msgstr "Àlbums de %s"
 
 #. module: music_manager
 #. odoo-python
@@ -726,6 +782,13 @@ msgstr "Àlbums"
 #, python-format
 msgid "All files are already in the library."
 msgstr "Tots els fitxers ja estan a la biblioteca."
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/music_import_queue.py:0
+#, python-format
+msgid "All music files have been processed successfully! Refresh the page to see the new records."
+msgstr "Tots els fitxers s'han processat correctament! Refresca la pàgina per veure els nous registres."
 
 #. module: music_manager
 #. odoo-python
@@ -994,18 +1057,14 @@ msgstr "Bandera de país"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
 msgid "Cover"
 msgstr "Coberta"
 
 #. module: music_manager
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
@@ -1103,8 +1162,6 @@ msgstr "Disc"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_album__disk_amount
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__disk_amount
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
 #, python-format
 msgid "Disk amount"
@@ -1198,9 +1255,6 @@ msgid "Downloaders"
 msgstr "Motors de descàrrega"
 
 #. module: music_manager
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
 msgid "Duration"
 msgstr "Durada"
@@ -1306,6 +1360,14 @@ msgstr "Freqüència (kHz)"
 
 #. module: music_manager
 #. odoo-python
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__complete_name
+#, python-format
+msgid "Full hierarchy"
+msgstr "Jerarquia completa"
+
+#. module: music_manager
+#. odoo-python
 #: code:addons/music_manager/models/audio_settings.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_audio_settings__image_format
 #, python-format
@@ -1342,8 +1404,6 @@ msgstr "Usuaris generals del mòdul Music Manager (sols veuen els seus registres
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_wizard_view_form
@@ -1458,6 +1518,13 @@ msgid "Image size"
 msgstr "Dimensions"
 
 #. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/music_import_queue.py:0
+#, python-format
+msgid "Import Task Finished"
+msgstr "Tasca d'Importació Finalitzada"
+
+#. module: music_manager
 #: model:ir.actions.act_window,name:music_manager.music_manager_music_import_queue_action
 #: model:ir.ui.menu,name:music_manager.music_manager_music_menu_import_queue
 msgid "Import queue"
@@ -1534,11 +1601,8 @@ msgid "Last Updated on"
 msgstr "Data de l'última actualització"
 
 #. module: music_manager
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_music_import_queue_view_tree
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
@@ -1800,8 +1864,8 @@ msgstr "Següent"
 #. odoo-python
 #: code:addons/music_manager/wizards/change_owner_wizard.py:0
 #, python-format
-msgid "Nice! Now, all selected records belong to %s."
-msgstr "Genial! Ara, tots els registres seleccionats pertanyen a %s."
+msgid "Nice! Now, selected record(s) belongs to %s."
+msgstr "Genial! Ara, el/s registre/s seleccionat/s pertany/en a %s."
 
 #. module: music_manager
 #. odoo-python
@@ -1858,6 +1922,7 @@ msgstr "Artista original trobat"
 #. module: music_manager
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__custom_owner_id
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__custom_owner_id
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_music_import_queue__custom_owner_id
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__custom_owner_id
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_searchbar
@@ -1869,12 +1934,6 @@ msgstr "Artista original trobat"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
 msgid "Owner"
 msgstr "Propietari/ària"
-
-#. module: music_manager
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
-msgid "Owner(s)"
-msgstr "Propietari/s"
 
 #. module: music_manager
 #. odoo-python
@@ -1893,6 +1952,27 @@ msgstr "Propietaris/àries"
 #, python-format
 msgid "PNG"
 msgstr "PNG"
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
+msgid "Parent"
+msgstr "Pare"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__parent_id
+#, python-format
+msgid "Parent genre"
+msgstr "Gènere pare"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/genre.py:0
+#: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__parent_path
+#, python-format
+msgid "Parent path"
+msgstr "Ruta jeràrquica"
 
 #. module: music_manager
 #. odoo-python
@@ -1936,9 +2016,21 @@ msgid "Picture"
 msgstr "Imatge"
 
 #. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_change_owner_wizard_view_form
+msgid "Please, choose a new owner for the selected record(s)."
+msgstr "Si us plau, elegeix un nou propietari/ària per al/s registre/s seleccionat/s."
+
+#. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_wizard_view_form
 msgid "Polishing your track details! ✨"
 msgstr "Polint els detalls de la cançó! ✨"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/music_import_queue.py:0
+#, python-format
+msgid "Process completed, but %s file(s) failed. Check the queue for details."
+msgstr "Procés completat, però %s fitxer/s ha/n fallat. Revisa la cua per a més detalls."
 
 #. module: music_manager
 #. odoo-python
@@ -1986,18 +2078,6 @@ msgstr "Estàs a punt per carregar el teu següent èxit? 🎧"
 #, python-format
 msgid "Real name"
 msgstr "Nom real"
-
-#. module: music_manager
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
-msgid "Registered albums"
-msgstr "Àlbums registrats"
-
-#. module: music_manager
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
-msgid "Registered tracks"
-msgstr "Cançons registrades"
 
 #. module: music_manager
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_audio_settings__root_dir
@@ -2191,9 +2271,6 @@ msgstr "Aquest gènere no té cap cançó per actualitzar!"
 #. odoo-python
 #: code:addons/music_manager/models/track.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__name
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_wizard_view_form
@@ -2239,8 +2316,6 @@ msgstr "Nombre total de discs trobat"
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 msgid "Total duration"
 msgstr "Durada total"
 
@@ -2307,8 +2382,6 @@ msgstr "Assistent Musical"
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_artist__track_amount
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_genre__track_amount
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_tree
 #, python-format
 msgid "Track amount"
@@ -2318,9 +2391,6 @@ msgstr "Nombre de cançons"
 #. odoo-python
 #: code:addons/music_manager/models/track.py:0 code:addons/music_manager/wizards/track_wizard.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__track_artist_ids
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_wizard_view_form
 #, python-format
@@ -2346,11 +2416,6 @@ msgid "Track library"
 msgstr "Biblioteca de cançons"
 
 #. module: music_manager
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
-msgid "Track list"
-msgstr "Llista de cançons"
-
-#. module: music_manager
 #: model:ir.actions.act_window,name:music_manager.music_manager_track_view_action_admin
 msgid "Track management"
 msgstr "Gestió de pistes"
@@ -2359,9 +2424,6 @@ msgstr "Gestió de pistes"
 #. odoo-python
 #: code:addons/music_manager/models/track.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_track__track_no
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
 #, python-format
 msgid "Track no"
 msgstr "Número de pista"
@@ -2402,9 +2464,20 @@ msgstr "Cançó/ns"
 #. odoo-python
 #: code:addons/music_manager/models/album.py:0
 #: model:ir.model.fields,field_description:music_manager.field_music_manager_album__track_ids
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #, python-format
 msgid "Tracks"
 msgstr "Cançons"
+
+#. module: music_manager
+#. odoo-python
+#: code:addons/music_manager/models/album.py:0 code:addons/music_manager/models/artist.py:0
+#: code:addons/music_manager/models/genre.py:0
+#, python-format
+msgid "Tracks of %s"
+msgstr "Cançons de %s"
 
 #. module: music_manager
 #. odoo-python
@@ -2516,9 +2589,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_album_view_tree
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_searchbar
-#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_form
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_searchbar
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_track_view_tree
@@ -2635,6 +2706,11 @@ msgstr "per missatge d'error"
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_import_queue_view_searchbar
 msgid "by file path"
 msgstr "per ruta d'arxiu"
+
+#. module: music_manager
+#: model_terms:ir.ui.view,arch_db:music_manager.music_manager_genre_view_searchbar
+msgid "by genre name"
+msgstr "per nom de gènere"
 
 #. module: music_manager
 #: model_terms:ir.ui.view,arch_db:music_manager.music_manager_artist_view_searchbar

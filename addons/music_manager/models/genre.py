@@ -22,7 +22,7 @@ class Genre(Model, ProcessImageMixin):
     # Default fields
     description = Html(string=_("Description"))
     name = Char(string=_("Name"), required=True)
-    parent_path = Char(index=True, unaccent=False)
+    parent_path = Char(string=_("Parent path"), index=True, unaccent=False)
     picture = Binary(string=_("Picture"))
 
     # Relationships
