@@ -98,21 +98,6 @@ class Artist(Model, ProcessImageMixin):
 
         return super().unlink()
 
-    @api.depends('name', 'start_year', 'country_id')
-    def _compute_display_name(self) -> None:
-        for artist in self:
-            name = artist.name
-            data = []
-
-            if artist.start_year:
-                data.append(artist.start_year)
-
-            if artist.country_id:
-                data.append(artist.country_id.code)
-
-            suffix = f" ({' · '.join(data)})" if data else ""
-            artist.display_name = f"{name}{suffix}"
-
     @api.depends('album_ids')
     def _compute_album_amount(self) -> None:
         album_model = self.env['music_manager.album']
@@ -129,6 +114,21 @@ class Artist(Model, ProcessImageMixin):
 
         for artist in self:
             artist.album_amount = mapped_data.get(artist.id, 0)
+
+    @api.depends('name', 'start_year', 'country_id')
+    def _compute_display_name(self) -> None:
+        for artist in self:
+            name = artist.name
+            data = []
+
+            if artist.start_year:
+                data.append(artist.start_year)
+
+            if artist.country_id:
+                data.append(artist.country_id.code)
+
+            suffix = f" ({' · '.join(data)})" if data else ""
+            artist.display_name = f"{name}{suffix}"
 
     @api.depends('name')
     def _compute_display_title_form(self) -> None:
@@ -162,17 +162,6 @@ class Artist(Model, ProcessImageMixin):
         for artist in self:
             artist.track_amount = mapped_data.get(artist.id, 0)
 
-    def action_view_artist_tracks(self):
-        self.ensure_one()
-        return {
-            'name': _("Tracks of %s", self.name),
-            'type': 'ir.actions.act_window',
-            'res_model': 'music_manager.track',
-            'view_mode': 'tree,form',
-            'domain': ['|', ('original_artist_id', '=', self.id), ('track_artist_ids', 'in', self.ids)],
-            'context': {'default_original_artist_id': self.id},
-        }
-
     def action_view_artist_albums(self):
         self.ensure_one()
         return {
@@ -182,6 +171,17 @@ class Artist(Model, ProcessImageMixin):
             'view_mode': 'tree,form',
             'domain': [('album_artist_id', '=', self.id)],
             'context': {'default_album_artist_id': self.id},
+        }
+
+    def action_view_artist_tracks(self):
+        self.ensure_one()
+        return {
+            'name': _("Tracks of %s", self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'music_manager.track',
+            'view_mode': 'tree,form',
+            'domain': ['|', ('original_artist_id', '=', self.id), ('track_artist_ids', 'in', self.ids)],
+            'context': {'default_original_artist_id': self.id},
         }
 
     def update_songs(self):

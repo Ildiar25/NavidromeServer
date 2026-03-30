@@ -8,7 +8,7 @@ from odoo.api import Environment
 from .artist import Artist
 from .genre import Genre
 from .track import Track
-from ..utils.custom_types import AlbumVals, CustomWarningMessage, DisplayNotification, YearValue
+from ..utils.custom_types import AlbumVals, CustomWarningMessage, DisplayNotification, WindowActionView, YearValue
 
 
 class Album:
@@ -26,21 +26,26 @@ class Album:
     env: Environment
     ensure_one: Callable[[], Self]
     exists: Callable[[], bool | Self]
+    sudo: Callable[[], bool | Self]
+    with_context: Callable[..., Self]
 
     # Custom fields
     name: str
+
     album_artist_id: Artist | int | Literal[False]
     genre_id: Genre | int | Literal[False]
     track_ids: Sequence[Track] | Sequence[int]
+
     album_type: Literal['uncategorized', 'album', 'compilation', 'ep', 'single']
-    disk_amount: int
     display_duration: str | Literal[False]
+    disk_amount: int
     duration: int
     is_complete: bool
     picture: bytes | Literal[False]
     progress: int
     track_amount: int
     year: YearValue | Literal[False]
+
     custom_owner_ids: Sequence[Users] | Sequence[int]
     all_track_ids: Sequence[Track] | Sequence[int]
 
@@ -61,55 +66,8 @@ class Album:
         :return: Deleted records.
         """
 
-    def _compute_album_progress(self: Self) -> None:
-        """Calculates album complete progress
-        :return: None
-        """
-
-    def _compute_display_name(self: Self) -> None:
-        """Calculates the display name. It shows context info like artist's name or album type.
-        :return: None
-        """
-
     def _compute_album_owners(self: Self) -> None:
         """Calculates album owners.
-        :return: None
-        """
-
-    def _compute_album_type(self: Self) -> None:
-        """Calculates album type according to track amount & time duration.
-        :return: None
-        """
-
-    def _compute_all_track_ids(self: Self) -> None:
-        """Calculates all track ids.
-        :return: None
-        """
-
-    def _compute_is_complete(self: Self) -> None:
-        """Calculates if an album is complete or not
-        :return: None
-        """
-
-    def _compute_track_amount(self: Self) -> None:
-        """Calculates track amount linked to this album record.
-        Result is saved into `track_amount` field.
-        :return: None
-        """
-
-    def _compute_disk_amount(self: Self) -> None:
-        """Calculates disk amount linked to itself according to track metadata.
-        Result is saved into `disk_amount` field.
-        :return: None
-        """
-
-    def _compute_disk_duration(self: Self) -> None:
-        """Calculates album total duration in minutes according to all track durations.
-        :return: None
-        """
-
-    def _compute_display_duration(self: Self) -> None:
-        """Calculates displayed album total duration according to disk duration.
         :return: None
         """
 
@@ -125,6 +83,16 @@ class Album:
         :return: None
         """
 
+    def _compute_album_progress(self: Self) -> None:
+        """Calculates album complete progress
+        :return: None
+        """
+
+    def _compute_album_type(self: Self) -> None:
+        """Calculates album type according to track amount & time duration.
+        :return: None
+        """
+
     def _compute_album_year(self: Self) -> None:
         """Computes album year. If year is not available for the album, it falls back to the `year` field
         of the first track with an available year.
@@ -137,6 +105,48 @@ class Album:
         :return: None
         """
 
+    def _compute_all_track_ids(self: Self) -> None:
+        """Calculates all track ids.
+        :return: None
+        """
+
+    def _compute_display_duration(self: Self) -> None:
+        """Calculates displayed album total duration according to disk duration.
+        :return: None
+        """
+
+    def _compute_display_name(self: Self) -> None:
+        """Calculates the display name. It shows context info like artist's name or album type.
+        :return: None
+        """
+
+    def _compute_disk_amount(self: Self) -> None:
+        """Calculates disk amount linked to itself according to track metadata.
+        Result is saved into `disk_amount` field.
+        :return: None
+        """
+
+    def _compute_disk_duration(self: Self) -> None:
+        """Calculates album total duration in minutes according to all track durations.
+        :return: None
+        """
+
+    def _compute_is_complete(self: Self) -> None:
+        """Calculates if an album is complete or not
+        :return: None
+        """
+
+    def _compute_track_amount(self: Self) -> None:
+        """Calculates track amount linked to this album record.
+        Result is saved into `track_amount` field.
+        :return: None
+        """
+
+    def action_view_album_content(self: Self) -> WindowActionView:
+        """Open a list of tracks that belong to the album record.
+        :return: A new window action with environment context
+        """
+
     def update_songs(self: Self) -> DisplayNotification | None:
         """Update track metadata linked to this album. It calls to the `save_changes()` method for each track.
         :return: None | Dictionary with UI information
@@ -146,6 +156,10 @@ class Album:
         """Calls 'get_years_list' method from file_utils.py to get a years list.
         :return: Complete years list
         """
+
+    # ------------------------------------------------------------------------ #
+    # Inherit Methods
+    # ------------------------------------------------------------------------ #
 
     def _validate_picture_image(self: Self) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.

@@ -41,8 +41,8 @@ class Album(Model, ProcessImageMixin):
         default='uncategorized',
         store=True,
     )
-    disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', store=False)
     display_duration = Char(string=_("Duration (min)"), compute='_compute_display_duration', store=False, readonly=True)
+    disk_amount = Integer(string=_("Disk amount"), compute='_compute_disk_amount', store=False)
     duration = Integer(string=_("Duration (sec)"), compute='_compute_disk_duration', store=False)
     is_complete = Boolean(
         string=_("Album complete"), compute='_compute_is_complete', store=True, readonly=True, default=False
@@ -64,8 +64,12 @@ class Album(Model, ProcessImageMixin):
     )
 
     # Techincal fields
-    custom_owner_ids = Many2many(comodel_name='res.users', string=_("Owners"), compute='_compute_album_owners', store=True)
-    all_track_ids = Many2many(comodel_name='music_manager.track', string=_("All tracks"), compute='_compute_all_track_ids')
+    all_track_ids = Many2many(
+        comodel_name='music_manager.track', string=_("All tracks"), compute='_compute_all_track_ids'
+    )
+    custom_owner_ids = Many2many(
+        comodel_name='res.users', string=_("Owners"), compute='_compute_album_owners', store=True
+    )
 
     @api.model_create_multi
     def create(self, list_vals):
@@ -140,6 +144,26 @@ class Album(Model, ProcessImageMixin):
 
         return True
 
+    @api.depends('track_ids.custom_owner_id')
+    def _compute_album_owners(self) -> None:
+        for album in self:
+            album.custom_owner_ids = album.track_ids.mapped('custom_owner_id')
+
+    @api.depends('track_ids.picture')
+    def _compute_album_picture(self) -> None:
+        for album in self:
+            tracks_with_pic = album.track_ids.filtered(lambda track: track.picture)
+
+            if tracks_with_pic:
+                album.picture = tracks_with_pic[0].picture
+
+            else:
+                album.picture = False
+
+    def _inverse_album_picture(self) -> None:
+        for album in self:
+            album.track_ids.write({'picture': album.picture})
+
     @api.depends()
     def _compute_album_progress(self) -> None:
         for album in self:
@@ -166,6 +190,58 @@ class Album(Model, ProcessImageMixin):
             else:
                 album.progress = 0
 
+    @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration', 'is_complete')
+    def _compute_album_type(self) -> None:
+        for album in self:
+            trck_dur = album.track_ids.mapped('duration')
+            total_trck = album.track_amount
+            album_dur = album.duration
+
+            if not album.is_complete:
+                album.album_type = 'uncategorized'
+
+            elif any(album.track_ids.mapped('compilation')):
+                album.album_type = 'compilation'
+
+            elif (total_trck >= 7) or (total_trck < 7 and album_dur > 1800):
+                album.album_type = 'album'
+
+            elif (4 <= total_trck <= 6 and album_dur < 1800) or (1 <= total_trck <= 3 and any(map(lambda dur: dur > 600, trck_dur))):
+                album.album_type = 'ep'
+
+            elif (1 <= total_trck <= 3 and album_dur < 1800) or (any(map(lambda dur: dur > 600, trck_dur))):
+                album.album_type = 'single'
+
+    @api.depends('track_ids.year')
+    def _compute_album_year(self) -> None:
+        for album in self:
+            tracks_with_year = album.track_ids.filtered(lambda track: track.year)
+
+            if tracks_with_year:
+                album.year = tracks_with_year[0].year
+
+            else:
+                album.year = False
+
+    def _inverse_album_year(self) -> None:
+        for album in self:
+            album.track_ids.write({'year': album.year})
+
+    @api.depends('track_ids')
+    def _compute_all_track_ids(self) -> None:
+        for album in self:
+            all_tracks = self.env['music_manager.track'].sudo().search([
+                ('album_id', '=', album.id)
+            ])
+            album.all_track_ids = all_tracks
+
+    @api.depends('duration')
+    def _compute_display_duration(self) -> None:
+        for album in self:
+            hours, remainder = divmod(album.duration, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            album.display_duration = f"{hours:02}:{minutes:02}:{seconds:02}"
+
     @api.depends('name', 'album_type', 'album_artist_id')
     def _compute_display_name(self):
         # noinspection PyProtectedMember
@@ -190,44 +266,19 @@ class Album(Model, ProcessImageMixin):
 
             album.display_name = f"{name}{album_type_label}{artist_label}"
 
-    @api.depends('track_ids.custom_owner_id')
-    def _compute_album_owners(self) -> None:
+    @api.depends('track_ids.total_disk')
+    def _compute_disk_amount(self) -> None:
         for album in self:
-            album.custom_owner_ids = album.track_ids.mapped('custom_owner_id')
+            disk_amount = album.track_ids.mapped('total_disk')
+            album.disk_amount = max(disk_amount) if disk_amount else 0
 
-    @api.depends('track_ids', 'track_ids.compilation', 'track_ids.duration', 'track_amount', 'duration', 'is_complete')
-    def _compute_album_type(self) -> None:
+    @api.depends('track_ids.duration')
+    def _compute_disk_duration(self) -> None:
         for album in self:
-            trck_dur = album.track_ids.mapped('duration')
-            total_trck = album.track_amount
-            album_dur = album.duration
+            disk_duration = album.track_ids.mapped('duration')
+            album.duration = sum(disk_duration) if disk_duration else 0
 
-            if not album.is_complete:
-                album.album_type = 'uncategorized'
-
-            elif any(album.track_ids.mapped('compilation')):
-                album.album_type = 'compilation'
-
-            elif (total_trck >= 7) or (total_trck < 7 and album_dur > 1800):
-                album.album_type = 'album'
-
-            elif (4 <= total_trck <= 6 and album_dur < 1800) or (1 <= total_trck <= 3 and any(map(lambda dur: dur > 600, trck_dur))):
-                album.album_type = 'ep'
-
-            elif (1 <= total_trck <= 3 and album_dur < 1800) or (any(map(lambda dur: dur > 600, trck_dur))):
-                album.album_type = 'single'
-
-    @api.depends('track_ids')
-    def _compute_all_track_ids(self) -> None:
-        for album in self:
-            all_tracks = self.env['music_manager.track'].sudo().search([
-                ('album_id', '=', album.id)
-            ])
-            album.all_track_ids = all_tracks
-
-    @api.depends(
-        'track_ids', 'track_ids.track_no', 'track_ids.disk_no', 'track_ids.total_track', 'track_ids.total_disk'
-    )
+    @api.depends('track_ids', 'track_ids.track_no', 'track_ids.disk_no', 'track_ids.total_track', 'track_ids.total_disk')
     def _compute_is_complete(self) -> None:
         for album in self:
             if not album.track_ids:
@@ -255,55 +306,6 @@ class Album(Model, ProcessImageMixin):
     def _compute_track_amount(self) -> None:
         for album in self:
             album.track_amount = len(album.track_ids) if album.track_ids else 0
-
-    @api.depends('track_ids.total_disk')
-    def _compute_disk_amount(self) -> None:
-        for album in self:
-            disk_amount = album.track_ids.mapped('total_disk')
-            album.disk_amount = max(disk_amount) if disk_amount else 0
-
-    @api.depends('track_ids.duration')
-    def _compute_disk_duration(self) -> None:
-        for album in self:
-            disk_duration = album.track_ids.mapped('duration')
-            album.duration = sum(disk_duration) if disk_duration else 0
-
-    @api.depends('duration')
-    def _compute_display_duration(self) -> None:
-        for album in self:
-            hours, remainder = divmod(album.duration, 3600)
-            minutes, seconds = divmod(remainder, 60)
-            album.display_duration = f"{hours:02}:{minutes:02}:{seconds:02}"
-
-    @api.depends('track_ids.picture')
-    def _compute_album_picture(self) -> None:
-        for album in self:
-            tracks_with_pic = album.track_ids.filtered(lambda track: track.picture)
-
-            if tracks_with_pic:
-                album.picture = tracks_with_pic[0].picture
-
-            else:
-                album.picture = False
-
-    def _inverse_album_picture(self) -> None:
-        for album in self:
-            album.track_ids.write({'picture': album.picture})
-
-    @api.depends('track_ids.year')
-    def _compute_album_year(self) -> None:
-        for album in self:
-            tracks_with_year = album.track_ids.filtered(lambda track: track.year)
-
-            if tracks_with_year:
-                album.year = tracks_with_year[0].year
-
-            else:
-                album.year = False
-
-    def _inverse_album_year(self) -> None:
-        for album in self:
-            album.track_ids.write({'year': album.year})
 
     def action_view_album_content(self):
         self.ensure_one()

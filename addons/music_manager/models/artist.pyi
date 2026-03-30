@@ -8,7 +8,7 @@ from odoo.api import Environment
 
 from .album import Album
 from .track import Track
-from ..utils.custom_types import ArtistVals, DisplayNotification, CustomWarningMessage, YearValue
+from ..utils.custom_types import ArtistVals, DisplayNotification, CustomWarningMessage, WindowActionView, YearValue
 
 
 class Artist:
@@ -34,15 +34,19 @@ class Artist:
     real_name: str | Literal[False]
     start_year: YearValue | Literal[False]
     website: str | Literal[False]
+
     album_ids: Sequence[Album] | Sequence[int]
     country_id: Country | int | Literal[False]
     group_ids: Sequence[Artist] | Sequence[int]
     member_ids: Sequence[Artist] | Sequence[int]
     track_ids: Sequence[Track] | Sequence[int]
+
     album_amount: int
     display_title: str | Literal[False]
     track_amount: int
+
     country_code: str | Literal[False]
+
     custom_owner_id: Users | int
 
     def create(self, list_vals: list[ArtistVals]) -> Self:
@@ -63,14 +67,14 @@ class Artist:
         :return: Confirms deleted artist record.
         """
 
-    def _compute_display_name(self: Self) -> None:
-        """Calculates the display name. It shows context info like artist's debut year or his country.
-        :return: None
-        """
-
     def _compute_album_amount(self: Self) -> None:
         """Calculates album amount linked to this artist record.
         Result is saved into `album_amount` field.
+        :return: None
+        """
+
+    def _compute_display_name(self: Self) -> None:
+        """Calculates the display name. It shows context info like artist's debut year or his country.
         :return: None
         """
 
@@ -86,6 +90,16 @@ class Artist:
         :return: None
         """
 
+    def action_view_artist_albums(self: Self) -> WindowActionView:
+        """Open a list of albums that belong to the artist record
+        :return: A new window action with environment context
+        """
+
+    def action_view_artist_tracks(self: Self) -> WindowActionView:
+        """Open a list of tracks that belong to the artist record
+        :return: A new window action with environment context
+        """
+
     def update_songs(self: Self) -> DisplayNotification | None:
         """Update track metadata linked to this artist. It calls to the `save_changes()` method for each track.
         :return: None | Dictionary with UI information
@@ -95,6 +109,10 @@ class Artist:
         """Calls 'get_years_list' method from file_utils.py to get a years list.
         :return: Complete years list
         """
+
+    # ------------------------------------------------------------------------ #
+    # Inherit Methods
+    # ------------------------------------------------------------------------ #
 
     def _validate_picture_image(self: Self) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.
