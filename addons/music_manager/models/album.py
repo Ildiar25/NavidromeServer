@@ -314,8 +314,7 @@ class Album(Model, ProcessImageMixin):
             'type': 'ir.actions.act_window',
             'res_model': 'music_manager.track',
             'view_mode': 'tree,form',
-            'domain': [('album_id', '=', self.id)],
-            # 'context': {'search_default_disk_no': 1},
+            'domain': [('album_id', '=', self.id)]
         }
 
     def update_songs(self):
