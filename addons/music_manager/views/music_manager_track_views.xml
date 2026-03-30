@@ -23,10 +23,10 @@
             <field name="name">music_manager.track.view.tree</field>
             <field name="model">music_manager.track</field>
             <field name="arch" type="xml">
-                <tree string="Track tree view" decoration-danger="is_deleted" decoration-warning="not is_saved" create="False">
+                <tree string="Track tree view" decoration-danger="is_deleted" decoration-warning="not is_saved" decoration-muted="custom_owner_id != uid" decoration-it="custom_owner_id != uid" decoration-bf="custom_owner_id == uid" create="False">
                     <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}" optional="hide"/>
                     <field name="disk_no" string="Disk no" decoration-bf="True" width="40px" optional="hide"/>
-                    <field name="track_no" string="Track no" decoration-bf="True" width="40px" optional="hide"/>
+                    <field name="track_no" string="#" width="20px" decoration-bf="True"/>
                     <field name="name" string="Title"/>
                     <field name="display_artist_names" string="Artist(s)"/>
                     <field name="album_id" string="Album"/>
@@ -34,7 +34,7 @@
                     <field name="year" string="Year"/>
                     <field name="genre_id" string="Genre"/>
                     <field name="display_duration" string="Duration"/>
-                    <field name="custom_owner_id" string="Owner" groups="music_manager.group_music_manager_user_admin"/>
+                    <field name="custom_owner_id" string="Owner"  widget="many2one_avatar"/>
                     <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
                     <field name="display_bitrate" string="Quality" optional="hide"/>

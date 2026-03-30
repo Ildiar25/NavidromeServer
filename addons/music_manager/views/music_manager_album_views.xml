@@ -12,7 +12,7 @@
         <record id="music_manager_album_view_action_admin" model="ir.actions.act_window">
             <field name="name">Album management</field>
             <field name="res_model">music_manager.album</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,kanban,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
             <field name="limit">150</field>
         </record>
@@ -30,8 +30,10 @@
                             <div class="oe_kanban_global_click d-flex flex-column h-100" t-att-title="record.name.value" style="overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                                 <div class="position-relative" style="width: 100%; overflow: hidden; background: #f8f9fa;">
                                     <field name="picture" string="" widget="image" class="oe_kanban_image" options="{'preview_image': 'picture'}"/>
-                                    <div class="position-absolute top-0 end-0 p-1" style="width: 42%">
-                                        <field name="progress" widget="progressbar" invisible="is_complete"/>
+                                    <div class="position-absolute bottom-0 start-0 p-1">
+                                        <span class="badge rounded-pill text-bg-secondary ms-1">
+                                            <field name="progress" widget="progressbar" invisible="is_complete"/>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -72,6 +74,11 @@
                 <form string="Album form view" disable_autofocus="True" create="False">
                     <sheet class="form-bg-decoration">
                         <field name="is_complete" invisible="True"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_album_content" type="object" class="oe_stat_button" icon="fa-list-ol">
+                                <field name="track_amount" widget="statinfo" string="Tracks"/>
+                            </button>
+                        </div>
                         <header>
                             <h1> 💽 Editing album</h1>
                         </header>
@@ -99,28 +106,6 @@
                         <div class="d-flex flex-row justify-content-center">
                             <button name="update_songs" string="Update metadata for all songs" class="btn-outline-primary w-50" type="object"/>
                         </div>
-                        <separator/>
-                        <notebook>
-                            <page string="Track list">
-                                <field name="all_track_ids" readonly="True">
-                                    <tree decoration-danger="is_deleted" decoration-warning="not is_saved" decoration-muted="custom_owner_id != uid" decoration-it="custom_owner_id != uid" decoration-bf="custom_owner_id == uid">
-                                        <field name="track_no" string="#" width="20px" decoration-bf="True"/>
-                                        <field name="name" string="Title"/>
-                                        <field name="display_artist_names" string="Track artist(s)"/>
-                                        <field name="album_id" string="Album" optional="hide"/>
-                                        <field name="album_artist_id" string="Album artist" optional="hide"/>
-                                        <field name="year" string="Year"/>
-                                        <field name="genre_id" string="Genre"/>
-                                        <field name="display_duration" string="Duration"/>
-                                        <field name="custom_owner_id" widget="many2one_avatar"/>
-                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="is_saved" column_invisible="True"/>
-                                        <field name="is_deleted" column_invisible="True"/>
-                                    </tree>
-                                </field>
-                            </page>
-                        </notebook>
                     </sheet>
                 </form>
             </field>
