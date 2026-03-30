@@ -5,12 +5,11 @@ from .album import Album
 from .artist import Artist
 from .genre import Genre
 
-from ..utils.custom_types import YearValue
-
 
 class MusicImportQueue:
     """
-
+    Represents a MusicImportQueue model into the system.
+    Manage basic track data import and link or create metadata found to the system records.
     """
 
     _name: Final[str]
@@ -21,22 +20,20 @@ class MusicImportQueue:
     file_path: str | Literal[False]
     state: Literal['pending', 'processed', 'error'] | Literal[False]
 
-    def _cron_process_music_queue(self: Self) -> None:
-        """
-
-        :return:
-        """
-
-    def _cron_garbage_collector(self: Self) -> None:
-        """
-
-        :return:
-        """
-
     def create_track_from_scan(self: Self, file_path: str, data: Dict[str, str | bytes | int | bool | None]) -> None:
         """Creates new record automatically according to metadata found in file_path.
         :param file_path: Actual file path found when main folder was scanned
         :param data: Data dictionary according to metadata found
+        :return: None
+        """
+
+    def _cron_garbage_collector(self: Self) -> None:
+        """Delete records which write date is over than 24h.
+        :return: None
+        """
+
+    def _cron_process_music_queue(self: Self) -> None:
+        """Each 2 minutes create 50 new records into the system.
         :return: None
         """
 
@@ -65,12 +62,13 @@ class MusicImportQueue:
         :return: A sequence of artists objects
         """
 
+    def _notify_user(self: Self, error_count: int = 0) -> None:
+        """Sends a UI notification. Reports the user if there are encountered errors or a successful importation.
+        :param error_count: Error amount
+        :return: None
+        """
+
     def _match_track_year(self: Self, year: str) -> str:
         """Matches the year found in metadata according to years' list.
         :return: Year in string format as "YYYY" | Empty string if no year found
-        """
-
-    def _get_years_list(self: Self) -> list[YearValue]:
-        """Calls 'get_years_list' method from file_utils.py to get a years list.
-        :return: Complete years list
         """
