@@ -4,13 +4,13 @@ from pathlib import Path
 
 # noinspection PyProtectedMember
 from odoo import _, api
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import Model
 
 from .mixins.process_image_mixin import ProcessImageMixin
 from ..adapters import FileServiceAdapter, TrackServiceAdapter
-from ..utils.exceptions import FilePersistenceError, MusicManagerError, InvalidPathError
+from ..utils.exceptions import FilePersistenceError, InvalidPathError, MusicManagerError
 from ..utils.file_utils import get_years_list
 
 
@@ -22,13 +22,15 @@ class Track(Model, ProcessImageMixin):
     _description = 'track_table'
     _order = 'album_artist, album_name, disk_no, track_no'
     _sql_constraints = [
-        ('unique_track_no', 'UNIQUE(album_id, disk_no, track_no)', _("\nThis track number already exists on this disk.")),
+        ('unique_track_no',
+         'UNIQUE(album_id, disk_no, track_no)',
+         _("\nThis track number already exists on this disk.")),
     ]
 
     # Basic fields
-    picture = Binary(string=_("Picture"), attachment=True)
     disk_no = Integer(string=_("Disk no"))
     name = Char(string=_("Title"), required=True)
+    picture = Binary(string=_("Picture"), attachment=True)
     total_disk = Integer(string=_("Total disk no"))
     total_track = Integer(string=_("Total track no"))
     track_no = Integer(string=_("Track no"), required=True)
@@ -73,7 +75,21 @@ class Track(Model, ProcessImageMixin):
     # Technical fields
     has_valid_path = Boolean(string=_("Valid path"), default=False, readonly=True)
     is_saved = Boolean(string=_("Is saved"), default=False, readonly=True)
-    custom_owner_id = Many2one(comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True)
+    custom_owner_id = Many2one(
+        comodel_name='res.users', string="Owner", default=lambda self: self.env.user, required=True
+    )
+
+    def _search_is_deleted(self, operator, value):
+        matching_ids = []
+        saved_records = self.search([('is_saved', operator, True)])
+
+        for track in saved_records:
+            deleted = not track.file_exists(track.old_path)
+
+            if (value and deleted) or (not value and not deleted):
+                matching_ids.append(track.id)
+
+        return [("id", "in", matching_ids)]
 
     @api.model_create_multi
     def create(self, list_vals):
@@ -91,13 +107,19 @@ class Track(Model, ProcessImageMixin):
         return tracks
 
     def write(self, vals):
-        self._process_picture_image(vals)
+        for track in self:
+            if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+                if track.custom_owner_id != self.env.user:
+                    _logger.warning(f"WARNING: This user has trobules: {self.env.user.name} IS NOT {track.custom_owner_id.name}")
+                    raise AccessError(_("\nCannot update this track because you are not the owner. 🤷"))
 
+            if track.is_deleted:
+                raise UserError(_("You cannot modify a deleted file."))
+
+        self._process_picture_image(vals)
         res = super().write(vals)  # type: ignore[arg-type]
 
         for track in self:
-            if track.is_deleted:
-                raise UserError(_("You cannot modify a deleted file."))
             # noinspection PyProtectedMember
             track._sync_album_with_artist()
             # noinspection PyProtectedMember
@@ -108,29 +130,32 @@ class Track(Model, ProcessImageMixin):
         return res
 
     def unlink(self):
+        for track in self:
+            if not self.env.user.has_group('music_manager.group_music_manager_user_admin'):
+                if track.custom_owner_id != self.env.user:
+                    raise AccessError(_("\nCannot delete this track because you are not the owner. 🤷"))
+
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
-        delete_files = settings.to_delete if settings else False
+        deletion_active = settings.to_delete if settings else False
+        track_model = self.env['music_manager.track'].sudo()
         file_service = self._get_file_service_adapter()
 
-        # Check DB info
+        # Preparing DB variables
         files_to_check = [(track.file_path, track.is_deleted) for track in self]
-        potential_empty_albums = self.mapped('album_id')
+        albums_to_check = self.mapped('album_id')
 
         # Delete track records
         res = super().unlink()
 
-        # Look for empty albums
-        tracks_still_in_db = self.env['music_manager.track'].sudo().search([
-            ('album_id', 'in', potential_empty_albums.ids)
-        ])
+        # Ensure empty albums
+        empty_albums = albums_to_check.exists().filtered(
+            lambda album: track_model.search_count([('album_id', '=', album.id)]) == 0
+        )
 
-        album_ids_with_content = tracks_still_in_db.mapped('album_id').ids
-        albums_to_delete = potential_empty_albums.filtered(lambda album: album.id not in album_ids_with_content)
+        if empty_albums:
+            empty_albums.sudo().with_context(skip_album_sync=True).unlink()
 
-        if albums_to_delete:
-            albums_to_delete.sudo().with_context(skip_album_sync=True).unlink()
-
-        if not delete_files:
+        if not deletion_active:
             return res
 
         # File cleaning
@@ -138,31 +163,60 @@ class Track(Model, ProcessImageMixin):
             if not path or is_deleted:
                 continue
 
-            still_used = self.env['music_manager.track'].sudo().search_count([('file_path', '=', path)])
+            still_used = track_model.search_count([('file_path', '=', path)])
 
-            if still_used == 0:
-                try:
-                    file_service.delete_file(path)
+            if still_used != 0:
+                continue
 
-                except InvalidPathError as invalid_path:
-                    _logger.warning(f"File to delete not found, continuing: {invalid_path}")
-                    continue
+            try:
+                file_service.delete_file(path)
 
-                except FilePersistenceError as not_allowed:
-                    _logger.error(f"Cannot delete the file: {not_allowed}")
-                    raise ValidationError(
-                        _("\nAn internal issue ocurred while trying to delete the file."
-                          "\nPlease, try it again with a different record.")
-                    )
+            except InvalidPathError as invalid_path:
+                _logger.warning(f"File to delete not found, continuing: {invalid_path}")
+                continue
 
-                except MusicManagerError as unknown_error:
-                    _logger.error(f"Unespected error while trying to delete the file: {unknown_error}")
-                    raise ValidationError(
-                        _("\nDamn! Something went wrong while deleting the file."
-                          "\nPlease, contact with your Admin.")
-                    )
+            except FilePersistenceError as not_allowed:
+                _logger.error(f"Cannot delete the file: {not_allowed}")
+                raise ValidationError(
+                    _("\nAn internal issue ocurred while trying to delete the file."
+                      "\nPlease, try it again with a different record.")
+                )
+
+            except MusicManagerError as unknown_error:
+                _logger.error(f"Unespected error while trying to delete the file: {unknown_error}")
+                raise ValidationError(
+                    _("\nDamn! Something went wrong while deleting the file."
+                      "\nPlease, contact with your Admin.")
+                )
 
         return res
+
+    @api.depends('album_artist_id')
+    def _compute_compilation_value(self) -> None:
+        for track in self:
+            if track.album_artist_id and track.album_artist_id.name.lower() == 'various artists':
+                track.compilation = True
+
+            else:
+                track.compilation = False
+
+    def _inverse_compilation_value(self) -> None:
+        for track in self:
+
+            current_name = track.album_artist_id.name.lower() if track.album_artist_id else ""
+            target_name = None
+            fallback_artists = self.env['music_manager.artist']
+
+            if track.compilation:
+                target_name = "Various Artists"
+
+            elif current_name == 'various artists' or not track.album_artist_id:
+                target_name = track.original_artist_id.name if track.original_artist_id else ""
+                fallback_artists = track.track_artist_ids
+
+            if target_name is not None:
+                # noinspection PyProtectedMember
+                track.album_artist_id = track._find_or_create_single_artist(target_name, fallback_artists)
 
     @api.depends('track_artist_ids.name')
     def _compute_display_artist_name(self) -> None:
@@ -208,44 +262,9 @@ class Track(Model, ProcessImageMixin):
                 title=track.name or '',
             )
 
-    @api.depends('album_artist_id')
-    def _compute_compilation_value(self) -> None:
-        for track in self:
-            if track.album_artist_id and track.album_artist_id.name.lower() == 'various artists':
-                track.compilation = True
-
-            else:
-                track.compilation = False
-
-    def _inverse_compilation_value(self) -> None:
-        for track in self:
-
-            current_name = track.album_artist_id.name.lower() if track.album_artist_id else ""
-            target_name = None
-            fallback_artists = self.env['music_manager.artist']
-
-            if track.compilation:
-                target_name = "Various Artists"
-
-            elif current_name == 'various artists' or not track.album_artist_id:
-                target_name = track.original_artist_id.name if track.original_artist_id else ""
-                fallback_artists = track.track_artist_ids
-
-            if target_name is not None:
-                # noinspection PyProtectedMember
-                track.album_artist_id = track._find_or_create_single_artist(target_name, fallback_artists)
-
-    def _search_is_deleted(self, operator, value):
-        matching_ids = []
-        saved_records = self.search([('is_saved', operator, True)])
-
-        for track in saved_records:
-            deleted = not track.file_exists(track.old_path)
-
-            if (value and deleted) or (not value and not deleted):
-                matching_ids.append(track.id)
-
-        return [("id", "in", matching_ids)]
+    @api.onchange('compilation')
+    def _display_album_artist_changes(self) -> None:
+        self._inverse_compilation_value()
 
     @api.constrains('track_artist_ids', 'name', 'album_id', 'custom_owner_id')
     def _check_track_name(self) -> None:
@@ -276,10 +295,6 @@ class Track(Model, ProcessImageMixin):
                 continue
 
             track.has_valid_path = file_service.is_valid(track.file_path)
-
-    @api.onchange('compilation')
-    def _display_album_artist_changes(self) -> None:
-        self._inverse_compilation_value()
 
     def save_changes(self):
         track = self.ensure_one()
@@ -314,6 +329,24 @@ class Track(Model, ProcessImageMixin):
             }
         }
 
+    def _ensure_optional_fields(self) -> None:
+        self.ensure_one()
+
+        protected_fields = [
+            ('track_artist_ids', _("Track artist(s)")),
+            ('genre_id', _("Genre")),
+            ('original_artist_id', _("Original artist")),
+            ('year', _("Year")),
+        ]
+
+        for field, label in protected_fields:
+            value = getattr(self, field, None)
+
+            if not value:
+                raise ValidationError(
+                    _("Field '%s' cannot be empty. Please fill it or restore previous value.", label)
+                )
+
     def _find_or_create_single_artist(self, artist_name, fallback_ids):
         if not artist_name or artist_name.lower() == 'unknown':
             return fallback_ids[:1]
@@ -340,24 +373,6 @@ class Track(Model, ProcessImageMixin):
         file_extension = settings.sound_format if settings else 'mp3'
 
         return TrackServiceAdapter(file_type=file_extension)
-
-    def _ensure_optional_fields(self) -> None:
-        self.ensure_one()
-
-        protected_fields = [
-            ('track_artist_ids', _("Track artist(s)")),
-            ('genre_id', _("Genre")),
-            ('original_artist_id', _("Original artist")),
-            ('year', _("Year")),
-        ]
-
-        for field, label in protected_fields:
-            value = getattr(self, field, None)
-
-            if not value:
-                raise ValidationError(
-                    _("Field '%s' cannot be empty. Please fill it or restore previous value.", label)
-                )
 
     def _perform_save_changes(self):
         failure_messages = []
@@ -416,19 +431,25 @@ class Track(Model, ProcessImageMixin):
 
     def _sync_album_with_artist(self) -> None:
         self.ensure_one()
-        if self.album_id and self.album_artist_id:
-            if self.album_id.album_artist_id != self.album_artist_id:
-                self.album_id.write(
-                    {'album_artist_id': self.album_artist_id.id}
-                )
+
+        if not self.album_id or not self.album_artist_id:
+            return
+
+        if self.album_id.album_artist_id != self.album_artist_id:
+            self.album_id.sudo().write(
+                {'album_artist_id': self.album_artist_id.id}
+            )
 
     def _sync_album_with_genre(self) -> None:
         self.ensure_one()
-        if self.album_id and self.genre_id:
-            if self.album_id.genre_id != self.genre_id:
-                self.album_id.write(
-                    {'genre_id': self.genre_id.id}
-                )
+
+        if not self.album_id or not self.genre_id:
+            return
+
+        if self.album_id.genre_id != self.genre_id:
+            self.album_id.sudo().write(
+                {'genre_id': self.genre_id.id}
+            )
 
     def _sync_album_with_owner(self) -> None:
         self.ensure_one()
@@ -439,14 +460,16 @@ class Track(Model, ProcessImageMixin):
         if self.custom_owner_id in self.album_id.custom_owner_ids:
             return
 
-        album_class = self.env['music_manager.album']
-        found_album = album_class.search([
+        actual_album = self.album_id
+        album_class = self.env['music_manager.album'].sudo()
+
+        target_album = album_class.search([
             ('name', '=', self.album_id.name),
             ('album_artist_id', '=', self.album_artist_id.id),
         ], limit=1)
 
-        if not found_album:
-            found_album = album_class.create(
+        if not target_album:
+            target_album = self.env['music_manager.album'].create(
                 {
                     'name': self.album_id.name,
                     'album_artist_id': self.album_artist_id.id if self.album_artist_id else False,
@@ -454,12 +477,15 @@ class Track(Model, ProcessImageMixin):
                 }
             )
 
-        old_album = self.album_id
-        if found_album != old_album:
-            self.album_id = found_album.id
+        if target_album != actual_album:
+            self.album_id = target_album.id
 
-        if old_album and not old_album.exists().track_ids:
-            old_album.unlink()
+            tracks_count = self.env['music_manager.track'].sudo().search_count([
+                ('album_id', '=', actual_album.id)
+            ])
+
+            if tracks_count == 0:
+                actual_album.sudo().with_context(skip_album_sync=True).unlink()
 
     def _update_metadata(self) -> None:
 

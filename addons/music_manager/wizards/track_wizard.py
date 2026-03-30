@@ -6,13 +6,13 @@ from urllib.parse import urlparse
 # noinspection PyProtectedMember
 from odoo import _, api
 from odoo.exceptions import ValidationError
-from odoo.fields import Binary, Boolean, Char, Integer, Selection, Many2many, Many2one
+from odoo.fields import Binary, Boolean, Char, Integer, Many2many, Many2one, Selection
 from odoo.models import TransientModel
 
-from ..models.mixins.process_image_mixin import ProcessImageMixin
 from ..adapters.download_service_adapter import DownloadServiceAdapter
 from ..adapters.file_service_adapter import FileServiceAdapter
 from ..adapters.track_service_adapter import TrackServiceAdapter
+from ..models.mixins.process_image_mixin import ProcessImageMixin
 from ..utils.constants import ALLOWED_MUSIC_FORMAT
 from ..utils.data_encoding import base64_decode, base64_encode
 from ..utils.exceptions import (
@@ -23,7 +23,7 @@ from ..utils.exceptions import (
     MusicManagerError,
     VideoProcessingError,
 )
-from ..utils.file_utils import validate_allowed_mimes, get_years_list
+from ..utils.file_utils import get_years_list, validate_allowed_mimes
 
 
 _logger = logging.getLogger(__name__)
@@ -43,9 +43,9 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     tmp_genre = Char(string=_("Genre found"))
     tmp_name = Char(string=_("Title found"))
     tmp_original_artist = Char(string=_("Original artist found"))
-    tmp_track_no = Integer(string=_("Track number found"))
     tmp_total_disk = Integer(string=_("Total disk number found"))
     tmp_total_track = Integer(string=_("Total track number found"))
+    tmp_track_no = Integer(string=_("Track number found"))
     tmp_year = Char(string=_("Year found"))
     year = Selection(string=_("Year"), selection='_get_years_list')
     url = Char(string=_("Youtube URL"))
@@ -59,8 +59,8 @@ class TrackWizard(TransientModel, ProcessImageMixin):
     sample_rate = Integer(string=_("Sample rate"), default=0, readonly=True)
 
     # Relational fields
-    possible_album_id = Many2one(comodel_name='music_manager.album', string=_("Matched album"))
     possible_album_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Matched album artist"))
+    possible_album_id = Many2one(comodel_name='music_manager.album', string=_("Matched album"))
     possible_artist_ids = Many2many(comodel_name='music_manager.artist', string=_("Matched artist(s)"))
     possible_genre_id = Many2one(comodel_name='music_manager.genre', string=_("Matched genre"))
     possible_original_artist_id = Many2one(comodel_name='music_manager.artist', string=_("Matched original artist"))
@@ -104,22 +104,6 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             return
 
         self.has_valid_path = file_service.is_valid(self.file_path)
-
-    @api.constrains('file', 'url', 'file_path')
-    def _check_fields(self) -> None:
-        self.ensure_one()
-        if self.file_path and self.has_valid_path:
-            return
-
-        if not self.file and not self.url:
-            _logger.info(f"CONSTRAINT CHECK | file: {bool(self.file)} | url: {bool(self.url)}")
-            raise ValidationError(_("\nMust add an URL or upload a file to proceed."))
-
-        if self.file and self.url:
-            _logger.info(f"CONSTRAINT CHECK | file: {bool(self.file)} | url: {bool(self.url)}")
-            raise ValidationError(
-                _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
-            )
 
     @api.onchange('possible_album_artist_id')
     def _compute_compilation_value(self) -> None:
@@ -182,6 +166,22 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             }
 
         return None
+
+    @api.constrains('file', 'url', 'file_path')
+    def _check_fields(self) -> None:
+        self.ensure_one()
+        if self.file_path and self.has_valid_path:
+            return
+
+        if not self.file and not self.url:
+            _logger.info(f"CONSTRAINT CHECK | file: {bool(self.file)} | url: {bool(self.url)}")
+            raise ValidationError(_("\nMust add an URL or upload a file to proceed."))
+
+        if self.file and self.url:
+            _logger.info(f"CONSTRAINT CHECK | file: {bool(self.file)} | url: {bool(self.url)}")
+            raise ValidationError(
+                _("\nOnly one field can be added at the same time. Please, delete one of them to continue.")
+            )
 
     def action_back(self):
         self.ensure_one()
@@ -297,41 +297,21 @@ class TrackWizard(TransientModel, ProcessImageMixin):
             }
         }
 
-    def _download_file(self) -> None:
+    def _check_already_exists(self) -> None:
         self.ensure_one()
-        if not (self.url and isinstance(self.url, str)):
+
+        if not self.possible_album_id or not self.possible_album_artist_id:
             return
 
-        try:
-            download_service = self._get_download_service_adapter(self.url)
-            bytes_file = download_service.to_buffer()
+        domain = [
+            ('album_id', '=', self.possible_album_id.id),
+            ('album_artist_id', '=', self.possible_album_artist_id.id),
+            ('track_no', '=', self.tmp_track_no),
+            ('disk_no', '=', self.tmp_disk_no),
+        ]
 
-            self.write(
-                {
-                    'url': False,
-                    'file': base64_encode(bytes_file)
-                }
-            )
-
-        except ClientPlatformError as download_error:
-            _logger.error(f"Failed to process YouTube URL '{self.url}': {download_error}")
-            raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
-
-        except VideoProcessingError as video_error:
-            _logger.error(f"Failed to process downloaded video: {video_error}")
-            raise ValidationError(
-                _("\nAn internal issue ocurred while processing the video. Please, try a different URL.")
-            )
-
-        except InvalidPathError as invalid_path:
-            _logger.error(f"There was an issue with file path: {invalid_path}")
-            raise ValidationError(_("\nActually, the final path where to save file is not valid."))
-
-        except MusicManagerError as unknown_error:
-            _logger.error(f"Unexpected error while processing video URL '{self.url}': {unknown_error}")
-            raise ValidationError(
-                _("\nDamn! Something went wrong while validating URL.\nPlease, contact with your Admin.")
-            )
+        if self.env['music_manager.track'].search_count(domain) > 0:
+            raise ValidationError(_("\nThis track number already exists on this disk."))
 
     def _create_new_track_record(self):
         self.ensure_one()
@@ -368,21 +348,41 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
         return {'id': track.id, 'name': track.name} if track else None
 
-    def _check_already_exists(self) -> None:
+    def _download_file(self) -> None:
         self.ensure_one()
-
-        if not self.possible_album_id or not self.possible_album_artist_id:
+        if not (self.url and isinstance(self.url, str)):
             return
 
-        domain = [
-            ('album_id', '=', self.possible_album_id.id),
-            ('album_artist_id', '=', self.possible_album_artist_id.id),
-            ('track_no', '=', self.tmp_track_no),
-            ('disk_no', '=', self.tmp_disk_no),
-        ]
+        try:
+            download_service = self._get_download_service_adapter(self.url)
+            bytes_file = download_service.to_buffer()
 
-        if self.env['music_manager.track'].search_count(domain) > 0:
-            raise ValidationError(_("\nThis track number already exists on this disk."))
+            self.write(
+                {
+                    'url': False,
+                    'file': base64_encode(bytes_file)
+                }
+            )
+
+        except ClientPlatformError as download_error:
+            _logger.error(f"Failed to process YouTube URL '{self.url}': {download_error}")
+            raise ValidationError(_("\nInvalid YouTube URL or video is not accessible."))
+
+        except VideoProcessingError as video_error:
+            _logger.error(f"Failed to process downloaded video: {video_error}")
+            raise ValidationError(
+                _("\nAn internal issue ocurred while processing the video. Please, try a different URL.")
+            )
+
+        except InvalidPathError as invalid_path:
+            _logger.error(f"There was an issue with file path: {invalid_path}")
+            raise ValidationError(_("\nActually, the final path where to save file is not valid."))
+
+        except MusicManagerError as unknown_error:
+            _logger.error(f"Unexpected error while processing video URL '{self.url}': {unknown_error}")
+            raise ValidationError(
+                _("\nDamn! Something went wrong while validating URL.\nPlease, contact with your Admin.")
+            )
 
     def _ensure_optional_fields(self):
         self.ensure_one()
@@ -406,13 +406,13 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         if not artist_name or artist_name.lower() == 'unknown':
             return fallback_artists[:1]
 
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
         artist = artist_model.search([('name', '=', artist_name)], limit=1)
 
         if artist:
             return artist
 
-        return artist_model.create({'name': artist_name})
+        return self.env['music_manager.artist'].create({'name': artist_name})
 
     def _get_download_service_adapter(self, video_url):
         settings = self.env['music_manager.audio_settings'].search([], limit=1)
@@ -440,22 +440,9 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
         return TrackServiceAdapter(file_type=file_extension)
 
-    def _match_album_id(self) -> None:
-        self.ensure_one()
-        album_model = self.env['music_manager.album']
-
-        self.possible_album_id = False
-
-        if not self.tmp_album:
-            _logger.info(f"There is no TMP ALBUM: {self.tmp_album}")
-            return
-
-        found = album_model.search([('name', '=', self.tmp_album)], limit=1)
-        self.possible_album_id = found
-
     def _match_album_artist_id(self) -> None:
         self.ensure_one()
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
 
         self.possible_album_artist_id = False
 
@@ -466,9 +453,22 @@ class TrackWizard(TransientModel, ProcessImageMixin):
         found = artist_model.search([('name', '=', self.tmp_album_artist)], limit=1)
         self.possible_album_artist_id = found
 
+    def _match_album_id(self) -> None:
+        self.ensure_one()
+        album_model = self.env['music_manager.album'].sudo()
+
+        self.possible_album_id = False
+
+        if not self.tmp_album:
+            _logger.info(f"There is no TMP ALBUM: {self.tmp_album}")
+            return
+
+        found = album_model.search([('name', '=', self.tmp_album)], limit=1)
+        self.possible_album_id = found
+
     def _match_artist_ids(self) -> None:
         self.ensure_one()
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
 
         self.possible_artist_ids = artist_model.browse()
 
@@ -483,7 +483,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_genre_id(self) -> None:
         self.ensure_one()
-        genre_model = self.env['music_manager.genre']
+        genre_model = self.env['music_manager.genre'].sudo()
 
         self.possible_genre_id = False
 
@@ -495,7 +495,7 @@ class TrackWizard(TransientModel, ProcessImageMixin):
 
     def _match_original_artist_id(self) -> None:
         self.ensure_one()
-        artist_model = self.env['music_manager.artist']
+        artist_model = self.env['music_manager.artist'].sudo()
 
         self.possible_original_artist_id = False
 

@@ -9,7 +9,14 @@ from .album import Album
 from .artist import Artist
 from .genre import Genre
 from ..adapters import FileServiceAdapter, TrackServiceAdapter
-from ..utils.custom_types import CustomWarningMessage, DisplayNotification, DomainCustomFilter, MessageCounter, YearValue, TrackVals
+from ..utils.custom_types import (
+    CustomWarningMessage,
+    DisplayNotification,
+    DomainCustomFilter,
+    MessageCounter,
+    TrackVals,
+    YearValue
+)
 
 
 class Track:
@@ -29,24 +36,27 @@ class Track:
     ensure_one: Callable[[], Self]
 
     # Custom fields
-    picture: bytes | Literal[False]
     disk_no: int | Literal[False]
     name: str
+    picture: bytes | Literal[False]
     total_disk: int | Literal[False]
     total_track: int | Literal[False]
     track_no: int
     year: YearValue | Literal[False]
+
     bitrate: int
     channels: str
     codec: str
     duration: int
     mime_type: str
     sample_rate: int
+
     album_artist_id: Artist | int | Literal[False]
     album_id: Album | int | Literal[False]
     genre_id: Genre | int | Literal[False]
     original_artist_id: Artist | int | Literal[False]
     track_artist_ids: Sequence[Artist] | Sequence[int]
+
     compilation: bool
     display_artist_names: str | Literal[False]
     display_bitrate: str | Literal[False]
@@ -55,11 +65,20 @@ class Track:
     is_deleted: bool | Literal[False]
     file_path: str | Literal[False]
     old_path: str | Literal[False]
+
     album_name: str | Literal[False]
     album_artist: str | Literal[False]
+
     has_valid_path: bool
     is_saved: bool
     custom_owner_id: Users | int
+
+    def _search_is_deleted(self: Self, operator: str, value: bool) -> DomainCustomFilter:
+        """This method returns a record list according to the given filter.
+        :param operator: Representative string from different operators like '=' or '!='.
+        :param value: Boolean value
+        :return: List with diferent records according to filter.
+        """
 
     def create(self, list_vals: list[TrackVals]) -> Self:
         """Overrides 'create' method to process cover track & syncronizes with album & artist ids.
@@ -78,6 +97,16 @@ class Track:
         associated tracks. It also deletes the track's file path before the record itself is deleted.
         The MP3 file is also removed if the user has the necessary permissions.
         :return: Deleted records.
+        """
+
+    def _compute_compilation_value(self: Self) -> None:
+        """Toggles `collection` field according to album artist name.
+        :return: None
+        """
+
+    def _inverse_compilation_value(self: Self) -> None:
+        """Sets artist name as 'various artists' if `collection` field is True.
+        :return: None
         """
 
     def _compute_display_artist_name(self: Self) -> None:
@@ -110,21 +139,9 @@ class Track:
         :return: None
         """
 
-    def _compute_compilation_value(self: Self) -> None:
-        """Toggles `collection` field according to album artist name.
+    def _display_album_artist_changes(self: Self) -> None:
+        """Updates album artist name visuals.
         :return: None
-        """
-
-    def _inverse_compilation_value(self: Self) -> None:
-        """Sets artist name as 'various artists' if `collection` field is True.
-        :return: None
-        """
-
-    def _search_is_deleted(self: Self, operator: str, value: bool) -> DomainCustomFilter:
-        """This method returns a record list according to the given filter.
-        :param operator: Representative string from different operators like '=' or '!='.
-        :param value: Boolean value
-        :return: List with diferent records according to filter.
         """
 
     def _check_track_name(self: Self) -> None:
@@ -137,14 +154,14 @@ class Track:
         :return: None
         """
 
-    def _display_album_artist_changes(self: Self) -> None:
-        """Updates album artist name visuals.
-        :return: None
-        """
-
     def save_changes(self: Self) -> DisplayNotification:
         """Updates track metadata & path file.
         :return: Dictionary with notification data
+        """
+
+    def _ensure_optional_fields(self: Self) -> None:
+        """Check if all metadata fields are filled
+        :return: None
         """
 
     def _find_or_create_single_artist(self: Self, artist_name: str, fallback_artists: Sequence[Artist]) -> Artist | Literal[False]:
@@ -162,11 +179,6 @@ class Track:
     def _get_track_service_adapter(self: Self) -> TrackServiceAdapter:
         """Ensure track service adapter has its settings updated
         :return: TrackServiceAdapter with updated settings
-        """
-
-    def _ensure_optional_fields(self: Self) -> None:
-        """Check if all metadata fields are filled
-        :return: None
         """
 
     def _perform_save_changes(self: Self) -> MessageCounter | None:
@@ -204,11 +216,15 @@ class Track:
         :return: Complete years list
         """
 
+    # ------------------------------------------------------------------------ #
+    # Inherit Methods
+    # ------------------------------------------------------------------------ #
+
     def _validate_picture_image(self: Self) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.
         """
 
-    def _process_picture_image(self, vals: TrackVals) -> None:
+    def _process_picture_image(self: Self, vals: TrackVals) -> None:
         """MIXIN: See process_image_mixin documentation.
         :param vals: Dictionary with vals to write
         :return: None

@@ -8,10 +8,7 @@ from odoo.models import Model
 from odoo.fields import Boolean, Char, Integer, Selection
 
 from ..adapters.file_service_adapter import FileServiceAdapter
-from ..adapters.track_service_adapter import TrackServiceAdapter
 from ..utils.custom_types import DisplayNotification
-from ..utils.data_encoding import base64_encode_in_bytes
-from ..utils.file_utils import get_years_list
 
 
 _logger = logging.getLogger(__name__)
@@ -97,17 +94,18 @@ class AudioSettings(Model):
 
     def action_read_root_folder(self):
         self.ensure_one()
-        file_service = FileServiceAdapter(self.root_dir, self.sound_format)
 
+        file_service = FileServiceAdapter(self.root_dir, self.sound_format)
         str_file_paths = [str(file_path) for file_path in file_service.get_all_file_paths()]
 
         if not str_file_paths:
             return self._notify_user(_("Root folder is empty, add some files first!"), 'info')
 
-        existing_tracks = self.env['music_manager.track'].search_read(
-            [('file_path', 'in', str_file_paths)], ['file_path']
-        )
-        existing_queue = self.env['music_manager.music_import_queue'].search_read(
+        track_model = self.env['music_manager.track']
+        import_queue_model = self.env['music_manager.music_import_queue']
+
+        existing_tracks = track_model.search_read([('file_path', 'in', str_file_paths)], ['file_path'])
+        existing_queue = import_queue_model.search_read(
             [('file_path', 'in', str_file_paths), ('state', 'in', ['pending', 'error'])], ['file_path']
         )
 
@@ -117,15 +115,19 @@ class AudioSettings(Model):
         to_enqueue = [path for path in str_file_paths if path not in processed_paths and path not in pending_paths]
 
         if not to_enqueue:
-            return self._notify_user(_("All files are already in the library."), 'info')
+            return self._notify_user(_("All files are already in the library."), 'success')
 
-        self.env['music_manager.music_import_queue'].create(
-            [{'file_path': path, 'state': 'pending'} for path in to_enqueue],
-        )
+        cron = self.env.ref('music_manager.ir_cron_music_import_queue')
+
+        if cron and not cron.active:
+            _logger.warning(f"CRON 'Music Manager | Background Importer' is dissabled. Activating...")
+            cron.write({'active': True})
+
+        import_queue_model.create([{'file_path': path, 'state': 'pending'} for path in to_enqueue])
 
         return self._notify_user(
             _("Root folder scan finished! • Found %s new files. Processing in background...", len(to_enqueue)),
-            'success'
+            'info'
         )
 
     @staticmethod

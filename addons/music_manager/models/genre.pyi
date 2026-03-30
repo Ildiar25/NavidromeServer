@@ -7,7 +7,7 @@ from odoo.api import Environment
 
 from .album import Album
 from .track import Track
-from ..utils.custom_types import CustomWarningMessage, DisplayNotification, GenreVals
+from ..utils.custom_types import CustomWarningMessage, DisplayNotification, GenreVals, WindowActionView
 
 
 class Genre:
@@ -18,7 +18,10 @@ class Genre:
 
     _name: Final[str]
     _description: str | None
+    _parent_name: str | None
+    _parent_store: bool
     _order: str | None
+    _rec_name: Final[str]
     _sql_constraints: list[tuple[str, str, str]] | None
 
     # Base model fields necessaries for context
@@ -27,13 +30,19 @@ class Genre:
     ensure_one: Callable[[], Self]
 
     # Custom fields
-    name: str
     description: str | Literal[False]
+    name: str
+    parent_path: str | Literal[False]
     picture: bytes | Literal[False]
-    track_ids: Sequence[Track] | Sequence[int]
+
     album_ids: Sequence[Album] | Sequence[int]
+    parent_id: Genre | int | Literal[False]
+    track_ids: Sequence[Track] | Sequence[int]
+
+    complete_name: str | Literal[False]
     track_amount: int
     disk_amount: int
+
     custom_owner_id: Users | int
 
     def create(self, list_vals: list[GenreVals]) -> Self:
@@ -53,9 +62,9 @@ class Genre:
         :return: Confirms deleted genre record.
         """
 
-    def _compute_track_amount(self: Self) -> None:
-        """Calculates track amount linked to this genre record.
-        Result is saved into `track_amount` field.
+    def _compute_complete_name(self: Self) -> None:
+        """Calculates complete name of a genre according to its parent genre record.
+        Result is saved into `complete_name` field.
         :return: None
         """
 
@@ -65,16 +74,36 @@ class Genre:
         :return: None
         """
 
-    def update_songs(self) -> DisplayNotification | None:
+    def _compute_track_amount(self: Self) -> None:
+        """Calculates track amount linked to this genre record.
+        Result is saved into `track_amount` field.
+        :return: None
+        """
+
+    def action_view_genre_albums(self: Self) -> WindowActionView:
+        """Open a list of albums that belong to the genre record
+        :return: A new window action with environment context
+        """
+
+    def action_view_genre_tracks(self: Self) -> WindowActionView:
+        """Open a list of tracks that belong to the genre record
+        :return: A new window action with environment context
+        """
+
+    def update_songs(self: Self) -> DisplayNotification | None:
         """Update track metadata linked to this genre. It calls to the `save_changes()` method for each track.
         :return: None | Dictionary with UI information
         """
+
+    # ------------------------------------------------------------------------ #
+    # Inherit Methods
+    # ------------------------------------------------------------------------ #
 
     def _validate_picture_image(self: Self) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.
         """
 
-    def _process_picture_image(self, vals: GenreVals) -> None:
+    def _process_picture_image(self: Self, vals: GenreVals) -> None:
         """MIXIN: See process_image_mixin documentation.
         :param vals: Dictionary with vals to write
         :return: None

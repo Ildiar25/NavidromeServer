@@ -4,15 +4,57 @@
         <record id="music_manager_genre_view_action_general" model="ir.actions.act_window">
             <field name="name">Genres</field>
             <field name="res_model">music_manager.genre</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">kanban,tree,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_general')])]"/>
+            <field name="limit">100</field>
         </record>
 
         <record id="music_manager_genre_view_action_admin" model="ir.actions.act_window">
             <field name="name">Genre management</field>
             <field name="res_model">music_manager.genre</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,kanban,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
+            <field name="limit">100</field>
+        </record>
+
+        <!-- Kanban view -->
+        <record id="music_manager_genre_view_kanban" model="ir.ui.view">
+            <field name="name">music_manager.genre.view.kanban</field>
+            <field name="model">music_manager.genre</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="picture"/>
+                    <field name="track_amount"/>
+                    <field name="disk_amount"/>
+                    <template>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                                <div class="o_kanban_image_fill_left d-none d-md-block"
+                                     t-attf-style="background-image:url('#{kanban_image('music_manager.genre', 'picture', record.id.raw_value)}')">
+                                </div>
+
+                                <div class="oe_kanban_details d-flex flex-column">
+                                    <strong class="o_kanban_record_title oe_partner_heading">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="mt-auto">
+                                        <span class="badge rounded-pill text-bg-primary">
+                                            <i class="fa fa-music" role="img" aria-label="Tracks" title="Tracks"/>
+                                            <t t-esc="record.track_amount.value"/>
+                                        </span>
+                                        <span class="badge rounded-pill text-bg-secondary ms-1">
+                                            <i class="fa fa-dot-circle-o" role="img" aria-label="Albums" title="Albums"/>
+                                            <t t-esc="record.disk_amount.value"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </template>
+                </kanban>
+            </field>
         </record>
 
         <!-- Tree View -->
@@ -21,7 +63,8 @@
             <field name="model">music_manager.genre</field>
             <field name="arch" type="xml">
                 <tree string="Genre tree view">
-                    <field name="name" string="Name"/>
+                    <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
+                    <field name="complete_name" string="Name"/>
                     <field name="track_amount" string="Track amount"/>
                     <field name="disk_amount" string="Disk amount"/>
                     <field name="custom_owner_id" string="Added by"/>
@@ -38,17 +81,27 @@
             <field name="arch" type="xml">
                 <form string="Genre form view">
                     <sheet class="form-bg-decoration">
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_genre_tracks" type="object" class="oe_stat_button" icon="fa-music">
+                                <field name="track_amount" widget="statinfo" string="Tracks"/>
+                            </button>
+                            <button name="action_view_genre_albums" type="object" class="oe_stat_button"
+                                    icon="fa-dot-circle-o">
+                                <field name="disk_amount" widget="statinfo" string="Albums"/>
+                            </button>
+                        </div>
                         <header>
                             <h1> 🎵 Editing genre</h1>
                         </header>
                         <separator/>
                         <group class="flex-row justify-content-start">
-                            <group style="border-right: 1px solid #ccc; height: auto; width: 200px">
-                                <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [150, 150]}"/>
+                            <group style="border-right: 1px solid #ccc; height: auto; width: 250px">
+                                <field name="picture" string="" class="crop-image-preview" widget="image" options="{'preview_image': 'picture', 'size': [200, 200]}"/>
                             </group>
                             <group class="flex-grow-1">
                                 <group>
                                     <field name="name" string="Genre name"/>
+                                    <field name="parent_id" string="Parent" options="{'no_create': True, 'no_open': True}"/>
                                     <field name="description" string="Description"/>
                                     <field name="custom_owner_id" string="Owner" readonly="False" groups="music_manager.group_music_manager_user_admin"/>
                                 </group>
@@ -58,46 +111,6 @@
                         <div class="d-flex flex-row justify-content-center">
                             <button name="update_songs" string="Update metadata for all songs" class="btn-outline-primary w-50" type="object"/>
                         </div>
-                        <separator/>
-                        <notebook>
-                            <page string="Registered albums">
-                                <field name="album_ids" readonly="True">
-                                    <tree decoration-warning="not is_complete">
-                                        <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
-                                        <field name="name" string="Album title"/>
-                                        <field name="album_artist_id" string="Album artist"/>
-                                        <field name="genre_id" string="Genre"/>
-                                        <field name="track_amount" string="Track amount" optional="hide"/>
-                                        <field name="disk_amount" string="Disk amount" optional="hide"/>
-                                        <field name="display_duration" string="Total duration"/>
-                                        <field name="year" string="Year"/>
-                                        <field name="custom_owner_ids" string="Owner(s)" widget="many2many_tags"/>
-                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="is_complete" column_invisible="True"/>
-                                    </tree>
-                                </field>
-                            </page>
-                            <page string="Registered tracks">
-                                <field name="track_ids" readonly="True">
-                                    <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
-                                        <field name="track_no" string="Track no" optional="hide"/>
-                                        <field name="name" string="Title"/>
-                                        <field name="display_artist_names" string="Track artist(s)"/>
-                                        <field name="album_id" string="Album"/>
-                                        <field name="album_artist_id" string="Album artist"/>
-                                        <field name="year" string="Year"/>
-                                        <field name="genre_id" string="Genre" optional="hide"/>
-                                        <field name="display_duration" string="Duration"/>
-                                        <field name="custom_owner_id" widget="many2one_avatar"/>
-                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="is_saved" column_invisible="True"/>
-                                        <field name="is_deleted" column_invisible="True"/>
-                                    </tree>
-                                </field>
-                            </page>
-                        </notebook>
                     </sheet>
                 </form>
             </field>
@@ -109,6 +122,9 @@
             <field name="model">music_manager.genre</field>
             <field name="arch" type="xml">
                 <search string="Genre searchbar view">
+                    <!-- Custom fields -->
+                    <field name="complete_name" string="by genre name"/>
+
                     <!-- Custom filters -->
                     <filter name="my_contributions" string="My contributions" domain="[('custom_owner_id', '=', uid)]"/>
 

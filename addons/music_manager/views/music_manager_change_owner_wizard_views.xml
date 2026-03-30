@@ -7,6 +7,7 @@
             <field name="view_mode">form</field>
             <field name="target">new</field>
             <field name="binding_model_id" ref="model_music_manager_artist"/>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
         </record>
 
         <record id="action_change_owner_id_genre" model="ir.actions.act_window">
@@ -15,6 +16,7 @@
             <field name="view_mode">form</field>
             <field name="target">new</field>
             <field name="binding_model_id" ref="model_music_manager_genre"/>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
         </record>
 
         <record id="action_change_owner_id_track" model="ir.actions.act_window">
@@ -23,6 +25,7 @@
             <field name="view_mode">form</field>
             <field name="target">new</field>
             <field name="binding_model_id" ref="model_music_manager_track"/>
+            <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
         </record>
 
         <!-- Form view -->
@@ -31,14 +34,18 @@
             <field name="model">music_manager.change_owner_wizard</field>
             <field name="arch" type="xml">
                 <form string="Change owner form view">
-                    <group>
-                        <field name="current_owner_ids" string="Current owner(s)" widget="many2many_tags" readonly="True"/>
-                        <field name="new_owner_id" string="New owner"/>
-                    </group>
-                    <footer>
-                        <button string="Cancel" class="btn-default" special="cancel"/>
-                        <button string="Apply" type="object" name="apply_owner_changes" class="btn btn-success"/>
-                    </footer>
+                    <sheet>
+                        <p>Please, choose a new owner for the selected record(s).</p>
+                        <separator/>
+                        <group>
+                            <field name="current_owner_ids" string="Current owner(s)" widget="many2many_tags" readonly="True"/>
+                            <field name="new_owner_id" string="New owner"/>
+                        </group>
+                        <footer>
+                            <button string="Cancel" class="btn-default" special="cancel"/>
+                            <button string="Apply" type="object" name="apply_owner_changes" class="btn btn-success"/>
+                        </footer>
+                    </sheet>
                 </form>
             </field>
         </record>

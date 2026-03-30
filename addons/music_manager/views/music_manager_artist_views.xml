@@ -12,7 +12,7 @@
         <record id="music_manager_artist_view_action_admin" model="ir.actions.act_window">
             <field name="name">Artist management</field>
             <field name="res_model">music_manager.artist</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,kanban,form</field>
             <field name="groups_id" eval="[(6, 0, [ref('music_manager.group_music_manager_user_admin')])]"/>
         </record>
 
@@ -86,6 +86,14 @@
             <field name="arch" type="xml">
                 <form string="Artist form view" disable_autofocus="True">
                     <sheet class="form-bg-decoration">
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_artist_tracks" type="object" class="oe_stat_button" icon="fa-music">
+                                <field name="track_amount" widget="statinfo" string="Tracks"/>
+                            </button>
+                            <button name="action_view_artist_albums" type="object" class="oe_stat_button" icon="fa-dot-circle-o">
+                                <field name="album_amount" widget="statinfo" string="Albums"/>
+                            </button>
+                        </div>
                         <header>
                             <h1> 👤 Editing artist</h1>
                         </header>
@@ -116,45 +124,6 @@
                         <div class="d-flex flex-row justify-content-center">
                             <button name="update_songs" string="Update metadata for all songs" class="btn-outline-primary w-50" type="object"/>
                         </div>
-                        <notebook>
-                            <page string="Registered albums">
-                                <field name="album_ids" readonly="True">
-                                    <tree decoration-warning="not is_complete">
-                                        <field name="picture" string="Cover" widget="image" options="{'preview_image': 'picture', 'size': [28]}"/>
-                                        <field name="name" string="Album title"/>
-                                        <field name="album_artist_id" string="Album artist"/>
-                                        <field name="genre_id" string="Genre"/>
-                                        <field name="track_amount" string="Track amount" optional="hide"/>
-                                        <field name="disk_amount" string="Disk amount" optional="hide"/>
-                                        <field name="display_duration" string="Total duration"/>
-                                        <field name="year" string="Year"/>
-                                        <field name="custom_owner_ids" string="Owner(s)" widget="many2many_tags"/>
-                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="is_complete" column_invisible="True"/>
-                                    </tree>
-                                </field>
-                            </page>
-                            <page string="Registered tracks">
-                                <field name="track_ids" readonly="True">
-                                    <tree decoration-danger="is_deleted" decoration-warning="not is_saved">
-                                        <field name="track_no" string="Track no" optional="hide"/>
-                                        <field name="name" string="Title"/>
-                                        <field name="display_artist_names" string="Track artist(s)"/>
-                                        <field name="album_id" string="Album"/>
-                                        <field name="album_artist_id" string="Album artist"/>
-                                        <field name="year" string="Year"/>
-                                        <field name="genre_id" string="Genre"/>
-                                        <field name="display_duration" string="Duration"/>
-                                        <field name="custom_owner_id" widget="many2one_avatar"/>
-                                        <field name="create_date" string="Create date" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="write_date" string="Last update" groups="music_manager.group_music_manager_user_admin"/>
-                                        <field name="is_saved" column_invisible="True"/>
-                                        <field name="is_deleted" column_invisible="True"/>
-                                    </tree>
-                                </field>
-                            </page>
-                        </notebook>
                     </sheet>
                 </form>
             </field>

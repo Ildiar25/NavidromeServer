@@ -2,11 +2,11 @@
 from collections.abc import Callable, Sequence
 from typing import Dict, Final, Literal, Self
 
-from addons.music_manager.adapters import DownloadServiceAdapter, FileServiceAdapter, TrackServiceAdapter
 from odoo.api import Environment
 
-from addons.music_manager.models import Album, Artist, Genre
-from addons.music_manager.utils.custom_types import YearValue, CustomWarningMessage, WindowActionView, TrackVals
+from ..adapters import DownloadServiceAdapter, FileServiceAdapter, TrackServiceAdapter
+from ..models import Album, Artist, Genre
+from ..utils.custom_types import CustomWarningMessage, TrackVals, WindowActionView, YearValue
 
 
 class TrackWizard:
@@ -33,26 +33,30 @@ class TrackWizard:
     tmp_genre: str | Literal[False]
     tmp_name: str | Literal[False]
     tmp_original_artist: str | Literal[False]
-    tmp_track_no: int | Literal[False]
     tmp_total_disk: int | Literal[False]
     tmp_total_track: int | Literal[False]
+    tmp_track_no: int | Literal[False]
     tmp_year: str | Literal[False]
     year: YearValue | Literal[False]
     url: str | Literal[False]
+
     bitrate: int
     channels: str
     codec: str
     duration: int
     mime_type: str
     sample_rate: int
-    possible_album_id: Album | int | Literal[False]
+
     possible_album_artist_id: Artist | int | Literal[False]
+    possible_album_id: Album | int | Literal[False]
     possible_artist_ids: Sequence[Artist] | Sequence[int]
     possible_genre_id: Genre | int | Literal[False]
     possible_original_artist_id: Artist | int | Literal[False]
+
     file_path: str | Literal[False]
     has_valid_path: bool
     tmp_compilation: bool
+
     state: Literal['start', 'uploaded', 'metadata', 'done']
 
     def _compute_file_path(self: Self) -> None:
@@ -62,11 +66,6 @@ class TrackWizard:
 
     def _compute_has_valid_path(self: Self) -> None:
         """Calculates if the path has the mandatory fields like artist, album, disk number, track number and title.
-        :return: None
-        """
-
-    def _check_fields(self: Self) -> None:
-        """Force the user to give a url or upload a file. But just one of them.
         :return: None
         """
 
@@ -91,6 +90,11 @@ class TrackWizard:
         :return: Warning Message (dict) | None
         """
 
+    def _check_fields(self: Self) -> None:
+        """Force the user to give a url or upload a file. But just one of them.
+        :return: None
+        """
+
     def action_back(self: Self) -> WindowActionView:
         """Allows User to move between wizard states.
         :return: Window view UI
@@ -111,8 +115,8 @@ class TrackWizard:
         :return: Window view UI | None
         """
 
-    def _download_file(self: Self) -> None:
-        """Downloads file from a griven url & writes it to 'file' field.
+    def _check_already_exists(self: Self) -> None:
+        """Checks if the track already exists in the database.
         :return: None
         """
 
@@ -121,8 +125,8 @@ class TrackWizard:
         :return: A dictionary with generic recordset values as ID & name | None
         """
 
-    def _check_already_exists(self: Self) -> None:
-        """Checks if the track already exists in the database.
+    def _download_file(self: Self) -> None:
+        """Downloads file from a griven url & writes it to 'file' field.
         :return: None
         """
 
@@ -153,13 +157,13 @@ class TrackWizard:
         :return: TrackServiceAdapter with updated settings
         """
 
-    def _match_album_id(self: Self) -> None:
-        """Matches album ID with given temporary album name.
+    def _match_album_artist_id(self: Self) -> None:
+        """Matches album artist ID with given temporary album artist name.
         :return: None
         """
 
-    def _match_album_artist_id(self: Self) -> None:
-        """Matches album artist ID with given temporary album artist name.
+    def _match_album_id(self: Self) -> None:
+        """Matches album ID with given temporary album name.
         :return: None
         """
 
@@ -198,11 +202,15 @@ class TrackWizard:
         :return: Complete years list
         """
 
+    # ------------------------------------------------------------------------ #
+    # Inherit Methods
+    # ------------------------------------------------------------------------ #
+
     def _validate_picture_image(self: Self) -> CustomWarningMessage | None:
         """MIXIN: See process_image_mixin documentation.
         """
 
-    def _process_picture_image(self, vals: TrackVals) -> None:
+    def _process_picture_image(self: Self, vals: TrackVals) -> None:
         """MIXIN: See process_image_mixin documentation.
         :param vals: Dictionary with vals to write
         :return: None
