@@ -20,8 +20,8 @@ class Genre(Model, ProcessImageMixin):
     ]
 
     # Default fields
-    name = Char(string=_("Name"), required=True)
     description = Html(string=_("Description"))
+    name = Char(string=_("Name"), required=True)
     parent_path = Char(index=True, unaccent=False)
     picture = Binary(string=_("Picture"))
 
@@ -120,23 +120,23 @@ class Genre(Model, ProcessImageMixin):
         for genre in self:
             genre.track_amount = mapped_data.get(genre.id, 0)
 
-    def action_view_genre_tracks(self):
-        self.ensure_one()
-        return {
-            'name': _("Tracks of %s", self.name),
-            'type': 'ir.actions.act_window',
-            'res_model': 'music_manager.track',
-            'view_mode': 'tree,form',
-            'domain': [('genre_id', 'child_of', self.id)],
-            'context': {'default_genre_id': self.id},
-        }
-
     def action_view_genre_albums(self):
         self.ensure_one()
         return {
             'name': _("Albums of %s", self.name),
             'type': 'ir.actions.act_window',
             'res_model': 'music_manager.album',
+            'view_mode': 'tree,form',
+            'domain': [('genre_id', 'child_of', self.id)],
+            'context': {'default_genre_id': self.id},
+        }
+
+    def action_view_genre_tracks(self):
+        self.ensure_one()
+        return {
+            'name': _("Tracks of %s", self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'music_manager.track',
             'view_mode': 'tree,form',
             'domain': [('genre_id', 'child_of', self.id)],
             'context': {'default_genre_id': self.id},
