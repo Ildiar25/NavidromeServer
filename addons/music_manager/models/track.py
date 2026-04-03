@@ -113,6 +113,9 @@ class Track(Model, ProcessImageMixin):
                     _logger.warning(f"WARNING: This user has trobules: {self.env.user.name} IS NOT {track.custom_owner_id.name}")
                     raise AccessError(_("\nCannot update this track because you are not the owner. 🤷"))
 
+            if self.env.context.get('skip_physical_check'):
+                continue
+
             if track.is_deleted:
                 raise UserError(_("You cannot modify a deleted file."))
 
@@ -402,8 +405,8 @@ class Track(Model, ProcessImageMixin):
 
                 if track.old_path != track.file_path:
                     file_service.update_file_path(track.old_path, track.file_path)
+                    track.with_context(skip_physical_check=True).write({'old_path': track.file_path})
 
-                track.old_path = track.file_path
                 success_counter += 1
 
             except InvalidPathError as invalid_path:
